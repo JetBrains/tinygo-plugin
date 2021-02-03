@@ -1,6 +1,6 @@
-package com.github.pleomaxx3002.tinygoplugin.listeners
+package org.jetbrains.tinygoplugin.listeners
 
-import com.github.pleomaxx3002.tinygoplugin.services.MyProjectService
+import org.jetbrains.tinygoplugin.services.MyProjectService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener

@@ -1,4 +1,4 @@
-package com.github.pleomaxx3002.tinygoplugin
+package org.jetbrains.tinygoplugin
 
 import com.intellij.AbstractBundle
 import org.jetbrains.annotations.NonNls

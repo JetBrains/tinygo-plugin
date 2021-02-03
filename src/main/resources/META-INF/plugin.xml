@@ -1,19 +1,21 @@
 <idea-plugin>
-    <id>com.github.pleomaxx3002.tinygoplugin</id>
-    <name>tinygo-plugin</name>
-    <vendor>pleomaxx3002</vendor>
+    <id>org.jetbrains.tinygoplugin</id>
+    <name>TinyGo</name>
+    <vendor>JetBrains</vendor>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <!-- Requires the Go plugin -->
+    <depends>org.jetbrains.plugins.go</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.pleomaxx3002.tinygoplugin.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.pleomaxx3002.tinygoplugin.services.MyProjectService"/>
+        <applicationService serviceImplementation="org.jetbrains.tinygoplugin.services.MyApplicationService"/>
+        <projectService serviceImplementation="org.jetbrains.tinygoplugin.services.MyProjectService"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.pleomaxx3002.tinygoplugin.listeners.MyProjectManagerListener"
+        <listener class="org.jetbrains.tinygoplugin.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
 </idea-plugin>
