@@ -1,7 +1,7 @@
 package org.jetbrains.tinygoplugin.services
 
-import org.jetbrains.tinygoplugin.MyBundle
 import com.intellij.openapi.project.Project
+import org.jetbrains.tinygoplugin.MyBundle
 
 class MyProjectService(project: Project) {
 
