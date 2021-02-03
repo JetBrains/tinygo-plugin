@@ -9,13 +9,12 @@
     <!-- Requires the Go plugin -->
     <depends>org.jetbrains.plugins.go</depends>
 
+
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="org.jetbrains.tinygoplugin.services.MyApplicationService"/>
-        <projectService serviceImplementation="org.jetbrains.tinygoplugin.services.MyProjectService"/>
+        <applicationConfigurable parentId="tools" instance="org.jetbrains.tinygoplugin.services.TinyGoSettingsService"
+                                 id="org.jetbrains.tinygoplugin.services.TinyGoSettingsService"
+                                 displayName="TinyGo"/>
+        <applicationService serviceImplementation="org.jetbrains.tinygoplugin.TinyGoPluginConfiguration"/>
     </extensions>
 
-    <applicationListeners>
-        <listener class="org.jetbrains.tinygoplugin.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 </idea-plugin>
