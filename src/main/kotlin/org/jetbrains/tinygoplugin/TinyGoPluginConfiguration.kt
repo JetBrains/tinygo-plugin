@@ -1,10 +1,14 @@
 package org.jetbrains.tinygoplugin
 
-import com.intellij.openapi.components.*
+import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.StoragePathMacros
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 import java.io.File
-
 
 enum class GarbageCollector {
     NONE, LEAKING, EXTALLOC, CONSERVATIVE
@@ -13,7 +17,6 @@ enum class GarbageCollector {
 enum class Scheduler {
     NONE, COROUTINES, TASKS
 }
-
 
 interface UserConfiguration {
 
@@ -48,7 +51,6 @@ class ProjectConfigurationImpl :
     override var scheduler = Scheduler.COROUTINES
     override var targetPlatform = ""
 
-
     override fun getState(): ProjectConfigurationImpl {
         return this
     }
@@ -68,5 +70,3 @@ class TinyGoConfiguration(userConfig: UserConfiguration, projectConfig: ProjectC
         )
     }
 }
-
-

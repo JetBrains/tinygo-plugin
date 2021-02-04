@@ -11,7 +11,6 @@ import org.jetbrains.tinygoplugin.GarbageCollector
 import org.jetbrains.tinygoplugin.Scheduler
 import javax.swing.JPanel
 
-
 class TinyGoSettingsUI {
     var mainPanel: JPanel
     private var tinyGoPathText: TextFieldWithBrowseButton
@@ -31,29 +30,15 @@ class TinyGoSettingsUI {
         gcComboBox = ComboBox(EnumComboBoxModel(GarbageCollector::class.java))
         schedulerComboBox = ComboBox(EnumComboBoxModel(Scheduler::class.java))
 
-
         @Suppress("DialogTitleCapitalization")
         tinyGoPathText.addBrowseFolderListener("Select TinyGo folder", null, null, fileDescriptor)
         targetPlatformText = JBTextField()
         mainPanel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(
-                JBLabel("Path to TinyGo executable: "),
-                tinyGoPathText, 2, true
-            )
-            .addLabeledComponent(
-                JBLabel("Target platform: "),
-                targetPlatformText, 1, true
-            )
-            .addLabeledComponent(
-                JBLabel(gcMessage),
-                gcComboBox, 1, false
-            )
-            .addLabeledComponent(
-                JBLabel(schedulerMessage),
-                schedulerComboBox, 1, false
-            )
+            .addLabeledComponent(JBLabel("Path to TinyGo executable: "), tinyGoPathText, 2, true)
+            .addLabeledComponent(JBLabel("Target platform: "), targetPlatformText, 1, true)
+            .addLabeledComponent(JBLabel(gcMessage), gcComboBox, 1, false)
+            .addLabeledComponent(JBLabel(schedulerMessage), schedulerComboBox, 1, false)
             .panel
-
     }
 
     var tinyGoPath: String by tinyGoPathText::text
