@@ -26,7 +26,7 @@ interface ProjectConfiguration {
     var targetPlatform: String
 }
 
-@State(name = "UserConfigurationState", storages = [Storage(StoragePathMacros.PRODUCT_WORKSPACE_FILE)])
+@State(name = "TinyGoPluginUserConfig", storages = [Storage(StoragePathMacros.PRODUCT_WORKSPACE_FILE)])
 @Service(Service.Level.PROJECT)
 class UserConfigurationImpl : PersistentStateComponent<UserConfigurationImpl>, UserConfiguration {
     override var tinyGoSDKPath: File = File("")
@@ -40,7 +40,7 @@ class UserConfigurationImpl : PersistentStateComponent<UserConfigurationImpl>, U
     }
 }
 
-@State(name = "ProjectConfigurationImpl", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
+@State(name = "TinyGoPlugin", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
 @Service(Service.Level.PROJECT)
 class ProjectConfigurationImpl :
     PersistentStateComponent<ProjectConfigurationImpl>, ProjectConfiguration {

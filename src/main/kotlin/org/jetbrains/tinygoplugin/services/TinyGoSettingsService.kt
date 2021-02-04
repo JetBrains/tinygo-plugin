@@ -15,6 +15,8 @@ class TinyGoSettingsService(p: Project) : Configurable {
     private fun setSettingsToUI(settings: TinyGoConfiguration) {
         settingsUI.targetPlatform = settings.targetPlatform
         settingsUI.tinyGoPath = settings.tinyGoSDKPath.absolutePath.toString()
+        settingsUI.garbageCollector = settings.gc
+        settingsUI.scheduler = settings.scheduler
     }
 
     override fun createComponent(): JComponent {
@@ -30,7 +32,9 @@ class TinyGoSettingsService(p: Project) : Configurable {
 
         return listOf(
             settingsUI.targetPlatform != settings.targetPlatform,
-            !compareFile(str = settingsUI.tinyGoPath, file = settings.tinyGoSDKPath)
+            !compareFile(str = settingsUI.tinyGoPath, file = settings.tinyGoSDKPath),
+            settingsUI.garbageCollector != settings.gc,
+            settingsUI.scheduler != settings.scheduler
         ).any { it }
     }
 
@@ -38,6 +42,8 @@ class TinyGoSettingsService(p: Project) : Configurable {
         val settings = TinyGoConfiguration.getInstance(project)
         settings.targetPlatform = settingsUI.targetPlatform
         settings.tinyGoSDKPath = File(settingsUI.tinyGoPath)
+        settings.scheduler = settingsUI.scheduler
+        settings.gc = settingsUI.garbageCollector
     }
 
     override fun getDisplayName(): String = "TinyGoPlugin"
