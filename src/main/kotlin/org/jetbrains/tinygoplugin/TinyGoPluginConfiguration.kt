@@ -1,28 +1,72 @@
 package org.jetbrains.tinygoplugin
 
-import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.components.State
-import com.intellij.openapi.components.Storage
+import com.intellij.openapi.components.*
+import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 import java.io.File
 
-@State(name = "TinyGo", storages = [Storage("tinygo_settings.xml")])
-class TinyGoPluginConfiguration : PersistentStateComponent<TinyGoPluginConfiguration> {
-    var tinyGoExecutablePath = File("")
-    var targetPlatform = ""
-    var gopath = File("")
 
-    override fun getState(): TinyGoPluginConfiguration {
+enum class GarbageCollector {
+    NONE, LEAKING, EXTALLOC, CONSERVATIVE
+}
+
+enum class Scheduler {
+    NONE, COROUTINES, TASKS
+}
+
+
+interface UserConfiguration {
+
+    var tinyGoSDKPath: File
+}
+
+interface ProjectConfiguration {
+    var gc: GarbageCollector
+    var scheduler: Scheduler
+    var targetPlatform: String
+}
+
+@State(name = "UserConfigurationState", storages = [Storage(StoragePathMacros.PRODUCT_WORKSPACE_FILE)])
+@Service(Service.Level.PROJECT)
+class UserConfigurationImpl : PersistentStateComponent<UserConfigurationImpl>, UserConfiguration {
+    override var tinyGoSDKPath: File = File("")
+
+    override fun getState(): UserConfigurationImpl {
         return this
     }
 
-    override fun loadState(state: TinyGoPluginConfiguration) {
+    override fun loadState(state: UserConfigurationImpl) {
         XmlSerializerUtil.copyBean(state, this)
     }
+}
 
-    companion object {
-        val instance: TinyGoPluginConfiguration
-            get() = ServiceManager.getService(TinyGoPluginConfiguration::class.java)
+@State(name = "ProjectConfigurationImpl", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
+@Service(Service.Level.PROJECT)
+class ProjectConfigurationImpl :
+    PersistentStateComponent<ProjectConfigurationImpl>, ProjectConfiguration {
+    override var gc = GarbageCollector.NONE
+    override var scheduler = Scheduler.COROUTINES
+    override var targetPlatform = ""
+
+
+    override fun getState(): ProjectConfigurationImpl {
+        return this
+    }
+
+    override fun loadState(state: ProjectConfigurationImpl) {
+        XmlSerializerUtil.copyBean(state, this)
     }
 }
+
+class TinyGoConfiguration(userConfig: UserConfiguration, projectConfig: ProjectConfiguration) :
+    UserConfiguration by userConfig, ProjectConfiguration by projectConfig {
+
+    companion object {
+        fun getInstance(p: Project): TinyGoConfiguration = TinyGoConfiguration(
+            projectConfig = p.service<ProjectConfigurationImpl>(),
+            userConfig = p.service<UserConfigurationImpl>()
+        )
+    }
+}
+
+
