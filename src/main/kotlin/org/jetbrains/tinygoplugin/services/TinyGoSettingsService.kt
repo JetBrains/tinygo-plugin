@@ -1,13 +1,19 @@
 package org.jetbrains.tinygoplugin.services
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.TinyGoSettingsUI
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
 import java.io.File
 import javax.swing.JComponent
 
-class TinyGoSettingsService(p: Project) : Configurable {
+class TinyGoSettingsService(p: Project) : Configurable, ActionListener {
+    companion object {
+        private val logger: Logger = Logger.getInstance(TinyGoSettingsService::class.java)
+    }
 
     lateinit var settingsUI: TinyGoSettingsUI
     val project: Project = p
@@ -20,7 +26,7 @@ class TinyGoSettingsService(p: Project) : Configurable {
     }
 
     override fun createComponent(): JComponent {
-        settingsUI = TinyGoSettingsUI()
+        settingsUI = TinyGoSettingsUI(this)
         val settings = TinyGoConfiguration.getInstance(project)
         setSettingsToUI(settings)
         return settingsUI.mainPanel
@@ -47,4 +53,8 @@ class TinyGoSettingsService(p: Project) : Configurable {
     }
 
     override fun getDisplayName(): String = "TinyGoPlugin"
+    override fun actionPerformed(e: ActionEvent?) {
+        logger.debug("Starting tinygo tags detection")
+        settingsUI.setDetectionInProgress()
+    }
 }

@@ -9,12 +9,16 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import org.jetbrains.tinygoplugin.GarbageCollector
 import org.jetbrains.tinygoplugin.Scheduler
+import java.awt.event.ActionListener
+import javax.swing.JButton
 import javax.swing.JPanel
 
-class TinyGoSettingsUI {
+class TinyGoSettingsUI(private val buttonAction: ActionListener) {
     var mainPanel: JPanel
     private var tinyGoPathText: TextFieldWithBrowseButton
     private var targetPlatformText: JBTextField
+    private var goTagsOutput: JBTextField
+    private var goArchOutput: JBTextField
 
     companion object {
         const val gcMessage = "Garbage collector: "
@@ -23,9 +27,18 @@ class TinyGoSettingsUI {
 
     private val gcComboBox: ComboBox<GarbageCollector>
     private val schedulerComboBox: ComboBox<Scheduler>
+    private val detectSettings: JButton
 
     init {
         tinyGoPathText = TextFieldWithBrowseButton()
+
+        goTagsOutput = JBTextField()
+        goTagsOutput.isEnabled = false
+        goArchOutput = JBTextField()
+        goArchOutput.isEnabled = false
+        detectSettings = JButton("Detect")
+        detectSettings.addActionListener(buttonAction)
+
         val fileDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor()
         gcComboBox = ComboBox(EnumComboBoxModel(GarbageCollector::class.java))
         schedulerComboBox = ComboBox(EnumComboBoxModel(Scheduler::class.java))
@@ -38,6 +51,9 @@ class TinyGoSettingsUI {
             .addLabeledComponent(JBLabel("Target platform: "), targetPlatformText, 1, true)
             .addLabeledComponent(JBLabel(gcMessage), gcComboBox, 1, false)
             .addLabeledComponent(JBLabel(schedulerMessage), schedulerComboBox, 1, false)
+            .addComponent(detectSettings)
+            .addLabeledComponent(JBLabel("Build tags"), goTagsOutput, 1, false)
+            .addLabeledComponent(JBLabel("GOARCH"), goArchOutput, 1, false)
             .panel
     }
 
@@ -45,4 +61,16 @@ class TinyGoSettingsUI {
     var targetPlatform: String by targetPlatformText::text
     var garbageCollector: GarbageCollector by gcComboBox::item
     var scheduler: Scheduler by schedulerComboBox::item
+    var goTags: String by goTagsOutput::text
+    var goArch: String by goArchOutput::text
+
+    fun setDetectionInProgress() {
+        detectSettings.isEnabled = false
+    }
+
+    fun updateTinyGoOutput(goArch: String, goTags: String) {
+        this.goArch = goArch
+        this.goTags = goTags
+        detectSettings.isEnabled = true
+    }
 }
