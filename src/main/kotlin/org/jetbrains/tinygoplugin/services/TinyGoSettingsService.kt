@@ -59,19 +59,26 @@ class TinyGoSettingsService(private val project: Project) : Configurable, Action
         settingsUI.setDetectionInProgress()
         val executor = GoExecutor.`in`(project, null)
         val settings = TinyGoConfiguration.getInstance(project)
-        val parameters = listOf("-target", settings.targetPlatform,
-            "-scheduler", settings.scheduler.cmd, " -gc", settings.gc.cmd)
-            .joinToString(" ")
+        /* ktlint-disable*/
+        val parameters = listOf(
+            "-target", settings.targetPlatform,
+            "-scheduler", settings.scheduler.cmd,
+            "-gc", settings.gc.cmd
+        )
+            .joinToString(" ", " ", " ")
+        /* ktlint-enable */
         executor.withParameterString("info $parameters")
         executor.showNotifications(true, false)
         val tinyGoExec = Paths.get(
-            Paths.get(settings.tinyGoSDKPath).toAbsolutePath().toString(), "bin", "tinygo")
+            Paths.get(settings.tinyGoSDKPath).toAbsolutePath().toString(),
+            "bin",
+            "tinygo"
+        )
         logger.debug("Tinygo path: $tinyGoExec")
         logger.debug("Tinygo parameters: $parameters")
         executor.withExePath(tinyGoExec.toString())
         val processHistory = GoHistoryProcessListener()
-        executor.executeWithProgress(true, true, processHistory, null)
-        { result: GoExecutor.ExecutionResult ->
+        executor.executeWithProgress(true, true, processHistory, null) { result ->
             logger.warn("${result.status}")
             logger.warn("${result.message}")
             val output = processHistory.output.joinToString("")
