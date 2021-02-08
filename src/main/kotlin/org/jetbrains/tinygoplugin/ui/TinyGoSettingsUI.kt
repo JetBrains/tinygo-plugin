@@ -13,12 +13,13 @@ import java.awt.event.ActionListener
 import javax.swing.JButton
 import javax.swing.JPanel
 
-class TinyGoSettingsUI(private val buttonAction: ActionListener) {
+class TinyGoSettingsUI(buttonAction: ActionListener) {
     var mainPanel: JPanel
     private var tinyGoPathText: TextFieldWithBrowseButton
     private var targetPlatformText: JBTextField
     private var goTagsOutput: JBTextField
     private var goArchOutput: JBTextField
+    private var goOSOutput: JBTextField
 
     companion object {
         const val gcMessage = "Garbage collector: "
@@ -36,6 +37,9 @@ class TinyGoSettingsUI(private val buttonAction: ActionListener) {
         goTagsOutput.isEnabled = false
         goArchOutput = JBTextField()
         goArchOutput.isEnabled = false
+        goOSOutput = JBTextField()
+        goOSOutput.isEnabled = false
+
         detectSettings = JButton("Detect")
         detectSettings.addActionListener(buttonAction)
 
@@ -54,6 +58,7 @@ class TinyGoSettingsUI(private val buttonAction: ActionListener) {
             .addComponent(detectSettings)
             .addLabeledComponent(JBLabel("Build tags"), goTagsOutput, 1, false)
             .addLabeledComponent(JBLabel("GOARCH"), goArchOutput, 1, false)
+            .addLabeledComponent(JBLabel("GOOS"), goOSOutput, 1, false)
             .panel
     }
 
@@ -63,14 +68,13 @@ class TinyGoSettingsUI(private val buttonAction: ActionListener) {
     var scheduler: Scheduler by schedulerComboBox::item
     var goTags: String by goTagsOutput::text
     var goArch: String by goArchOutput::text
+    var goOS: String by goOSOutput::text
 
     fun setDetectionInProgress() {
         detectSettings.isEnabled = false
     }
 
-    fun updateTinyGoOutput(goArch: String, goTags: String) {
-        this.goArch = goArch
-        this.goTags = goTags
+    fun onProcessingFinished() {
         detectSettings.isEnabled = true
     }
 }

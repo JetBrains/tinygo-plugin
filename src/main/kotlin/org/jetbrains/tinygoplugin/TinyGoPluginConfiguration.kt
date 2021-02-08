@@ -33,6 +33,7 @@ interface ProjectConfiguration {
     var targetPlatform: String
     var goTags: String
     var goArch: String
+    var goOS: String
 }
 
 @State(name = "TinyGoPluginUserConfig", storages = [Storage(StoragePathMacros.PRODUCT_WORKSPACE_FILE)])
@@ -58,6 +59,7 @@ class ProjectConfigurationImpl :
     override var targetPlatform = ""
     override var goTags = ""
     override var goArch = ""
+    override var goOS = ""
 
     override fun getState(): ProjectConfigurationImpl {
         return this

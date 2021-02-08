@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.services
 
 import com.goide.util.GoExecutor
+import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
@@ -68,27 +69,36 @@ class TinyGoSettingsService(private val project: Project) : Configurable, Action
         logger.debug("Tinygo path: $tinyGoExec")
         logger.debug("Tinygo parameters: $parameters")
         executor.withExePath(tinyGoExec.toString())
-        executor.executeWithProgress(true, true) { result: GoExecutor.ExecutionResult ->
+        val processHistory = GoHistoryProcessListener()
+        executor.executeWithProgress(true, true, processHistory, null)
+        { result: GoExecutor.ExecutionResult ->
             logger.warn("${result.status}")
             logger.warn("${result.message}")
-            val output = result.message!!
+            val output = processHistory.output.joinToString("")
             logger.warn(output)
             extractTinyGoInfo(output)
-            settingsUI.updateTinyGoOutput(settings.goArch, settings.goTags)
+            settingsUI.goArch = settings.goArch
+            settingsUI.goOS = settings.goOS
+            settingsUI.goTags = settings.goTags
+            settingsUI.onProcessingFinished()
         }
     }
 
     private fun extractTinyGoInfo(msg: String) {
-        val tagPattern = Regex("""^build tags:\s+(.+)${'$'})""")
-        val goarchPattern = Regex("""^GOARCH:\s+(.+)${'$'}""")
+        val tagPattern = Regex("""build tags:\s+(.+)\n""")
+        val goArchPattern = Regex("""GOARCH:\s+(.+)\n""")
+        val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
 
-        val tags = tagPattern.find(msg)!!
-        val goarch = goarchPattern.find(msg)!!
+        val tags = tagPattern.findAll(msg).first()
+        val goArch = goArchPattern.findAll(msg).first()
+        val goOS = goOSPattern.findAll(msg).first()
 
         val settings = TinyGoConfiguration.getInstance(project)
 
-        settings.goArch = goarch.groupValues[0]
-        settings.goTags = tags.groupValues[0]
+        settings.goArch = goArch.groupValues[1]
+        settings.goTags = tags.groupValues[1]
+        settings.goOS = goOS.groupValues[1]
+
         logger.warn("extraction finished")
     }
 }
