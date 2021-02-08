@@ -8,19 +8,23 @@ import com.intellij.openapi.components.StoragePathMacros
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
-import java.io.File
 
-enum class GarbageCollector {
-    NONE, LEAKING, EXTALLOC, CONSERVATIVE
+enum class GarbageCollector(val cmd: String) {
+    NONE("none"),
+    LEAKING("leaking"),
+    EXTALLOC("extalloc"),
+    CONSERVATIVE("conservative")
 }
 
-enum class Scheduler {
-    NONE, COROUTINES, TASKS
+enum class Scheduler(val cmd: String) {
+    NONE("none"),
+    COROUTINES("coroutines"),
+    TASKS("tasks")
 }
 
 interface UserConfiguration {
 
-    var tinyGoSDKPath: File
+    var tinyGoSDKPath: String
 }
 
 interface ProjectConfiguration {
@@ -34,7 +38,7 @@ interface ProjectConfiguration {
 @State(name = "TinyGoPluginUserConfig", storages = [Storage(StoragePathMacros.PRODUCT_WORKSPACE_FILE)])
 @Service(Service.Level.PROJECT)
 class UserConfigurationImpl : PersistentStateComponent<UserConfigurationImpl>, UserConfiguration {
-    override var tinyGoSDKPath: File = File("")
+    override var tinyGoSDKPath = ""
 
     override fun getState(): UserConfigurationImpl {
         return this
