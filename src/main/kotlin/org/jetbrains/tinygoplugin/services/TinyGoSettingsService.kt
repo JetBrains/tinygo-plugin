@@ -1,7 +1,9 @@
 package org.jetbrains.tinygoplugin.services
 
+import com.goide.project.GoModuleSettings
 import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.TinyGoConfiguration
@@ -17,13 +19,16 @@ class TinyGoSettingsService(private val project: Project) : Configurable, Action
     }
 
     lateinit var settingsUI: TinyGoSettingsUI
-    val infoExtractor = TinyGoInfoExtractor(project)
+    private val infoExtractor = TinyGoInfoExtractor(project)
 
     private fun setSettingsToUI(settings: TinyGoConfiguration) {
         settingsUI.targetPlatform = settings.targetPlatform
         settingsUI.tinyGoPath = Paths.get(settings.tinyGoSDKPath).toAbsolutePath().toString()
         settingsUI.garbageCollector = settings.gc
         settingsUI.scheduler = settings.scheduler
+        settingsUI.goTags = settings.goTags
+        settingsUI.goOS = settings.goOS
+        settingsUI.goArch = settings.goArch
     }
 
     override fun createComponent(): JComponent {
@@ -71,6 +76,23 @@ class TinyGoSettingsService(private val project: Project) : Configurable, Action
             settingsUI.goOS = settings.goOS
             settingsUI.goTags = settings.goTags
             settingsUI.onProcessingFinished()
+            propagateGoSettings()
         }
+    }
+
+    private fun propagateGoSettings() {
+        val goSettings = ModuleManager.getInstance(project).modules.map {
+            it?.getService(GoModuleSettings::class.java)
+        }.filterNotNull().firstOrNull()
+        if (goSettings == null) {
+            logger.warn("Could not find go module settings")
+            return
+        }
+        val tinyGoSettings = TinyGoConfiguration.getInstance(project)
+        val buildSettings = goSettings.buildTargetSettings
+        buildSettings.arch = tinyGoSettings.goArch
+        buildSettings.os = tinyGoSettings.goOS
+        buildSettings.customFlags = tinyGoSettings.goTags.split(' ').toTypedArray()
+        goSettings.buildTargetSettings = buildSettings
     }
 }

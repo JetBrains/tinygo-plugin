@@ -46,5 +46,5 @@ class TinyGopathManager : GoRootsProvider {
         return mutableSetOf()
     }
 
-    override fun isExternal(): Boolean = false
+    override fun isExternal(): Boolean = true
 }
