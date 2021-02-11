@@ -22,14 +22,6 @@ This specific section is a source for the [plugin.xml](/src/main/resources/META-
 To keep everything working, do not remove `<!-- ... -->` sections. 
 <!-- Plugin description end -->
 
-## Dependencies
-This plugin requires gradle-intellij-plugin with GoLand-IDE support
-1. Clone [gradle-intellij-plugin patch](https://github.com/pleomaxx3002/gradle-intellij-plugin)
-1. Install the patch into local maven repository
-
-Alternatively you can remove pluginManagement section in [settings file](./settings.gradle.kts)
-and modify project to be consistent with [GoLand plugin development guide](https://plugins.jetbrains.com/docs/intellij/goland.html#configuring-plugin-projects-targeting-goland)
-
 ## Installation
 
 Only development version is available at the moment.

@@ -24,6 +24,9 @@ class TinyGoSettingsService(private val project: Project) : Configurable, Action
         settingsUI.tinyGoPath = Paths.get(settings.tinyGoSDKPath).toAbsolutePath().toString()
         settingsUI.garbageCollector = settings.gc
         settingsUI.scheduler = settings.scheduler
+        settingsUI.goArch = settings.goArch
+        settingsUI.goOS = settings.goOS
+        settingsUI.goTags = settings.goTags
     }
 
     override fun createComponent(): JComponent {
@@ -66,10 +69,7 @@ class TinyGoSettingsService(private val project: Project) : Configurable, Action
             logger.trace(output)
             infoExtractor.extractTinyGoInfo(output)
 
-            val settings = TinyGoConfiguration.getInstance(project)
-            settingsUI.goArch = settings.goArch
-            settingsUI.goOS = settings.goOS
-            settingsUI.goTags = settings.goTags
+            setSettingsToUI(TinyGoConfiguration.getInstance(project))
             settingsUI.onProcessingFinished()
         }
     }

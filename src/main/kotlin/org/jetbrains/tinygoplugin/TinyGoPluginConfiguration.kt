@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 
 enum class GarbageCollector(val cmd: String) {
+    AUTO_DETECT("Auto detect"),
     NONE("none"),
     LEAKING("leaking"),
     EXTALLOC("extalloc"),
@@ -17,6 +18,7 @@ enum class GarbageCollector(val cmd: String) {
 }
 
 enum class Scheduler(val cmd: String) {
+    AUTO_DETECT("Auto detect"),
     NONE("none"),
     COROUTINES("coroutines"),
     TASKS("tasks")
@@ -36,7 +38,7 @@ interface ProjectConfiguration {
     var goOS: String
 }
 
-@State(name = "TinyGoPluginUserConfig", storages = [Storage(StoragePathMacros.PRODUCT_WORKSPACE_FILE)])
+@State(name = "TinyGoPluginUserConfig", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
 @Service(Service.Level.PROJECT)
 class UserConfigurationImpl : PersistentStateComponent<UserConfigurationImpl>, UserConfiguration {
     override var tinyGoSDKPath = ""
@@ -50,12 +52,12 @@ class UserConfigurationImpl : PersistentStateComponent<UserConfigurationImpl>, U
     }
 }
 
-@State(name = "TinyGoPlugin", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
+@State(name = "TinyGoPlugin", storages = [Storage("tinygoSettings.xml")])
 @Service(Service.Level.PROJECT)
 class ProjectConfigurationImpl :
     PersistentStateComponent<ProjectConfigurationImpl>, ProjectConfiguration {
-    override var gc = GarbageCollector.NONE
-    override var scheduler = Scheduler.COROUTINES
+    override var gc = GarbageCollector.AUTO_DETECT
+    override var scheduler = Scheduler.AUTO_DETECT
     override var targetPlatform = ""
     override var goTags = ""
     override var goArch = ""
