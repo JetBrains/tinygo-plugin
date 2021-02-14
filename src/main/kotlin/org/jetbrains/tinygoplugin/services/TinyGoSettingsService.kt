@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.services
 
+import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.observable.properties.GraphProperty
@@ -9,7 +10,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.layout.panel
-import com.intellij.util.ui.UI.PanelFactory.panel
 import org.jetbrains.tinygoplugin.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -71,7 +71,7 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
         prop = propertyGraph.graphProperty(settings::scheduler),
         objProperty = TinyGoConfiguration::scheduler
     )
-    private val goos = MappedGraphProperty(
+    private val goOS = MappedGraphProperty(
         prop = propertyGraph.graphProperty(settings::goOS),
         objProperty = TinyGoConfiguration::goOS
     )
@@ -94,6 +94,19 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
     override fun getDisplayName(): String = "TinyGo"
 
     override fun actionPerformed(e: ActionEvent?) {
+        val executor = infoExtractor.assembleTinyGoShellCommand(settings)
+        val processHistory = GoHistoryProcessListener()
+        executor.executeWithProgress(true, true, processHistory, null) { result ->
+            val output = processHistory.output.joinToString("")
+            logger.trace(output)
+            settings.extractTinyGoInfo(output)
+            // update all ui fields
+            goArch.reset()
+            goTags.reset()
+            goOS.reset()
+            gc.reset()
+            scheduler.reset()
+        }
     }
 
     override fun setDisplayName(name: String?) {
@@ -128,7 +141,7 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
             button("Detect", this@TinyGoSettingsService::actionPerformed)
         }
         row("GOOS") {
-            textField(property = goos).enabled(false)
+            textField(property = goOS).enabled(false)
         }
         row("GOARCH") {
             textField(property = goArch).enabled(false)
