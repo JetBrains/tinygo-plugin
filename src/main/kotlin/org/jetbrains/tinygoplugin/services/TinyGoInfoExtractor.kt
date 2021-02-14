@@ -3,9 +3,9 @@ package org.jetbrains.tinygoplugin.services
 import com.goide.util.GoExecutor
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
-import org.jetbrains.tinygoplugin.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import java.nio.file.Paths
 
 fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {

@@ -1,20 +1,13 @@
-package org.jetbrains.tinygoplugin
+package org.jetbrains.tinygoplugin.configuration
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.jetbrains.tinygoplugin.configuration.ProjectConfiguration
-import org.jetbrains.tinygoplugin.configuration.ProjectConfigurationImpl
-import org.jetbrains.tinygoplugin.configuration.ProjectConfigurationState
-import org.jetbrains.tinygoplugin.configuration.UserConfiguration
-import org.jetbrains.tinygoplugin.configuration.UserConfigurationImpl
-import org.jetbrains.tinygoplugin.configuration.UserConfigurationState
 
 data class TinyGoConfiguration(
+    private val project: Project,
     private val userConfig: UserConfigurationState = UserConfigurationState(),
     private val projectConfig: ProjectConfigurationState = ProjectConfigurationState(),
-    private val project: Project,
-) :
-    UserConfiguration by userConfig, ProjectConfiguration by projectConfig {
+) : UserConfiguration by userConfig, ProjectConfiguration by projectConfig {
 
     fun saveState(p: Project) {
         p.service<ProjectConfigurationImpl>().projectState = projectConfig.copy()

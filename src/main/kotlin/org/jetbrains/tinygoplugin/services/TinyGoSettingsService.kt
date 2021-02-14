@@ -10,9 +10,9 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.layout.panel
-import org.jetbrains.tinygoplugin.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import javax.swing.JComponent
@@ -110,6 +110,7 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
     }
 
     override fun setDisplayName(name: String?) {
+        logger.warn("Request to change display name to: $name")
     }
 
     override fun reset() {
