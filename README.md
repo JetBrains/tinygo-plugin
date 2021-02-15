@@ -54,3 +54,5 @@ Use ktlint plugin to format code
 1. Add target platform
 1. (Optional) Update Garbage collection choice and Scheduler
 1. Press detect button
+1. Press "Update gopath" button.
+1. Enable "Index Entire GOPATH" in GOPATH settings

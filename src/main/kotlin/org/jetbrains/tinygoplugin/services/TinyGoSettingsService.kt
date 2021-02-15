@@ -11,12 +11,11 @@ import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import com.intellij.ui.EnumComboBoxModel
+import com.intellij.ui.layout.GrowPolicy
 import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import javax.swing.JComponent
 import kotlin.reflect.KMutableProperty1
 
@@ -24,7 +23,7 @@ internal interface Resetable {
     fun reset()
 }
 
-class TinyGoSettingsService(private val project: Project) : NamedConfigurable<TinyGoConfiguration>(), ActionListener {
+class TinyGoSettingsService(private val project: Project) : NamedConfigurable<TinyGoConfiguration>() {
     companion object {
         private val logger: Logger = Logger.getInstance(TinyGoSettingsService::class.java)
     }
@@ -95,16 +94,15 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
 
     override fun getDisplayName(): String = "TinyGo"
 
-    override fun actionPerformed(e: ActionEvent?) {
+    fun extractTinyGOParameters() {
         val executor = infoExtractor.assembleTinyGoShellCommand(settings)
         val processHistory = GoHistoryProcessListener()
         executor.executeWithProgress(true, true, processHistory, null) { result ->
             val output = processHistory.output.joinToString("")
             logger.trace(output)
             settings.extractTinyGoInfo(output)
-            resetableProperties.forEach(Resetable::reset)
-            propagateGoSettings()
             // update all ui fields
+            resetableProperties.forEach(Resetable::reset)
         }
     }
 
@@ -131,27 +129,32 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
             )
         }
         row("Target platform") {
-            textField(property = target)
+            textField(property = target).growPolicy(GrowPolicy.MEDIUM_TEXT)
         }
         row("Compiler parameters:") {
-            comboBox(EnumComboBoxModel(GarbageCollector::class.java), gc)
-            comboBox(EnumComboBoxModel(Scheduler::class.java), scheduler)
+            row("Garbage collector") {
+                comboBox(EnumComboBoxModel(GarbageCollector::class.java), gc)
+            }
+            row("Scheduler") {
+                comboBox(EnumComboBoxModel(Scheduler::class.java), scheduler)
+            }
         }
         row {
-            button("Detect", this@TinyGoSettingsService::actionPerformed)
+            button("Detect") { extractTinyGOParameters() }
+            button("Update gopath") { propagateGoFlags() }
         }
         row("GOOS") {
-            textField(property = goOS).enabled(false)
+            textField(property = goOS).growPolicy(GrowPolicy.MEDIUM_TEXT)
         }
         row("GOARCH") {
-            textField(property = goArch).enabled(false)
+            textField(property = goArch).growPolicy(GrowPolicy.MEDIUM_TEXT)
         }
         row("Go tags") {
-            textField(property = goTags).enabled(false)
+            textField(property = goTags).growPolicy(GrowPolicy.MEDIUM_TEXT)
         }
     }
 
-    private fun propagateGoSettings() {
+    private fun propagateGoFlags() {
         val goSettings = ModuleManager.getInstance(project).modules.map {
             it?.getService(GoModuleSettings::class.java)
         }.filterNotNull().firstOrNull()
