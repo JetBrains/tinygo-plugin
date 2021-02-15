@@ -5,7 +5,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import org.jetbrains.tinygoplugin.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import java.nio.file.Paths
 
 class TinyGopathManager : GoRootsProvider {
