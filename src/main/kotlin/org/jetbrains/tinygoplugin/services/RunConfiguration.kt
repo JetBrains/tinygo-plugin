@@ -9,15 +9,19 @@ import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.icons.AllIcons
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.layout.GrowPolicy
 import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import java.nio.file.Path
 import javax.swing.Icon
 import javax.swing.JComponent
 
@@ -35,6 +39,7 @@ class TinyGoConfigurationEditor(private val project: Project, defaultConfigurati
     private val schedulerProperty = propertyGraph.graphProperty { Scheduler.AUTO_DETECT }
     private val targetProperty = propertyGraph.graphProperty { "" }
     private val tinyGoArguments = propertyGraph.graphProperty { "" }
+    private val main = propertyGraph.graphProperty { "" }
 
     init {
         resetEditorFrom(defaultConfiguration)
@@ -46,7 +51,7 @@ class TinyGoConfigurationEditor(private val project: Project, defaultConfigurati
         gcProperty.set(configuration.gc)
         schedulerProperty.set(configuration.scheduler)
         targetProperty.set(configuration.target)
-
+        main.set(configuration.mainFile.path)
         /* ktlint-disable */
         tinyGoArguments.set(
             listOf(
@@ -63,6 +68,7 @@ class TinyGoConfigurationEditor(private val project: Project, defaultConfigurati
         demoRunConfiguration.cmdlineOptions = tinyGoArguments.get().split(' ').filter {
             it.trim().isNotEmpty()
         }.toMutableList()
+        demoRunConfiguration.mainFile = VfsUtil.findFile(Path.of(main.get()), true)!!
     }
 
     override fun createEditor(): JComponent {
@@ -76,6 +82,9 @@ class TinyGoConfigurationEditor(private val project: Project, defaultConfigurati
             row("Command line arguments") {
                 textField(tinyGoArguments).growPolicy(GrowPolicy.MEDIUM_TEXT)
             }
+            row("Path to main") {
+                textFieldWithBrowseButton(property = main)
+            }
         }
     }
 }
@@ -86,6 +95,7 @@ class DemoRunConfiguration(project: Project, factory: ConfigurationFactory, name
     var target = ""
     var gc = GarbageCollector.AUTO_DETECT
     var scheduler = Scheduler.AUTO_DETECT
+    var mainFile: VirtualFile = project.workspaceFile!!.parent.parent
     var cmdlineOptions: MutableCollection<String> = ArrayList()
 
     init {
@@ -97,6 +107,7 @@ class DemoRunConfiguration(project: Project, factory: ConfigurationFactory, name
     }
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState? {
+        thisLogger().warn("Get state called")
         return null
     }
 
@@ -105,6 +116,7 @@ class DemoRunConfiguration(project: Project, factory: ConfigurationFactory, name
     }
     @Throws(RuntimeConfigurationException::class)
     override fun checkConfiguration() {
+        thisLogger().warn("Check configuration called")
     }
 }
 
