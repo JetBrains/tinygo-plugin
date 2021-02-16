@@ -17,12 +17,13 @@ import com.intellij.util.ui.UI.PanelFactory
 
 class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>() {
     private val tinyGoSdkBrowser = textFieldWithBrowseButton(
-        null, "", FileChooserDescriptorFactory.createSingleFolderDescriptor(),
-        fileChosen = { it: VirtualFile ->
+        null, "Choose TinyGo SDK Home",
+        FileChooserDescriptorFactory.createSingleFolderDescriptor(),
+        fileChosen = {
             if (TinyGoSdkUtil.checkDirectoryForTinyGo(it)) it.canonicalPath!!
             else {
                 Messages.showErrorDialog("Selected TinyGo path is invalid", "Invalid TinyGo")
-                ""
+                TinyGoSdkUtil.suggestSdkDirectoryStr()
             }
         }
     )
