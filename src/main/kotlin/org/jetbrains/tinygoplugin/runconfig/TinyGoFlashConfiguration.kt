@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.runconfig
 
+import com.goide.GoFileType
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.RunConfiguration
@@ -8,6 +9,7 @@ import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.options.SettingsEditor
@@ -75,7 +77,11 @@ class TinyGoConfigurationEditor(defaultConfiguration: TinyGoFlashConfiguration) 
                 textField(tinyGoArguments).growPolicy(GrowPolicy.MEDIUM_TEXT)
             }
             row("Path to main") {
-                textFieldWithBrowseButton(property = main)
+                val fileChooserDescriptor = FileChooserDescriptor(true, false, false, false, false, false)
+                textFieldWithBrowseButton(
+                    property = main,
+                    fileChooserDescriptor = fileChooserDescriptor
+                )
             }
         }
     }
@@ -108,6 +114,12 @@ class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, 
     }
     @Throws(RuntimeConfigurationException::class)
     override fun checkConfiguration() {
-        thisLogger().warn("Check configuration called")
+        if (!mainFile.isValid) {
+            throw RuntimeConfigurationException("Main file does not exists")
+        }
+        val mainFiletype = mainFile.fileType
+        if (mainFiletype !is GoFileType) {
+            throw RuntimeConfigurationException("Selected file is not a go file")
+        }
     }
 }
