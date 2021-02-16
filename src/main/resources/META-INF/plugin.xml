@@ -15,7 +15,7 @@
         <projectConfigurable parentId="go" instance="org.jetbrains.tinygoplugin.services.TinyGoSettingsService"
                              id="org.jetbrains.tinygoplugin.services.TinyGoSettingsService"
                              displayName="TinyGo"/>
-        <configurationType implementation="org.jetbrains.tinygoplugin.services.DemoRunConfigurationType"/>
+        <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
     </extensions>
 
 </idea-plugin>

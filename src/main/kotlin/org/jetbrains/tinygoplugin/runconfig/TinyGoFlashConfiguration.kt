@@ -1,14 +1,12 @@
-package org.jetbrains.tinygoplugin.services
+package org.jetbrains.tinygoplugin.runconfig
 
 import com.intellij.execution.Executor
 import com.intellij.execution.configurations.ConfigurationFactory
-import com.intellij.execution.configurations.ConfigurationType
 import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.execution.configurations.RunConfigurationBase
 import com.intellij.execution.configurations.RunProfileState
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.observable.properties.PropertyGraph
@@ -22,16 +20,10 @@ import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import java.nio.file.Path
-import javax.swing.Icon
 import javax.swing.JComponent
 
-internal const val CONFIGURATION_ID = "TinyGO"
-internal const val CONFIGURATION_NAME = "TinyGO Flash"
-internal const val DESCRIPTION = "TinyGo Flash Application"
-internal const val FACTORY_ID = "TinyGo Application"
-
-class TinyGoConfigurationEditor(private val project: Project, defaultConfiguration: DemoRunConfiguration) :
-    SettingsEditor<DemoRunConfiguration>() {
+class TinyGoConfigurationEditor(defaultConfiguration: TinyGoFlashConfiguration) :
+    SettingsEditor<TinyGoFlashConfiguration>() {
 
     private val propertyGraph = PropertyGraph()
     private val sdkProperty = propertyGraph.graphProperty { "" }
@@ -45,7 +37,7 @@ class TinyGoConfigurationEditor(private val project: Project, defaultConfigurati
         resetEditorFrom(defaultConfiguration)
     }
 
-    override fun resetEditorFrom(configuration: DemoRunConfiguration) {
+    override fun resetEditorFrom(configuration: TinyGoFlashConfiguration) {
         sdkProperty.set(configuration.tinyGoSDKPath)
         sdkProperty.set(configuration.tinyGoSDKPath)
         gcProperty.set(configuration.gc)
@@ -64,11 +56,11 @@ class TinyGoConfigurationEditor(private val project: Project, defaultConfigurati
         )
     }
 
-    override fun applyEditorTo(demoRunConfiguration: DemoRunConfiguration) {
-        demoRunConfiguration.cmdlineOptions = tinyGoArguments.get().split(' ').filter {
+    override fun applyEditorTo(tinyGoFlashConfiguration: TinyGoFlashConfiguration) {
+        tinyGoFlashConfiguration.cmdlineOptions = tinyGoArguments.get().split(' ').filter {
             it.trim().isNotEmpty()
         }.toMutableList()
-        demoRunConfiguration.mainFile = VfsUtil.findFile(Path.of(main.get()), true)!!
+        tinyGoFlashConfiguration.mainFile = VfsUtil.findFile(Path.of(main.get()), true)!!
     }
 
     override fun createEditor(): JComponent {
@@ -89,7 +81,7 @@ class TinyGoConfigurationEditor(private val project: Project, defaultConfigurati
     }
 }
 
-class DemoRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
+class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
     RunConfigurationBase<Any?>(project, factory, name) {
     var tinyGoSDKPath: String = ""
     var target = ""
@@ -112,49 +104,10 @@ class DemoRunConfiguration(project: Project, factory: ConfigurationFactory, name
     }
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration?> {
-        return TinyGoConfigurationEditor(project, this)
+        return TinyGoConfigurationEditor(this)
     }
     @Throws(RuntimeConfigurationException::class)
     override fun checkConfiguration() {
         thisLogger().warn("Check configuration called")
-    }
-}
-
-class DemoConfigurationFactory(type: ConfigurationType) : ConfigurationFactory(type) {
-    override fun createTemplateConfiguration(project: Project): RunConfiguration {
-        return DemoRunConfiguration(project, this, "Demo")
-    }
-
-    override fun getName(): String {
-        return FACTORY_NAME
-    }
-
-    override fun getId(): String =
-        CONFIGURATION_ID
-
-    companion object {
-        private const val FACTORY_NAME = "Demo configuration factory"
-    }
-}
-
-class DemoRunConfigurationType : ConfigurationType {
-    override fun getDisplayName(): String {
-        return "TinyGoDisplayName"
-    }
-
-    override fun getConfigurationTypeDescription(): String {
-        return "TinyGoConfigurationTypeDescriptor"
-    }
-
-    override fun getIcon(): Icon {
-        return AllIcons.General.Information
-    }
-
-    override fun getId(): String {
-        return "TinyGoId"
-    }
-
-    override fun getConfigurationFactories(): Array<ConfigurationFactory> {
-        return arrayOf<ConfigurationFactory>(DemoConfigurationFactory(this))
     }
 }
