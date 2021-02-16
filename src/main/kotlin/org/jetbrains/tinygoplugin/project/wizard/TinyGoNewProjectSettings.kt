@@ -6,5 +6,6 @@ import org.jetbrains.annotations.NotNull
 
 data class TinyGoNewProjectSettings(
     var sdk: @NotNull GoSdk,
-    var tinyGoSdkPath: String
+    var tinyGoSdkPath: String,
+    var tinyGoTarget: String
 ) : GoNewProjectSettings(sdk)
