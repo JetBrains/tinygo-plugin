@@ -2,17 +2,13 @@ package org.jetbrains.tinygoplugin.services
 
 import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
-import com.intellij.ui.EnumComboBoxModel
-import com.intellij.ui.layout.panel
-import org.jetbrains.tinygoplugin.configuration.GarbageCollector
-import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.ui.TinyGoUIComponents
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import javax.swing.JComponent
@@ -94,9 +90,8 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
     override fun getDisplayName(): String = "TinyGo"
 
     override fun actionPerformed(e: ActionEvent?) {
-        val executor = infoExtractor.assembleTinyGoShellCommand(settings)
         val processHistory = GoHistoryProcessListener()
-        executor.executeWithProgress(true, true, processHistory, null) { result ->
+        infoExtractor.extractTinyGoInfo(settings, processHistory) { result ->
             val output = processHistory.output.joinToString("")
             logger.trace(output)
             settings.extractTinyGoInfo(output)
@@ -123,32 +118,16 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
 
     override fun getBannerSlogan(): String = "Tinygo slogan"
 
-    override fun createOptionsPanel(): JComponent = panel {
-        row("TinyGo Path") {
-            textFieldWithBrowseButton(
-                property = tinygoSDKPath, project = project,
-                fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor(),
-                fileChosen = { it.canonicalPath ?: settings.tinyGoSDKPath }
-            )
-        }
-        row("Target platform") {
-            textField(property = target)
-        }
-        row("Compiler parameters:") {
-            comboBox(EnumComboBoxModel(GarbageCollector::class.java), gc)
-            comboBox(EnumComboBoxModel(Scheduler::class.java), scheduler)
-        }
-        row {
-            button("Detect", this@TinyGoSettingsService::actionPerformed)
-        }
-        row("GOOS") {
-            textField(property = goOS).enabled(false)
-        }
-        row("GOARCH") {
-            textField(property = goArch).enabled(false)
-        }
-        row("Go tags") {
-            textField(property = goTags).enabled(false)
-        }
-    }
+    override fun createOptionsPanel(): JComponent = TinyGoUIComponents.generateSettingsPanel(
+        tinygoSDKPath,
+        fileChosen = { it.canonicalPath ?: settings.tinyGoSDKPath },
+        target,
+        gc,
+        scheduler,
+        this::actionPerformed,
+        goOS,
+        goArch,
+        goTags,
+        project
+    )
 }
