@@ -2,87 +2,31 @@ package org.jetbrains.tinygoplugin.services
 
 import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.observable.properties.GraphProperty
-import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
-import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
-import com.intellij.ui.EnumComboBoxModel
-import com.intellij.ui.layout.panel
-import org.jetbrains.tinygoplugin.configuration.GarbageCollector
-import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.ui.CanResetSettingsUI
+import org.jetbrains.tinygoplugin.ui.ResetableProperty
+import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
+import org.jetbrains.tinygoplugin.ui.TinyGoUIComponents
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import javax.swing.JComponent
-import kotlin.reflect.KMutableProperty1
 
-internal interface Resetable {
-    fun reset()
-}
-
-class TinyGoSettingsService(private val project: Project) : NamedConfigurable<TinyGoConfiguration>(), ActionListener {
+class TinyGoSettingsService(private val project: Project) : NamedConfigurable<TinyGoConfiguration>(),
+    CanResetSettingsUI, ActionListener {
     companion object {
         private val logger: Logger = Logger.getInstance(TinyGoSettingsService::class.java)
     }
-    // list of all UI properties to be resetted
-    private val resetableProperties: MutableCollection<Resetable> = ArrayList()
-    // wrapper around graph property that binds the field to the property in settings
-    inner class MappedGraphProperty<T>(
-        private val prop: GraphProperty<T>,
-        private val objProperty: KMutableProperty1<TinyGoConfiguration, T>,
-    ) : GraphProperty<T> by prop, Resetable {
-        init {
-            prop.afterChange {
-                objProperty.set(this@TinyGoSettingsService.settings, it)
-            }
-            prop.afterReset {
-                prop.set(objProperty.get(this@TinyGoSettingsService.settings))
-            }
-            this@TinyGoSettingsService.resetableProperties.add(this)
-        }
-
-        override fun reset() = prop.reset()
-    }
-
-    private val infoExtractor = TinyGoInfoExtractor(project)
 
     // local copy of the settings
-    private var settings = TinyGoConfiguration.getInstance(project).deepCopy()
+    override var settings: TinyGoConfiguration = TinyGoConfiguration.getInstance(project).deepCopy()
 
-    private val propertyGraph = PropertyGraph()
-    // set initial string
-    private val tinygoSDKPath =
-        MappedGraphProperty(
-            prop = propertyGraph.graphProperty(settings::tinyGoSDKPath),
-            objProperty = TinyGoConfiguration::tinyGoSDKPath
-        )
-    private val target = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(settings::targetPlatform),
-        objProperty = TinyGoConfiguration::targetPlatform
-    )
+    // list of all UI properties to be resetted
+    override var resetableProperties: MutableCollection<ResetableProperty> = ArrayList()
 
-    private val gc = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(settings::gc),
-        objProperty = TinyGoConfiguration::gc
-    )
-    private val scheduler = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(settings::scheduler),
-        objProperty = TinyGoConfiguration::scheduler
-    )
-    private val goOS = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(settings::goOS),
-        objProperty = TinyGoConfiguration::goOS
-    )
-    private val goArch = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(settings::goArch),
-        objProperty = TinyGoConfiguration::goArch
-    )
-    private val goTags = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(settings::goTags),
-        objProperty = TinyGoConfiguration::goTags
-    )
+    private val infoExtractor = TinyGoInfoExtractor(project)
+    private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 
     override fun isModified(): Boolean = settings.modified(project)
 
@@ -93,20 +37,24 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
 
     override fun getDisplayName(): String = "TinyGo"
 
-    override fun actionPerformed(e: ActionEvent?) {
-        val executor = infoExtractor.assembleTinyGoShellCommand(settings)
+    private fun callExtractor() {
         val processHistory = GoHistoryProcessListener()
-        executor.executeWithProgress(true, true, processHistory, null) { result ->
+        infoExtractor.extractTinyGoInfo(settings, processHistory) { result ->
             val output = processHistory.output.joinToString("")
             logger.trace(output)
             settings.extractTinyGoInfo(output)
             // update all ui fields
-            goArch.reset()
-            goTags.reset()
-            goOS.reset()
-            gc.reset()
-            scheduler.reset()
+            propertiesWrapper.goArch.reset()
+            propertiesWrapper.goTags.reset()
+            propertiesWrapper.goOS.reset()
+
+            propertiesWrapper.gc.reset()
+            propertiesWrapper.scheduler.reset()
         }
+    }
+
+    override fun actionPerformed(e: ActionEvent?) {
+        callExtractor()
     }
 
     override fun setDisplayName(name: String?) {
@@ -115,7 +63,7 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
 
     override fun reset() {
         settings = TinyGoConfiguration.getInstance(project).deepCopy()
-        resetableProperties.forEach(Resetable::reset)
+        resetableProperties.forEach(ResetableProperty::reset)
         super.reset()
     }
 
@@ -123,32 +71,10 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
 
     override fun getBannerSlogan(): String = "Tinygo slogan"
 
-    override fun createOptionsPanel(): JComponent = panel {
-        row("TinyGo Path") {
-            textFieldWithBrowseButton(
-                property = tinygoSDKPath, project = project,
-                fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor(),
-                fileChosen = { it.canonicalPath ?: settings.tinyGoSDKPath }
-            )
-        }
-        row("Target platform") {
-            textField(property = target)
-        }
-        row("Compiler parameters:") {
-            comboBox(EnumComboBoxModel(GarbageCollector::class.java), gc)
-            comboBox(EnumComboBoxModel(Scheduler::class.java), scheduler)
-        }
-        row {
-            button("Detect", this@TinyGoSettingsService::actionPerformed)
-        }
-        row("GOOS") {
-            textField(property = goOS).enabled(false)
-        }
-        row("GOARCH") {
-            textField(property = goArch).enabled(false)
-        }
-        row("Go tags") {
-            textField(property = goTags).enabled(false)
-        }
-    }
+    override fun createOptionsPanel(): JComponent = TinyGoUIComponents.generateSettingsPanel(
+        propertiesWrapper,
+        fileChosen = { it.canonicalPath ?: settings.tinyGoSDKPath },
+        this::actionPerformed,
+        project
+    )
 }

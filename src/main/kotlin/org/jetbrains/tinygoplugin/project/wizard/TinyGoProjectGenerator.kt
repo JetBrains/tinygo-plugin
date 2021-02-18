@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.project.wizard
 
 import com.goide.GoIcons
+import com.goide.util.GoHistoryProcessListener
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
 import com.intellij.openapi.module.Module
@@ -9,6 +10,8 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkUtil
+import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
+import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import javax.swing.Icon
 
 class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
@@ -20,16 +23,23 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
 
     override fun validate(baseDirPath: String): ValidationResult = ValidationResult.OK
 
+    private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
+        val processHistory = GoHistoryProcessListener()
+        TinyGoInfoExtractor(project).extractTinyGoInfo(tinyGoSettings, processHistory) {
+            val output = processHistory.output.joinToString("")
+            tinyGoSettings.extractTinyGoInfo(output)
+            tinyGoSettings.saveState(project)
+        }
+    }
+
     override fun doGenerateProject(
         project: Project,
         baseDir: VirtualFile,
         newProjectSettings: TinyGoNewProjectSettings,
         module: Module
     ) {
-        val tinyGoSettings = TinyGoConfiguration.getInstance(project)
-        tinyGoSettings.tinyGoSDKPath = newProjectSettings.tinyGoSdkPath
-        tinyGoSettings.targetPlatform = newProjectSettings.tinyGoTarget
-        tinyGoSettings.saveState(project)
+        newProjectSettings.tinyGoSettings.saveState(project)
+        extractTinyGoSettings(project, newProjectSettings.tinyGoSettings)
 
         TinyGoSdkUtil.notifyTinyGoNotConfigured(
             project,
