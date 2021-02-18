@@ -55,10 +55,17 @@ class TinyGoSdkUtil private constructor() {
         fun suggestSdkDirectoryStr(): String = suggestSdkDirectory()?.canonicalPath ?: ""
 
         private fun suggestSdkDirectory(): VirtualFile? {
-            // TODO: implement search on other platforms
-            if (GoOsManager.isMac()) {
+            if (GoOsManager.isLinux()) {
+                // must be extended and tested on Linux
+                val usrLibs = "/usr/local/tinygo"
+                if (FileUtil.exists(usrLibs)) {
+                    if (checkDirectoryForTinyGo(File(usrLibs))) {
+                        return LocalFileSystem.getInstance().findFileByPath(usrLibs)
+                    }
+                }
+            } else if (GoOsManager.isMac()) {
                 val macPorts = "/opt/local/lib/tinygo"
-                val homeBrew = "/usr/local/Cellar/tinygo" // TODO: implement search in PATH
+                val homeBrew = "/usr/local/Cellar/tinygo"
                 val file = FileUtil.findFirstThatExist(macPorts, homeBrew)
                 if (file != null) {
                     val tinyGoSdkDirectories = file.canonicalFile.listFiles {
@@ -66,6 +73,21 @@ class TinyGoSdkUtil private constructor() {
                     }?.first()
                     if (tinyGoSdkDirectories != null) {
                         return LocalFileSystem.getInstance().findFileByIoFile(tinyGoSdkDirectories)
+                    }
+                }
+            } else if (GoOsManager.isWindows()) {
+                // must be tested under Windows
+                val winScoopInstallDir = "${System.getenv("SCOOP")}\\tinygo"
+                val winScoopGlobalInstallDir = "${System.getenv("SCOOP_GLOBAL")}\\tinygo"
+                val winC = "C:\\tinygo"
+                val winProgramFiles = "C:\\Program Files\\tinygo"
+                val winProgramFilesX86 = "C:\\Program Files (x86)\\tinygo"
+                val file = FileUtil.findFirstThatExist(
+                    winScoopInstallDir, winScoopGlobalInstallDir, winC, winProgramFiles, winProgramFilesX86
+                )
+                if (file != null) {
+                    if (checkDirectoryForTinyGo(file)) {
+                        return LocalFileSystem.getInstance().findFileByIoFile(file)
                     }
                 }
             }
