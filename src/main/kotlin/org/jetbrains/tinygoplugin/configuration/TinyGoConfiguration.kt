@@ -4,7 +4,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 
 data class TinyGoConfiguration(
-    private val project: Project,
+    private val project: Project?,
     private val userConfig: UserConfigurationState = UserConfigurationState(),
     private val projectConfig: ProjectConfigurationState = ProjectConfigurationState(),
 ) : UserConfiguration by userConfig, ProjectConfiguration by projectConfig {

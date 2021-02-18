@@ -1,11 +1,10 @@
 package org.jetbrains.tinygoplugin.ui
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EnumComboBoxModel
-import com.intellij.ui.layout.*
+import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import java.awt.event.ActionEvent
@@ -14,55 +13,46 @@ import javax.swing.JPanel
 class TinyGoUIComponents private constructor() {
     companion object {
         fun generateTinyGoParametersPanel(
-            tinyGoSDKPath: GraphProperty<String>,
+            wrapper: TinyGoPropertiesWrapper,
             fileChosen: ((chosenFile: VirtualFile) -> String),
-            target: GraphProperty<String>,
-            gc: GraphProperty<GarbageCollector>,
-            scheduler: GraphProperty<Scheduler>,
             project: Project? = null
         ): JPanel = panel {
             row("TinyGo Path") {
                 textFieldWithBrowseButton(
-                    property = tinyGoSDKPath, project = project,
+                    property = wrapper.tinygoSDKPath, project = project,
                     fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor(),
                     fileChosen = fileChosen
                 )
             }
             row("Target platform") {
-                textField(property = target)
+                textField(property = wrapper.target)
             }
             row("Compiler parameters:") {
-                comboBox(EnumComboBoxModel(GarbageCollector::class.java), gc)
-                comboBox(EnumComboBoxModel(Scheduler::class.java), scheduler)
+                comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
+                comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
             }
         }
 
         fun generateSettingsPanel(
-            tinyGoSDKPath: GraphProperty<String>,
+            wrapper: TinyGoPropertiesWrapper,
             fileChosen: ((chosenFile: VirtualFile) -> String),
-            target: GraphProperty<String>,
-            gc: GraphProperty<GarbageCollector>,
-            scheduler: GraphProperty<Scheduler>,
             actionPerformed: ((event: ActionEvent) -> Unit),
-            goOS: GraphProperty<String>,
-            goArch: GraphProperty<String>,
-            goTags: GraphProperty<String>,
             project: Project? = null
         ): JPanel = panel {
             row {
-                generateTinyGoParametersPanel(tinyGoSDKPath, fileChosen, target, gc, scheduler, project)()
+                generateTinyGoParametersPanel(wrapper, fileChosen, project)()
             }
             row {
                 button("Detect", actionPerformed)
             }
             row("GOOS") {
-                textField(property = goOS).enabled(false)
+                textField(property = wrapper.goOS).enabled(false)
             }
             row("GOARCH") {
-                textField(property = goArch).enabled(false)
+                textField(property = wrapper.goArch).enabled(false)
             }
             row("Go tags") {
-                textField(property = goTags).enabled(false)
+                textField(property = wrapper.goTags).enabled(false)
             }
         }
     }

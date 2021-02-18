@@ -30,14 +30,6 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
             tinyGoSettings.extractTinyGoInfo(output)
             tinyGoSettings.saveState(project)
         }
-
-        /*val executor = infoExtractor.assembleTinyGoShellCommand(tinyGoSettings)
-
-        executor.executeWithProgress(true, true, processHistory, null) { result ->
-            val output = processHistory.output.joinToString("")
-            tinyGoSettings.extractTinyGoInfo(output)
-            tinyGoSettings.saveState(project)
-        }*/
     }
 
     override fun doGenerateProject(
@@ -46,14 +38,8 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
         newProjectSettings: TinyGoNewProjectSettings,
         module: Module
     ) {
-        val tinyGoSettings = TinyGoConfiguration.getInstance(project)
-        tinyGoSettings.tinyGoSDKPath = newProjectSettings.tinyGoSdkPath
-        tinyGoSettings.targetPlatform = newProjectSettings.tinyGoTarget
-        tinyGoSettings.gc = newProjectSettings.tinyGoGarbageCollector
-        tinyGoSettings.scheduler = newProjectSettings.tinyGoScheduler
-        tinyGoSettings.saveState(project)
-
-        extractTinyGoSettings(project, tinyGoSettings)
+        newProjectSettings.tinyGoSettings.saveState(project)
+        extractTinyGoSettings(project, newProjectSettings.tinyGoSettings)
 
         TinyGoSdkUtil.notifyTinyGoNotConfigured(
             project,
