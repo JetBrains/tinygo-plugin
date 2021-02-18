@@ -19,6 +19,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.layout.GrowPolicy
 import com.intellij.ui.layout.panel
+import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
@@ -64,7 +65,10 @@ class TinyGoConfigurationEditor(defaultConfiguration: TinyGoFlashConfiguration) 
         tinyGoFlashConfiguration.cmdlineOptions = tinyGoArguments.get().split(' ').filter {
             it.trim().isNotEmpty()
         }.toMutableList()
-        tinyGoFlashConfiguration.mainFile = VfsUtil.findFile(Path.of(main.get()), true)!!
+        val mainFile = Path.of(main.get())
+        if (mainFile.exists()) {
+            tinyGoFlashConfiguration.mainFile = VfsUtil.findFile(mainFile, true)!!
+        }
     }
 
     override fun createEditor(): JComponent {
@@ -103,7 +107,7 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
 
         goExecutor.withExePath(tinyGoExecutablePath.toString())
         goExecutor.withParameters(arguments)
-        return super.createRunExecutor()
+        return goExecutor
     }
 }
 
