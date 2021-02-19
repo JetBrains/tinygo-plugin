@@ -8,7 +8,7 @@ import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.CanResetSettingsUI
 import org.jetbrains.tinygoplugin.ui.ResetableProperty
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
-import org.jetbrains.tinygoplugin.ui.TinyGoUIComponents
+import org.jetbrains.tinygoplugin.ui.generateSettingsPanel
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import javax.swing.JComponent
@@ -71,7 +71,7 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
 
     override fun getBannerSlogan(): String = "Tinygo slogan"
 
-    override fun createOptionsPanel(): JComponent = TinyGoUIComponents.generateSettingsPanel(
+    override fun createOptionsPanel(): JComponent = generateSettingsPanel(
         propertiesWrapper,
         fileChosen = { it.canonicalPath ?: settings.tinyGoSDKPath },
         this::actionPerformed,

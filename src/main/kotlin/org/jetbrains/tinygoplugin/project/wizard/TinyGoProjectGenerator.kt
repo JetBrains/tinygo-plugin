@@ -9,7 +9,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.sdk.TinyGoSdkUtil
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import javax.swing.Icon
@@ -40,11 +39,6 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
     ) {
         newProjectSettings.tinyGoSettings.saveState(project)
         extractTinyGoSettings(project, newProjectSettings.tinyGoSettings)
-
-        TinyGoSdkUtil.notifyTinyGoNotConfigured(
-            project,
-            "Please set TinyGo fully up to complete project building, running and indexing"
-        )
     }
 
     override fun createPeer(): ProjectGeneratorPeer<TinyGoNewProjectSettings> {

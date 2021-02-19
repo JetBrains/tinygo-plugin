@@ -10,17 +10,18 @@ import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.util.ui.UI.PanelFactory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.UserConfigurationState
-import org.jetbrains.tinygoplugin.sdk.TinyGoSdkUtil
+import org.jetbrains.tinygoplugin.sdk.checkDirectoryForTinyGo
+import org.jetbrains.tinygoplugin.sdk.suggestSdkDirectoryStr
 import org.jetbrains.tinygoplugin.ui.SettingsDependentUI
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
-import org.jetbrains.tinygoplugin.ui.TinyGoUIComponents
+import org.jetbrains.tinygoplugin.ui.generateTinyGoParametersPanel
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 
 class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>(), SettingsDependentUI {
     override var settings: TinyGoConfiguration = TinyGoConfiguration(
         null, userConfig = UserConfigurationState(
-            tinyGoSDKPath = TinyGoSdkUtil.suggestSdkDirectoryStr()
+            tinyGoSDKPath = suggestSdkDirectoryStr()
         )
     )
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
@@ -39,13 +40,13 @@ class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettin
         panel.add(createGridPanel(locationComponent, sdkCombo).resize().createPanel())
         panel.add(
             decorateSettingsPanelForUI(
-                TinyGoUIComponents.generateTinyGoParametersPanel(
+                generateTinyGoParametersPanel(
                     propertiesWrapper,
                     fileChosen = {
-                        if (TinyGoSdkUtil.checkDirectoryForTinyGo(it)) it.canonicalPath!!
+                        if (checkDirectoryForTinyGo(it)) it.canonicalPath!!
                         else {
                             Messages.showErrorDialog("Selected TinyGo path is invalid", "Invalid TinyGo")
-                            TinyGoSdkUtil.suggestSdkDirectoryStr()
+                            suggestSdkDirectoryStr()
                         }
                     },
                 )
