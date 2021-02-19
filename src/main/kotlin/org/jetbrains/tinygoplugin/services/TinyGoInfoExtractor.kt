@@ -1,8 +1,10 @@
 package org.jetbrains.tinygoplugin.services
 
 import com.goide.util.GoExecutor
+import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
+import com.intellij.util.Consumer
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
@@ -58,5 +60,14 @@ internal class TinyGoInfoExtractor(private val project: Project) {
             parameters.addAll(listOf("-gc", settings.gc.cmd))
         }
         return parameters
+    }
+
+    fun extractTinyGoInfo(
+        settings: TinyGoConfiguration,
+        processHistory: GoHistoryProcessListener,
+        onFinish: Consumer<in GoExecutor.ExecutionResult?>
+    ) {
+        val executor = assembleTinyGoShellCommand(settings)
+        executor.executeWithProgress(true, true, processHistory, null, onFinish)
     }
 }

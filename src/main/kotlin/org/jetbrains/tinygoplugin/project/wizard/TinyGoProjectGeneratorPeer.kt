@@ -3,46 +3,55 @@ package org.jetbrains.tinygoplugin.project.wizard
 import com.goide.sdk.combobox.GoSdkChooserCombo
 import com.goide.wizard.GoProjectGeneratorPeer
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
-import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.LabeledComponent
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
-import com.intellij.ui.layout.panel
+import com.intellij.util.ui.UI.PanelFactory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.sdk.TinyGoSdkUtil
-import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
+import org.jetbrains.tinygoplugin.configuration.UserConfigurationState
+import org.jetbrains.tinygoplugin.sdk.checkDirectoryForTinyGo
+import org.jetbrains.tinygoplugin.sdk.suggestSdkDirectoryStr
+import org.jetbrains.tinygoplugin.ui.SettingsProvider
+import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
+import org.jetbrains.tinygoplugin.ui.generateTinyGoParametersPanel
+import javax.swing.BoxLayout
 import javax.swing.JPanel
-import javax.swing.JTextField
 
-class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>() {
-    private var tinyGoPathBrowser: TextFieldWithBrowseButton = TextFieldWithBrowseButton()
+class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>(), SettingsProvider {
+    override var settings: TinyGoConfiguration = TinyGoConfiguration(
+        UserConfigurationState(tinyGoSDKPath = suggestSdkDirectoryStr())
+    )
+    private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 
-    init {
-        tinyGoPathBrowser.text = TinyGoSdkUtil.suggestSdkDirectory()?.path.toString()
-
-        tinyGoPathBrowser.addBrowseFolderListener(
-            "Select TinyGo Path", null, null,
-            FileChooserDescriptorFactory.createSingleFolderDescriptor()
-        )
-    }
+    private fun decorateSettingsPanelForUI(component: JPanel): JPanel =
+        PanelFactory.grid().add(PanelFactory.panel(component)).resize().createPanel()
 
     override fun createSettingsPanel(
         parentDisposable: Disposable,
         locationComponent: LabeledComponent<TextFieldWithBrowseButton>?,
         sdkCombo: GoSdkChooserCombo?,
         project: Project?
-    ) : JPanel {
-        val locationAndCombo = createGridPanel(locationComponent, sdkCombo).resize().createPanel()
-        return panel {
-            row { locationAndCombo() }
-            row("TinyGo Path:") { tinyGoPathBrowser() }
-        }
+    ): JPanel {
+        val panel = JPanel()
+        panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
+        panel.add(createGridPanel(locationComponent, sdkCombo).resize().createPanel())
+        panel.add(
+            decorateSettingsPanelForUI(
+                generateTinyGoParametersPanel(
+                    propertiesWrapper,
+                    fileChosen = {
+                        if (checkDirectoryForTinyGo(it)) it.canonicalPath!!
+                        else {
+                            Messages.showErrorDialog("Selected TinyGo path is invalid", "Invalid TinyGo")
+                            suggestSdkDirectoryStr()
+                        }
+                    },
+                )
+            ),
+        )
+        return panel
     }
 
-    override fun getSettings(): TinyGoNewProjectSettings {
-        return TinyGoNewProjectSettings(sdkFromCombo, tinyGoPathBrowser.text)
-    }
-
+    override fun getSettings(): TinyGoNewProjectSettings = TinyGoNewProjectSettings(sdkFromCombo, settings)
 }
