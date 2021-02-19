@@ -17,8 +17,6 @@
                              displayName="TinyGo"/>
     </extensions>
 
-
-    <!-- Requires the GoLand -->
     <extensions defaultExtensionNs="com.goide">
         <rootsProvider id="default" implementation="org.jetbrains.tinygoplugin.services.TinyGopathManager"/>
     </extensions>
