@@ -16,6 +16,13 @@
                              id="org.jetbrains.tinygoplugin.services.TinyGoSettingsService"
                              displayName="TinyGo"/>
         <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
+
+        <directoryProjectGenerator implementation="org.jetbrains.tinygoplugin.project.wizard.TinyGoProjectGenerator"/>
+
+    </extensions>
+
+    <extensions defaultExtensionNs="com.goide">
+        <rootsProvider id="default" implementation="org.jetbrains.tinygoplugin.services.TinyGopathManager"/>
     </extensions>
 
 </idea-plugin>

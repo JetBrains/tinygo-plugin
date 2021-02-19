@@ -43,3 +43,16 @@ Only development version is available at the moment.
 Plugin based on the [IntelliJ Platform Plugin Template][template].
 
 [template]: https://github.com/JetBrains/intellij-platform-plugin-template
+
+## Misc
+Use ktlint plugin to format code
+
+## Usage
+
+1. Go to `Preferences->Go->TinyGo`.
+1. Insert correct path to tinygo executable.
+1. Add target platform
+1. (Optional) Update Garbage collection choice and Scheduler
+1. Press detect button
+1. Press "Update gopath" button.
+1. Enable "Index Entire GOPATH" in GOPATH settings
