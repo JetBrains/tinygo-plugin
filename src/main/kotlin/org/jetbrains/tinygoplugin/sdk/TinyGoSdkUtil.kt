@@ -9,7 +9,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
@@ -37,14 +36,12 @@ fun checkDirectoryForTinyGo(dir: VirtualFile): Boolean {
 private fun checkDirectoryForTinyGo(dir: File): Boolean {
     if (dir.isDirectory) {
         val binDirCandidates = dir.listFiles { child -> child.isDirectory && child.name.endsWith("bin") }
-        if (binDirCandidates != null) {
-            if (binDirCandidates.isNotEmpty()) {
-                val binDir = binDirCandidates.first()
-                // research if other criteria possible
-                return binDir?.listFiles { child ->
-                    child.isFile && child.canExecute() && child.name.endsWith("tinygo")
-                }?.isNotEmpty() ?: false
-            }
+        if (binDirCandidates != null && binDirCandidates.isNotEmpty()) {
+            val binDir = binDirCandidates.first()
+            // research if other criteria possible
+            return binDir?.listFiles { child ->
+                child.isFile && child.canExecute() && child.name.endsWith("tinygo")
+            }?.isNotEmpty() ?: false
         }
     }
     return false
@@ -53,7 +50,7 @@ private fun checkDirectoryForTinyGo(dir: File): Boolean {
 fun suggestSdkDirectoryStr(): String = suggestSdkDirectory()?.canonicalPath ?: ""
 
 @Suppress("SpreadOperator")
-fun suggestSdkDirectory(): VirtualFile? {
+fun suggestSdkDirectory(): File? {
     val tinyGoSdkHomeCandidates: MutableList<String> = arrayListOf()
     if (GoOsManager.isLinux()) {
         tinyGoSdkHomeCandidates.add("/usr/local/tinygo")
@@ -62,8 +59,8 @@ fun suggestSdkDirectory(): VirtualFile? {
         val homeBrew = "/usr/local/Cellar/tinygo"
         val file = FileUtil.findFirstThatExist(macPorts, homeBrew)
         if (file != null) {
-            val tinyGoSdkDirectories = file.canonicalFile.listFiles {
-                    child -> checkDirectoryForTinyGo(child)
+            val tinyGoSdkDirectories = file.canonicalFile.listFiles { child ->
+                checkDirectoryForTinyGo(child)
             }
             if (!tinyGoSdkDirectories.isNullOrEmpty()) {
                 tinyGoSdkHomeCandidates.addAll(
@@ -84,10 +81,7 @@ fun suggestSdkDirectory(): VirtualFile? {
 
     return if (GoOsManager.isLinux() || GoOsManager.isMac() || GoOsManager.isWindows()) {
         if (tinyGoSdkHomeCandidates.isNotEmpty()) {
-            val safeCandidates = FileUtil.findFirstThatExist(*tinyGoSdkHomeCandidates.toTypedArray())
-            if (safeCandidates != null) {
-                LocalFileSystem.getInstance().findFileByIoFile(safeCandidates)
-            } else null
+            FileUtil.findFirstThatExist(*tinyGoSdkHomeCandidates.toTypedArray())
         } else null
     } else null
 }

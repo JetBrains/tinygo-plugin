@@ -7,8 +7,8 @@ import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
-import java.awt.event.ActionEvent
 import javax.swing.JPanel
+import kotlin.reflect.KFunction
 
 fun generateTinyGoParametersPanel(
     wrapper: TinyGoPropertiesWrapper,
@@ -34,14 +34,14 @@ fun generateTinyGoParametersPanel(
 fun generateSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
     fileChosen: ((chosenFile: VirtualFile) -> String),
-    actionPerformed: ((event: ActionEvent) -> Unit),
+    actionPerformed: KFunction<Unit>,//((event: ActionEvent) -> Unit),
     project: Project? = null
 ): JPanel = panel {
     row {
         generateTinyGoParametersPanel(wrapper, fileChosen, project)()
     }
     row {
-        button("Detect", actionPerformed)
+        button("Detect") { actionPerformed.call() }
     }
     row("GOOS") {
         textField(property = wrapper.goOS).enabled(false)

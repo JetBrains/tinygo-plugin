@@ -9,12 +9,10 @@ import org.jetbrains.tinygoplugin.ui.CanResetSettingsUI
 import org.jetbrains.tinygoplugin.ui.ResetableProperty
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateSettingsPanel
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import javax.swing.JComponent
 
 class TinyGoSettingsService(private val project: Project) : NamedConfigurable<TinyGoConfiguration>(),
-    CanResetSettingsUI, ActionListener {
+    CanResetSettingsUI {
     companion object {
         private val logger: Logger = Logger.getInstance(TinyGoSettingsService::class.java)
     }
@@ -37,24 +35,15 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
 
     override fun getDisplayName(): String = "TinyGo"
 
-    private fun callExtractor() {
+    fun callExtractor() {
         val processHistory = GoHistoryProcessListener()
         infoExtractor.extractTinyGoInfo(settings, processHistory) { result ->
             val output = processHistory.output.joinToString("")
             logger.trace(output)
             settings.extractTinyGoInfo(output)
             // update all ui fields
-            propertiesWrapper.goArch.reset()
-            propertiesWrapper.goTags.reset()
-            propertiesWrapper.goOS.reset()
-
-            propertiesWrapper.gc.reset()
-            propertiesWrapper.scheduler.reset()
+            resetableProperties.forEach(ResetableProperty::reset)
         }
-    }
-
-    override fun actionPerformed(e: ActionEvent?) {
-        callExtractor()
     }
 
     override fun setDisplayName(name: String?) {
@@ -74,7 +63,7 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
     override fun createOptionsPanel(): JComponent = generateSettingsPanel(
         propertiesWrapper,
         fileChosen = { it.canonicalPath ?: settings.tinyGoSDKPath },
-        this::actionPerformed,
+        this::callExtractor,
         project
     )
 }

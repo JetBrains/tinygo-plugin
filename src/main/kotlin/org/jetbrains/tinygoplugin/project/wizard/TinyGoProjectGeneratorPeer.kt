@@ -12,17 +12,15 @@ import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.UserConfigurationState
 import org.jetbrains.tinygoplugin.sdk.checkDirectoryForTinyGo
 import org.jetbrains.tinygoplugin.sdk.suggestSdkDirectoryStr
-import org.jetbrains.tinygoplugin.ui.SettingsDependentUI
+import org.jetbrains.tinygoplugin.ui.SettingsProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateTinyGoParametersPanel
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 
-class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>(), SettingsDependentUI {
+class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>(), SettingsProvider {
     override var settings: TinyGoConfiguration = TinyGoConfiguration(
-        null, userConfig = UserConfigurationState(
-            tinyGoSDKPath = suggestSdkDirectoryStr()
-        )
+        UserConfigurationState(tinyGoSDKPath = suggestSdkDirectoryStr())
     )
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 

@@ -10,15 +10,15 @@ interface ResetableProperty {
     fun reset()
 }
 
-interface SettingsDependentUI {
-    var settings: TinyGoConfiguration
+interface SettingsProvider {
+    val settings: TinyGoConfiguration
 }
 
-interface CanResetSettingsUI : SettingsDependentUI {
-    var resetableProperties: MutableCollection<ResetableProperty>
+interface CanResetSettingsUI : SettingsProvider {
+    val resetableProperties: MutableCollection<ResetableProperty>
 }
 
-class TinyGoPropertiesWrapper(val obj: SettingsDependentUI) {
+class TinyGoPropertiesWrapper(val obj: SettingsProvider) {
     // wrapper around graph property that binds the field to the property in settings
     inner class MappedGraphProperty<T>(
         private val prop: GraphProperty<T>,
