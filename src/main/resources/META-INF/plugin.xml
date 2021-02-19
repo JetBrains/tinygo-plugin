@@ -20,4 +20,8 @@
 
     </extensions>
 
+    <extensions defaultExtensionNs="com.goide">
+        <rootsProvider id="default" implementation="org.jetbrains.tinygoplugin.services.TinyGopathManager"/>
+    </extensions>
+
 </idea-plugin>
