@@ -30,8 +30,8 @@ class RunConfigurationWrapper(private val configurationProvider: ConfigurationPr
     )
 }
 
-class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoFlashConfiguration) :
-    SettingsEditor<TinyGoFlashConfiguration>() {
+class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoRunConfiguration) :
+    SettingsEditor<TinyGoRunConfiguration>() {
 
     private val properties = RunConfigurationWrapper(runConfiguration)
 
@@ -39,13 +39,13 @@ class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoFlashConf
         resetEditorFrom(runConfiguration)
     }
 
-    override fun resetEditorFrom(configuration: TinyGoFlashConfiguration) {
+    override fun resetEditorFrom(configuration: TinyGoRunConfiguration) {
         runConfiguration.runConfig = configuration.runConfig
         properties.reset()
     }
 
-    override fun applyEditorTo(tinyGoFlashConfiguration: TinyGoFlashConfiguration) {
-        tinyGoFlashConfiguration.runConfig = runConfiguration.runConfig.deepCopy()
+    override fun applyEditorTo(tinyGoRunConfiguration: TinyGoRunConfiguration) {
+        tinyGoRunConfiguration.runConfig = runConfiguration.runConfig.deepCopy()
     }
 
     override fun createEditor(): JComponent {

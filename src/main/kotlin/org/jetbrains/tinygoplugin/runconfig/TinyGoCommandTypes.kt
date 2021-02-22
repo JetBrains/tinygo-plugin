@@ -1,17 +1,17 @@
 package org.jetbrains.tinygoplugin.runconfig
 
-interface ConfigurationType {
+interface TinyGoCommandType {
     val command: String
 }
 
-class RunConfiguration : ConfigurationType {
+class TinyGoRunCommand : TinyGoCommandType {
     override val command: String = "run"
 }
 
-class FlashConfiguration : ConfigurationType {
+class TinyGoFlashCommand : TinyGoCommandType {
     override val command: String = "flash"
 }
 
-class TestConfiguration : ConfigurationType {
+class TinyGoTestCommand : TinyGoCommandType {
     override val command: String = "test"
 }

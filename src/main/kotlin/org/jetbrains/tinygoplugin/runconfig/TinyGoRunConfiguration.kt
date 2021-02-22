@@ -3,8 +3,6 @@ package org.jetbrains.tinygoplugin.runconfig
 import com.goide.GoFileType
 import com.goide.execution.GoModuleBasedConfiguration
 import com.goide.execution.GoRunConfigurationBase
-import com.goide.execution.GoRunningState
-import com.goide.util.GoExecutor
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
@@ -19,62 +17,18 @@ import org.jdom.Element
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
-import java.nio.file.Paths
 
-class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoFlashConfiguration) :
-    GoRunningState<TinyGoFlashConfiguration>(env, module, configuration) {
-    // override the function to supply GoExecutor with tinygo
-    override fun createRunExecutor(): GoExecutor {
-        val arguments =
-            listOf(configuration.command) +
-                configuration.cmdlineOptions +
-                listOf(configuration.runConfig.mainFile)
-        val goExecutor = GoExecutor.`in`(configuration.project, null)
-        val tinyGoExecutablePath = Paths.get(
-            Paths.get(configuration.tinyGoSettings.tinyGoSDKPath).toAbsolutePath().toString(),
-            "bin",
-            "tinygo"
-        )
-
-        goExecutor.withExePath(tinyGoExecutablePath.toString())
-        goExecutor.withParameters(arguments)
-        return goExecutor
-    }
-}
-
-data class RunSettings(
-    val tinyGoConfiguration: TinyGoConfiguration,
-    var cmdlineOptions: String,
-    var mainFile: String,
-) : TinyGoConfiguration by tinyGoConfiguration {
-    override fun deepCopy(): RunSettings = RunSettings(
-        tinyGoConfiguration.deepCopy(),
-        cmdlineOptions,
-        mainFile
-    )
-}
-
-fun TinyGoConfiguration.assembleCommandLineArguments(): Collection<String> {
-    /* ktlint-disable */
-    return listOf(
-        "-target", targetPlatform,
-        "-scheduler", scheduler.cmd,
-        "-gc", gc.cmd
-    )
-    /* ktlint-enable */
-}
-
-class TinyGoFlashConfiguration(
+class TinyGoRunConfiguration(
     project: Project,
     factory: ConfigurationFactory,
     name: String,
-    runType: ConfigurationType,
+    runType: TinyGoCommandType,
 ) :
     GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory),
     ConfigurationProvider<RunSettings> {
     companion object {
-        const val MAIN_FILE = "MAIN_FILE"
-        const val CMD_OPTIONS = "CMD_OPTIONS"
+        const val MAIN_FILE = "tinyGoMainFile"
+        const val CMD_OPTIONS = "tinyGoCMDOptions"
     }
 
     val command = runType.command
@@ -119,15 +73,15 @@ class TinyGoFlashConfiguration(
         }
     }
 
-    override fun createSettingsEditorGroup(): SettingsEditorGroup<TinyGoFlashConfiguration> {
-        val result = SettingsEditorGroup<TinyGoFlashConfiguration>()
-        val editor: SettingsEditor<TinyGoFlashConfiguration> = TinyGoRunConfigurationEditor(this)
-        result.addEditor("TinyGoEditorName", editor)
+    override fun createSettingsEditorGroup(): SettingsEditorGroup<TinyGoRunConfiguration> {
+        val result = SettingsEditorGroup<TinyGoRunConfiguration>()
+        val editor: SettingsEditor<TinyGoRunConfiguration> = TinyGoRunConfigurationEditor(this)
+        result.addEditor("TinyGo $command", editor)
         return result
     }
 
-    override fun newRunningState(p0: ExecutionEnvironment, p1: Module): TinyGoRunningState {
-        return TinyGoRunningState(p0, p1, this)
+    override fun newRunningState(environment: ExecutionEnvironment, module: Module): TinyGoRunningState {
+        return TinyGoRunningState(environment, module, this)
     }
 
     override fun writeExternal(element: Element) {
@@ -139,16 +93,10 @@ class TinyGoFlashConfiguration(
     override fun readExternal(element: Element) {
         super.readExternal(element)
         val filePath = JDOMExternalizerUtil.readCustomField(element, MAIN_FILE)
-        if (filePath != null) {
-            runConfig.mainFile = filePath
-        } else {
-            runConfig.mainFile = project.workspaceFile!!.parent.parent.canonicalPath.toString()
-        }
+        runConfig.mainFile =
+            (filePath ?: project.workspaceFile!!.parent.parent.canonicalPath.toString())
         val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
-        if (arguments != null) {
-            runConfig.cmdlineOptions = arguments
-        } else {
-            cmdlineOptions = runConfig.assembleCommandLineArguments()
-        }
+        runConfig.cmdlineOptions = arguments ?: ""
+        if (arguments == null) cmdlineOptions = runConfig.assembleCommandLineArguments()
     }
 }
