@@ -64,7 +64,12 @@ fun TinyGoConfiguration.assembleCommandLineArguments(): Collection<String> {
     /* ktlint-enable */
 }
 
-class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
+class TinyGoFlashConfiguration(
+    project: Project,
+    factory: ConfigurationFactory,
+    name: String,
+    runType: ConfigurationType,
+) :
     GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory),
     ConfigurationProvider<RunSettings> {
     companion object {
@@ -72,7 +77,7 @@ class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, 
         const val CMD_OPTIONS = "CMD_OPTIONS"
     }
 
-    val command = "flash"
+    val command = runType.command
     var runConfig: RunSettings
     var cmdlineOptions: Collection<String>
         get() = runConfig.cmdlineOptions.split(' ').map(String::trim).filterNot(String::isEmpty)

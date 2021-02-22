@@ -9,21 +9,13 @@ interface TinyGoConfiguration : UserConfiguration, ProjectConfiguration {
     fun modified(p: Project): Boolean
 
     companion object {
-        fun getInstance(p: Project): TinyGoConfiguration = TinyGoConfigurationImpl(
-            projectConfig = p.service<ProjectConfigurationImpl>().state,
-            userConfig = p.service<UserConfigurationImpl>().state,
-        )
+        fun getInstance(p: Project): TinyGoConfiguration = TinyGoConfigurationImpl.getInstance(p)
+
         fun getInstance(): TinyGoConfiguration = TinyGoConfigurationImpl()
-        fun getInstance(
-            userConfig: UserConfigurationState = UserConfigurationState(),
-            projectConfig: ProjectConfigurationState = ProjectConfigurationState()
-        ): TinyGoConfiguration {
-            return TinyGoConfigurationImpl(userConfig, projectConfig)
-        }
     }
 }
 
-data class TinyGoConfigurationImpl(
+internal data class TinyGoConfigurationImpl(
     private val userConfig: UserConfigurationState = UserConfigurationState(),
     private val projectConfig: ProjectConfigurationState = ProjectConfigurationState(),
 ) : TinyGoConfiguration, UserConfiguration by userConfig, ProjectConfiguration by projectConfig {
