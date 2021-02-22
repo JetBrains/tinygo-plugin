@@ -1,9 +1,9 @@
 package org.jetbrains.tinygoplugin.icon
 
-import com.intellij.openapi.util.IconLoader
-//import com.intellij.util.SVGLoader
+import com.intellij.icons.AllIcons
 
 object TinyGoPluginIcons {
     @JvmField
-    val TinyGoIcon = IconLoader.getIcon("/icons/tinygo-logo.svg", javaClass)
+//    val TinyGoIcon = IconLoader.getIcon("/icons/tinygo-logo.png", javaClass)
+    val TinyGoIcon = AllIcons.General.Information
 }
