@@ -24,6 +24,19 @@ fun notifyTinyGoNotConfigured(project: Project?, content: String) {
     notification.notify(project)
 }
 
+fun getTinyGoExecutable(sdkRoot: VirtualFile?): VirtualFile? {
+    if (sdkRoot != null && sdkRoot.isValid && sdkRoot.isDirectory) {
+        val sdkBinDir = sdkRoot.findChild("bin")
+        if (sdkBinDir != null && sdkBinDir.isValid && sdkBinDir.isDirectory) {
+            val sdkTinyGoExecutable = sdkBinDir.findChild("tinygo")
+            if (sdkTinyGoExecutable != null && sdkTinyGoExecutable.isValid) {
+                return sdkTinyGoExecutable
+            }
+        }
+    }
+    return null
+}
+
 fun checkDirectoryForTinyGo(dir: VirtualFile): Boolean {
     val path = dir.canonicalPath
     if (path != null) {
