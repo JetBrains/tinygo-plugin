@@ -6,12 +6,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.io.exists
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import java.nio.file.Paths
 
 class TinyGopathManager : GoRootsProvider {
 
     private fun getTinyGoRoot(project: Project, subfolder: String? = null): VirtualFile? {
-        val settings = TinyGoConfigurationImpl.getInstance(project)
+        val settings = TinyGoConfiguration.getInstance(project)
         val tinyGoSDKPath = settings.tinyGoSDKPath
         if (tinyGoSDKPath.isEmpty()) {
             return null

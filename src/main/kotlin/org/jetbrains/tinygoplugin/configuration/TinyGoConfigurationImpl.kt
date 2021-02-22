@@ -3,19 +3,21 @@ package org.jetbrains.tinygoplugin.configuration
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 
-interface ITinyGoConfiguration : UserConfiguration, ProjectConfiguration {
-    fun deepCopy(): ITinyGoConfiguration
+interface TinyGoConfiguration : UserConfiguration, ProjectConfiguration {
+    fun deepCopy(): TinyGoConfiguration
     fun saveState(p: Project)
     fun modified(p: Project): Boolean
 
     companion object {
-        fun getInstance(p: Project): ITinyGoConfiguration = TinyGoConfigurationImpl(
+        fun getInstance(p: Project): TinyGoConfiguration = TinyGoConfigurationImpl(
             projectConfig = p.service<ProjectConfigurationImpl>().state,
             userConfig = p.service<UserConfigurationImpl>().state,
         )
-        fun getInstance(): ITinyGoConfiguration = TinyGoConfigurationImpl()
-        fun getInstance(userConfig: UserConfigurationState = UserConfigurationState(),
-                        projectConfig: ProjectConfigurationState = ProjectConfigurationState()) : ITinyGoConfiguration{
+        fun getInstance(): TinyGoConfiguration = TinyGoConfigurationImpl()
+        fun getInstance(
+            userConfig: UserConfigurationState = UserConfigurationState(),
+            projectConfig: ProjectConfigurationState = ProjectConfigurationState()
+        ): TinyGoConfiguration {
             return TinyGoConfigurationImpl(userConfig, projectConfig)
         }
     }
@@ -24,7 +26,7 @@ interface ITinyGoConfiguration : UserConfiguration, ProjectConfiguration {
 data class TinyGoConfigurationImpl(
     private val userConfig: UserConfigurationState = UserConfigurationState(),
     private val projectConfig: ProjectConfigurationState = ProjectConfigurationState(),
-) : ITinyGoConfiguration, UserConfiguration by userConfig, ProjectConfiguration by projectConfig {
+) : TinyGoConfiguration, UserConfiguration by userConfig, ProjectConfiguration by projectConfig {
 
     override fun saveState(p: Project) {
         p.service<ProjectConfigurationImpl>().projectState = projectConfig.copy()

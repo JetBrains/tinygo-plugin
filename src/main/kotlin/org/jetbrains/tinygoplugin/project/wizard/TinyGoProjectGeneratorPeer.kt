@@ -8,9 +8,7 @@ import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.util.ui.UI.PanelFactory
-import org.jetbrains.tinygoplugin.configuration.ITinyGoConfiguration
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfigurationImpl
-import org.jetbrains.tinygoplugin.configuration.UserConfigurationState
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.sdk.checkDirectoryForTinyGo
 import org.jetbrains.tinygoplugin.sdk.suggestSdkDirectoryStr
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
@@ -19,10 +17,15 @@ import org.jetbrains.tinygoplugin.ui.generateTinyGoParametersPanel
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 
-class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>(), ConfigurationProvider<ITinyGoConfiguration> {
-    override var tinyGoSettings: ITinyGoConfiguration = ITinyGoConfiguration.getInstance(
-        UserConfigurationState(tinyGoSDKPath = suggestSdkDirectoryStr())
-    )
+class TinyGoProjectGeneratorPeer :
+    GoProjectGeneratorPeer<TinyGoNewProjectSettings>(),
+    ConfigurationProvider<TinyGoConfiguration> {
+    override var tinyGoSettings: TinyGoConfiguration = TinyGoConfiguration.getInstance()
+
+    init {
+        tinyGoSettings.tinyGoSDKPath = suggestSdkDirectoryStr()
+    }
+
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 
     private fun decorateSettingsPanelForUI(component: JPanel): JPanel =
@@ -32,7 +35,7 @@ class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettin
         parentDisposable: Disposable,
         locationComponent: LabeledComponent<TextFieldWithBrowseButton>?,
         sdkCombo: GoSdkChooserCombo?,
-        project: Project?
+        project: Project?,
     ): JPanel {
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)

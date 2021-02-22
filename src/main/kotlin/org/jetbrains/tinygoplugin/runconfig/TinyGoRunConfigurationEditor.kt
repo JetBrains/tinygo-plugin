@@ -1,52 +1,68 @@
 package org.jetbrains.tinygoplugin.runconfig
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.observable.properties.GraphProperty
+import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.options.SettingsEditor
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.ui.layout.GrowPolicy
 import com.intellij.ui.layout.panel
+import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
+import org.jetbrains.tinygoplugin.ui.MappedGraphProperty
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
-import java.nio.file.Path
 import javax.swing.JComponent
+import kotlin.reflect.KMutableProperty1
 
+class RunConfigurationWrapper(private val configurationProvider: ConfigurationProvider<RunSettings>) :
+    TinyGoPropertiesWrapper(configurationProvider) {
+    inner class RunConfigurationProperty<T>(
+        prop: GraphProperty<T>,
+        objProperty: KMutableProperty1<RunSettings, T>,
+    ) : MappedGraphProperty<T, RunSettings>(prop, objProperty, configurationProvider, this)
+
+    val mainFile = RunConfigurationProperty(
+        prop = propertyGraph.graphProperty(configurationProvider.tinyGoSettings::mainFile),
+        objProperty = RunSettings::mainFile
+    )
+
+    val cmdLineArguments = RunConfigurationProperty(
+        prop = propertyGraph.graphProperty(configurationProvider.tinyGoSettings::cmdlineOptions),
+        objProperty = RunSettings::cmdlineOptions
+    )
+}
 
 class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoFlashConfiguration) :
     SettingsEditor<TinyGoFlashConfiguration>() {
 
-    private val properties = TinyGoPropertiesWrapper(runConfiguration)
+    private val properties = RunConfigurationWrapper(runConfiguration)
 
     init {
         resetEditorFrom(runConfiguration)
     }
 
     override fun resetEditorFrom(configuration: TinyGoFlashConfiguration) {
+        runConfiguration.runConfig = configuration.runConfig
+        properties.reset()
     }
 
     override fun applyEditorTo(tinyGoFlashConfiguration: TinyGoFlashConfiguration) {
-        tinyGoFlashConfiguration.cmdlineOptions = tinyGoArguments.get().split(' ').filter {
-            it.trim().isNotEmpty()
-        }.toMutableList()
-        val mainFile = Path.of(main.get())
-        if (mainFile.exists()) {
-            tinyGoFlashConfiguration.mainFile = VfsUtil.findFile(mainFile, true)!!
-        }
+        tinyGoFlashConfiguration.runConfig = runConfiguration.runConfig.deepCopy()
     }
 
     override fun createEditor(): JComponent {
         return panel {
             row("TinyGo path") {
-                textField(sdkProperty).enabled(false)
+                textField(properties.tinygoSDKPath).enabled(false)
             }
             row("Target") {
-                textField(targetProperty).enabled(false)
+                textField(properties.target).enabled(false)
             }
             row("Command line arguments") {
-                textField(tinyGoArguments).growPolicy(GrowPolicy.MEDIUM_TEXT)
+                textField(properties.cmdLineArguments).growPolicy(GrowPolicy.MEDIUM_TEXT)
             }
             row("Path to main") {
                 val fileChooserDescriptor = FileChooserDescriptor(true, false, false, false, false, false)
                 textFieldWithBrowseButton(
-                    property = main,
+                    property = properties.mainFile,
                     fileChooserDescriptor = fileChooserDescriptor
                 )
             }

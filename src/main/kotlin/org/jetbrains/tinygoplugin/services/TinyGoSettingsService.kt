@@ -6,20 +6,20 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
-import org.jetbrains.tinygoplugin.configuration.ITinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateSettingsPanel
 import javax.swing.JComponent
 
 class TinyGoSettingsService(private val project: Project) :
-    NamedConfigurable<ITinyGoConfiguration>(), ConfigurationProvider<ITinyGoConfiguration> {
+    NamedConfigurable<TinyGoConfiguration>(), ConfigurationProvider<TinyGoConfiguration> {
     companion object {
         val logger: Logger = Logger.getInstance(TinyGoSettingsService::class.java)
     }
 
     // local copy of the settings
-    override var tinyGoSettings: ITinyGoConfiguration = ITinyGoConfiguration.getInstance(project).deepCopy()
+    override var tinyGoSettings: TinyGoConfiguration = TinyGoConfiguration.getInstance(project).deepCopy()
 
     private val infoExtractor = TinyGoInfoExtractor(project)
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
@@ -49,12 +49,12 @@ class TinyGoSettingsService(private val project: Project) :
     }
 
     override fun reset() {
-        tinyGoSettings = ITinyGoConfiguration.getInstance(project).deepCopy()
+        tinyGoSettings = TinyGoConfiguration.getInstance(project).deepCopy()
         propertiesWrapper.reset()
         super.reset()
     }
 
-    override fun getEditableObject(): ITinyGoConfiguration = tinyGoSettings
+    override fun getEditableObject(): TinyGoConfiguration = tinyGoSettings
 
     override fun getBannerSlogan(): String = "Tinygo slogan"
 
@@ -71,7 +71,7 @@ class TinyGoSettingsService(private val project: Project) :
     )
 }
 
-fun propagateGoFlags(project: Project, settings: ITinyGoConfiguration) {
+fun propagateGoFlags(project: Project, settings: TinyGoConfiguration) {
     val goSettings = ModuleManager.getInstance(project).modules.mapNotNull {
         it?.getService(GoModuleSettings::class.java)
     }.firstOrNull()

@@ -16,8 +16,8 @@ import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import org.jdom.Element
-import org.jetbrains.tinygoplugin.configuration.ITinyGoConfiguration
-import org.jetbrains.tinygoplugin.ui.SettingsProvider
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 import java.nio.file.Paths
 
@@ -25,10 +25,13 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
     GoRunningState<TinyGoFlashConfiguration>(env, module, configuration) {
     // override the function to supply GoExecutor with tinygo
     override fun createRunExecutor(): GoExecutor {
-        val arguments = configuration.cmdlineOptions + listOf(configuration.mainFile.path)
+        val arguments =
+            listOf(configuration.command) +
+                configuration.cmdlineOptions +
+                listOf(configuration.runConfig.mainFile)
         val goExecutor = GoExecutor.`in`(configuration.project, null)
         val tinyGoExecutablePath = Paths.get(
-            Paths.get(configuration.settings.tinyGoSDKPath).toAbsolutePath().toString(),
+            Paths.get(configuration.tinyGoSettings.tinyGoSDKPath).toAbsolutePath().toString(),
             "bin",
             "tinygo"
         )
@@ -39,38 +42,73 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
     }
 }
 
+data class RunSettings(
+    val tinyGoConfiguration: TinyGoConfiguration,
+    var cmdlineOptions: String,
+    var mainFile: String,
+) : TinyGoConfiguration by tinyGoConfiguration {
+    override fun deepCopy(): RunSettings = RunSettings(
+        tinyGoConfiguration.deepCopy(),
+        cmdlineOptions,
+        mainFile
+    )
+}
+
+fun TinyGoConfiguration.assembleCommandLineArguments(): Collection<String> {
+    /* ktlint-disable */
+    return listOf(
+        "-target", targetPlatform,
+        "-scheduler", scheduler.cmd,
+        "-gc", gc.cmd
+    )
+    /* ktlint-enable */
+}
+
 class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
-    GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory), SettingsProvider {
+    GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory),
+    ConfigurationProvider<RunSettings> {
     companion object {
         const val MAIN_FILE = "MAIN_FILE"
         const val CMD_OPTIONS = "CMD_OPTIONS"
     }
 
-    override var settings = ITinyGoConfiguration.getInstance(project).deepCopy()
-    var cmdlineOptions: Collection<String> = ArrayList()
     val command = "flash"
-    var mainFile: VirtualFile = project.workspaceFile!!.parent.parent
+    var runConfig: RunSettings
+    var cmdlineOptions: Collection<String>
+        get() = runConfig.cmdlineOptions.split(' ').map(String::trim).filterNot(String::isEmpty)
+        set(value) {
+            runConfig.cmdlineOptions = value.joinToString(" ")
+        }
+
+    override val tinyGoSettings: RunSettings
+        get() = runConfig
 
     init {
-        cmdlineOptions = assembleArguments()
+        val tinyGoSettings = TinyGoConfiguration.getInstance(project).deepCopy()
+        val main = project.workspaceFile!!.parent.parent
+        runConfig =
+            RunSettings(tinyGoSettings, "", main.canonicalPath!!)
+        cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
     }
 
-    fun assembleArguments(): Collection<String> {
-        /* ktlint-disable */
-        return listOf(
-            "-target", settings.targetPlatform,
-            "-scheduler", settings.scheduler.cmd,
-            "-gc", settings.gc.cmd
-        )
-        /* ktlint-enable */
+    private fun mainFile(): VirtualFile? {
+        if (runConfig.mainFile.isEmpty()) {
+            return null
+        }
+        val file = File(runConfig.mainFile)
+        if (!file.exists()) {
+            return null
+        }
+        return VfsUtil.findFile(file.toPath(), false)
     }
 
     @Throws(RuntimeConfigurationException::class)
     override fun checkConfiguration() {
-        if (!mainFile.isValid) {
+        val main = mainFile() ?: throw RuntimeConfigurationException("Main file does not exists")
+        if (!main.isValid) {
             throw RuntimeConfigurationException("Main file does not exists")
         }
-        val mainFiletype = mainFile.fileType
+        val mainFiletype = main.fileType
         if (mainFiletype !is GoFileType) {
             throw RuntimeConfigurationException("Selected file is not a go file")
         }
@@ -89,22 +127,23 @@ class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, 
 
     override fun writeExternal(element: Element) {
         super.writeExternal(element)
-        JDOMExternalizerUtil.writeCustomField(element, MAIN_FILE, mainFile.toNioPath().toAbsolutePath().toString())
-        JDOMExternalizerUtil.writeCustomField(element, CMD_OPTIONS, cmdlineOptions.joinToString(" "))
+        JDOMExternalizerUtil.writeCustomField(element, MAIN_FILE, runConfig.mainFile)
+        JDOMExternalizerUtil.writeCustomField(element, CMD_OPTIONS, runConfig.cmdlineOptions)
     }
 
     override fun readExternal(element: Element) {
         super.readExternal(element)
         val filePath = JDOMExternalizerUtil.readCustomField(element, MAIN_FILE)
         if (filePath != null) {
-            val file = File(filePath)
-            if (file.exists()) {
-                val vfsFile = VfsUtil.findFile(file.toPath(), false)
-                if (vfsFile != null) {
-                    mainFile = vfsFile
-                }
-            }
+            runConfig.mainFile = filePath
+        } else {
+            runConfig.mainFile = project.workspaceFile!!.parent.parent.canonicalPath.toString()
         }
-        JDOMExternalizerUtil.writeCustomField(element, CMD_OPTIONS, cmdlineOptions.joinToString(" "))
+        val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
+        if (arguments != null) {
+            runConfig.cmdlineOptions = arguments
+        } else {
+            cmdlineOptions = runConfig.assembleCommandLineArguments()
+        }
     }
 }
