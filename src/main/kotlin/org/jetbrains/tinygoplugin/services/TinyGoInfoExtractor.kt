@@ -6,11 +6,11 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.util.Consumer
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
+import org.jetbrains.tinygoplugin.configuration.ITinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.Scheduler
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import java.nio.file.Paths
 
-fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
+fun ITinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val tagPattern = Regex("""build tags:\s+(.+)\n""")
     val goArchPattern = Regex("""GOARCH:\s+(.+)\n""")
     val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
@@ -37,7 +37,7 @@ internal class TinyGoInfoExtractor(private val project: Project) {
         val logger: Logger = Logger.getInstance(TinyGoInfoExtractor::class.java)
     }
 
-    fun assembleTinyGoShellCommand(settings: TinyGoConfiguration): GoExecutor {
+    fun assembleTinyGoShellCommand(settings: ITinyGoConfiguration): GoExecutor {
         val executor = GoExecutor.`in`(project, null)
         val parameters = tinyGoArguments(settings)
         executor.withParameters(parameters)
@@ -51,7 +51,7 @@ internal class TinyGoInfoExtractor(private val project: Project) {
         return executor
     }
 
-    private fun tinyGoArguments(settings: TinyGoConfiguration): List<String> {
+    private fun tinyGoArguments(settings: ITinyGoConfiguration): List<String> {
         val parameters = mutableListOf("info", "-target", settings.targetPlatform)
         if (settings.scheduler != Scheduler.AUTO_DETECT) {
             parameters.addAll(listOf("-scheduler", settings.scheduler.cmd))
@@ -63,7 +63,7 @@ internal class TinyGoInfoExtractor(private val project: Project) {
     }
 
     fun extractTinyGoInfo(
-        settings: TinyGoConfiguration,
+        settings: ITinyGoConfiguration,
         processHistory: GoHistoryProcessListener,
         onFinish: Consumer<in GoExecutor.ExecutionResult?>
     ) {

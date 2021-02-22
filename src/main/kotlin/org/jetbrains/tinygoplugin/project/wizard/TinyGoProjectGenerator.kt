@@ -8,7 +8,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.ITinyGoConfiguration
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.services.propagateGoFlags
@@ -23,7 +23,7 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
 
     override fun validate(baseDirPath: String): ValidationResult = ValidationResult.OK
 
-    private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
+    private fun extractTinyGoSettings(project: Project, tinyGoSettings: ITinyGoConfiguration) {
         val processHistory = GoHistoryProcessListener()
         TinyGoInfoExtractor(project).extractTinyGoInfo(tinyGoSettings, processHistory) {
             val output = processHistory.output.joinToString("")

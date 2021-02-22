@@ -1,50 +1,25 @@
 package org.jetbrains.tinygoplugin.runconfig
 
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
-import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
-import com.intellij.openapi.observable.properties.PropertyGraph
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.ui.layout.GrowPolicy
 import com.intellij.ui.layout.panel
-import com.intellij.util.io.exists
-import org.jetbrains.tinygoplugin.configuration.GarbageCollector
-import org.jetbrains.tinygoplugin.configuration.Scheduler
+import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import java.nio.file.Path
 import javax.swing.JComponent
 
-class TinyGoConfigurationEditor(defaultConfiguration: TinyGoFlashConfiguration) :
+
+class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoFlashConfiguration) :
     SettingsEditor<TinyGoFlashConfiguration>() {
 
-    private val propertyGraph = PropertyGraph()
-    private val sdkProperty = propertyGraph.graphProperty { "" }
-    private val gcProperty = propertyGraph.graphProperty { GarbageCollector.AUTO_DETECT }
-    private val schedulerProperty = propertyGraph.graphProperty { Scheduler.AUTO_DETECT }
-    private val targetProperty = propertyGraph.graphProperty { "" }
-    private val tinyGoArguments = propertyGraph.graphProperty { "" }
-    private val main = propertyGraph.graphProperty { "" }
+    private val properties = TinyGoPropertiesWrapper(runConfiguration)
 
     init {
-        resetEditorFrom(defaultConfiguration)
+        resetEditorFrom(runConfiguration)
     }
 
     override fun resetEditorFrom(configuration: TinyGoFlashConfiguration) {
-        sdkProperty.set(configuration.tinyGoSDKPath)
-        sdkProperty.set(configuration.tinyGoSDKPath)
-        gcProperty.set(configuration.gc)
-        schedulerProperty.set(configuration.scheduler)
-        targetProperty.set(configuration.target)
-        main.set(configuration.mainFile.path)
-        /* ktlint-disable */
-        tinyGoArguments.set(
-            listOf(
-                "flash",
-                "-target", configuration.target,
-                "-scheduler", configuration.scheduler.cmd,
-                "-gc", configuration.gc.cmd
-            ).joinToString(separator = " ")
-            /* ktlint-enable */
-        )
     }
 
     override fun applyEditorTo(tinyGoFlashConfiguration: TinyGoFlashConfiguration) {

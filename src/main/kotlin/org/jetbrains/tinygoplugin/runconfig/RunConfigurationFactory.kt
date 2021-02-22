@@ -1,13 +1,12 @@
 package org.jetbrains.tinygoplugin.runconfig
 
 import com.goide.execution.GoConfigurationFactoryBase
-import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.ConfigurationType
 import com.intellij.execution.configurations.ConfigurationTypeBase
 import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.icons.AllIcons
 import com.intellij.openapi.project.Project
-import javax.swing.Icon
+import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 
 internal const val CONFIGURATION_ID = "TinyGO"
 internal const val CONFIGURATION_NAME = "TinyGO Flash"
@@ -28,8 +27,9 @@ class TinyGoConfigurationFactory(type: ConfigurationType) : GoConfigurationFacto
     }
 }
 
+
 class TinyGoRunConfigurationType :
-    ConfigurationTypeBase(TINYGO_CONFIGURATION_ID, CONFIGURATION_NAME, DESCRIPTION, AllIcons.General.Information) {
+    ConfigurationTypeBase(TINYGO_CONFIGURATION_ID, CONFIGURATION_NAME, DESCRIPTION, TinyGoPluginIcons.TinyGoIcon) {
     init {
         addFactory(TinyGoConfigurationFactory(this))
     }

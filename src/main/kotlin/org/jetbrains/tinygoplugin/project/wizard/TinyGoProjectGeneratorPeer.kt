@@ -8,18 +8,19 @@ import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.util.ui.UI.PanelFactory
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.ITinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfigurationImpl
 import org.jetbrains.tinygoplugin.configuration.UserConfigurationState
 import org.jetbrains.tinygoplugin.sdk.checkDirectoryForTinyGo
 import org.jetbrains.tinygoplugin.sdk.suggestSdkDirectoryStr
-import org.jetbrains.tinygoplugin.ui.SettingsProvider
+import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateTinyGoParametersPanel
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 
-class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>(), SettingsProvider {
-    override var settings: TinyGoConfiguration = TinyGoConfiguration(
+class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettings>(), ConfigurationProvider<ITinyGoConfiguration> {
+    override var tinyGoSettings: ITinyGoConfiguration = ITinyGoConfiguration.getInstance(
         UserConfigurationState(tinyGoSDKPath = suggestSdkDirectoryStr())
     )
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
@@ -53,5 +54,5 @@ class TinyGoProjectGeneratorPeer : GoProjectGeneratorPeer<TinyGoNewProjectSettin
         return panel
     }
 
-    override fun getSettings(): TinyGoNewProjectSettings = TinyGoNewProjectSettings(sdkFromCombo, settings)
+    override fun getSettings(): TinyGoNewProjectSettings = TinyGoNewProjectSettings(sdkFromCombo, tinyGoSettings)
 }

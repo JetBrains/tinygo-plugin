@@ -16,9 +16,8 @@ import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import org.jdom.Element
-import org.jetbrains.tinygoplugin.configuration.GarbageCollector
-import org.jetbrains.tinygoplugin.configuration.Scheduler
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.ITinyGoConfiguration
+import org.jetbrains.tinygoplugin.ui.SettingsProvider
 import java.io.File
 import java.nio.file.Paths
 
@@ -29,7 +28,7 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
         val arguments = configuration.cmdlineOptions + listOf(configuration.mainFile.path)
         val goExecutor = GoExecutor.`in`(configuration.project, null)
         val tinyGoExecutablePath = Paths.get(
-            Paths.get(configuration.tinyGoSDKPath).toAbsolutePath().toString(),
+            Paths.get(configuration.settings.tinyGoSDKPath).toAbsolutePath().toString(),
             "bin",
             "tinygo"
         )
@@ -41,25 +40,29 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
 }
 
 class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
-    GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory) {
+    GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory), SettingsProvider {
     companion object {
         const val MAIN_FILE = "MAIN_FILE"
         const val CMD_OPTIONS = "CMD_OPTIONS"
     }
 
-    var tinyGoSDKPath: String = ""
-    var target = ""
-    var gc = GarbageCollector.AUTO_DETECT
-    var scheduler = Scheduler.AUTO_DETECT
+    override var settings = ITinyGoConfiguration.getInstance(project).deepCopy()
+    var cmdlineOptions: Collection<String> = ArrayList()
+    val command = "flash"
     var mainFile: VirtualFile = project.workspaceFile!!.parent.parent
-    var cmdlineOptions: MutableCollection<String> = ArrayList()
 
     init {
-        val settings = TinyGoConfiguration.getInstance(project)
-        tinyGoSDKPath = settings.tinyGoSDKPath
-        target = settings.targetPlatform
-        gc = settings.gc
-        scheduler = settings.scheduler
+        cmdlineOptions = assembleArguments()
+    }
+
+    fun assembleArguments(): Collection<String> {
+        /* ktlint-disable */
+        return listOf(
+            "-target", settings.targetPlatform,
+            "-scheduler", settings.scheduler.cmd,
+            "-gc", settings.gc.cmd
+        )
+        /* ktlint-enable */
     }
 
     @Throws(RuntimeConfigurationException::class)
@@ -75,7 +78,7 @@ class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, 
 
     override fun createSettingsEditorGroup(): SettingsEditorGroup<TinyGoFlashConfiguration> {
         val result = SettingsEditorGroup<TinyGoFlashConfiguration>()
-        val editor: SettingsEditor<TinyGoFlashConfiguration> = TinyGoConfigurationEditor(this)
+        val editor: SettingsEditor<TinyGoFlashConfiguration> = TinyGoRunConfigurationEditor(this)
         result.addEditor("TinyGoEditorName", editor)
         return result
     }
@@ -102,7 +105,6 @@ class TinyGoFlashConfiguration(project: Project, factory: ConfigurationFactory, 
                 }
             }
         }
-
         JDOMExternalizerUtil.writeCustomField(element, CMD_OPTIONS, cmdlineOptions.joinToString(" "))
     }
 }
