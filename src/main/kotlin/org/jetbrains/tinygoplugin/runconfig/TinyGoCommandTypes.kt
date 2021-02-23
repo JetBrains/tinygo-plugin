@@ -11,7 +11,3 @@ class TinyGoRunCommand : TinyGoCommandType {
 class TinyGoFlashCommand : TinyGoCommandType {
     override val command: String = "flash"
 }
-
-class TinyGoTestCommand : TinyGoCommandType {
-    override val command: String = "test"
-}

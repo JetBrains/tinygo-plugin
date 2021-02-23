@@ -24,7 +24,7 @@ class TinyGoConfigurationFactory(
         FACTORY_ID + runType.command
 
     override fun getName(): String {
-        return CONFIGURATION_NAME + runType.command
+        return "$CONFIGURATION_NAME ${runType.command}"
     }
 }
 
@@ -32,7 +32,6 @@ class TinyGoRunConfigurationType :
     ConfigurationTypeBase(TINYGO_CONFIGURATION_ID, CONFIGURATION_NAME, DESCRIPTION, TinyGoPluginIcons.TinyGoIcon) {
     init {
         addFactory(TinyGoConfigurationFactory(this, TinyGoRunCommand()))
-        addFactory(TinyGoConfigurationFactory(this, TinyGoTestCommand()))
         addFactory(TinyGoConfigurationFactory(this, TinyGoFlashCommand()))
     }
 }
