@@ -24,6 +24,7 @@ class TinyGoProjectGeneratorPeer :
 
     init {
         tinyGoSettings.tinyGoSDKPath = suggestSdkDirectoryStr()
+        tinyGoSettings.enabled = true
     }
 
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
@@ -44,7 +45,7 @@ class TinyGoProjectGeneratorPeer :
             decorateSettingsPanelForUI(
                 generateTinyGoParametersPanel(
                     propertiesWrapper,
-                    fileChosen = {
+                    {
                         if (checkDirectoryForTinyGo(it)) it.canonicalPath!!
                         else {
                             Messages.showErrorDialog("Selected TinyGo path is invalid", "Invalid TinyGo")
