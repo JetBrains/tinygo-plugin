@@ -40,6 +40,15 @@ fun generateTinyGoParametersPanel(
     project: Project? = null,
     filter: ComponentPredicate? = null,
 ): JPanel = panel {
+    tinyGoSettings(wrapper, fileChosen, project, filter)
+}
+
+private fun LayoutBuilder.tinyGoSettings(
+    wrapper: TinyGoPropertiesWrapper,
+    fileChosen: (chosenFile: VirtualFile) -> String,
+    project: Project?,
+    filter: ComponentPredicate?,
+) {
     filteredRow("TinyGo Path", filter = filter) {
         textFieldWithBrowseButton(
             property = wrapper.tinygoSDKPath, project = project,
@@ -72,9 +81,7 @@ fun generateSettingsPanel(
         val enabledCheckbox = checkBox("TinyGo enabled", property = wrapper.tinyGoEnabled)
         tinyGoEnabled = enabledCheckbox.selected
     }
-    row {
-        generateTinyGoParametersPanel(wrapper, fileChosen, project, tinyGoEnabled)()
-    }
+    tinyGoSettings(wrapper, fileChosen, project, tinyGoEnabled)
     filteredRow(filter = tinyGoEnabled) {
         button("Detect") { onDetect.call() /*extractTinyGOParameters()*/ }
         button("Update gopath") { onPropagateGoTags.call() /*propagateGoFlags()*/ }
