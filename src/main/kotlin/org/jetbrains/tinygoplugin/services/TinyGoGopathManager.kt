@@ -9,12 +9,12 @@ import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import java.nio.file.Paths
 
-class TinyGopathManager : GoRootsProvider {
+class TinyGoGopathManager : GoRootsProvider {
 
     private fun getTinyGoRoot(project: Project, subfolder: String? = null): VirtualFile? {
         val settings = TinyGoConfiguration.getInstance(project)
         val tinyGoSDKPath = settings.tinyGoSDKPath
-        if (tinyGoSDKPath.isEmpty()) {
+        if (tinyGoSDKPath.isEmpty() || !settings.enabled) {
             return null
         }
         val result = if (subfolder == null) Paths.get(tinyGoSDKPath) else Paths.get(tinyGoSDKPath, subfolder)
