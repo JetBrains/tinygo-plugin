@@ -16,15 +16,15 @@ class DummyLibraryFilter : SupportedLibrariesFilter {
 }
 
 class LibraryFilter(private val unsupportedPackages: Set<String>) : SupportedLibrariesFilter {
-    private val defaultPolicy = true
     override fun check(name: String): Boolean = !unsupportedPackages.contains(name)
 }
 
 @Service
 class TinyGoSupportedPackages(private val project: Project) {
-    private fun excludePackages(excludedPackages: Set<String>) {
+    private fun excludePackages(toExclude: Set<String>) {
         val importsSettings = GoImportsSettings.getInstance(project)
-        excludedPackages.forEach(importsSettings::excludePath)
+        val excludedPackages = importsSettings.excludedPackages
+        toExclude.filterNot { excludedPackages.contains(it) }.forEach(importsSettings::excludePath)
     }
 
     private val supportedPackagesData: SupportedLibrariesFilter by lazy {
