@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.inspections.libraries
 
 import com.goide.inspections.core.GoInspectionBase
+import com.goide.inspections.core.GoInspectionMessage
 import com.goide.inspections.core.GoProblemsHolder
 import com.goide.psi.GoImportSpec
 import com.goide.psi.GoVisitor
@@ -8,15 +9,23 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemHighlightType
-import com.intellij.openapi.diagnostic.thisLogger
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
-import org.yaml.snakeyaml.Yaml
+import org.jetbrains.tinygoplugin.services.SupportedLibrariesFilter
+import org.jetbrains.tinygoplugin.services.TinyGoSupportedPackages
+
+class UnsupportedLibraryMessage(private val packageName: String) : GoInspectionMessage {
+    override fun getTemplate(): String = ""
+    override fun toString(): String {
+        val tinyGoLink = "https://tinygo.org/lang-support/stdlib/#${packageName.replace('/', '-')}"
+        return """<html>$packageName is not supported by TinyGo. For details see <a href="$tinyGoLink">$packageName</a></html>"""
+    }
+}
 
 class UnsupportedLibrariesException(
     private val filter: SupportedLibrariesFilter,
     private val holder: GoProblemsHolder,
 ) : GoVisitor() {
-
     override fun visitImportSpec(o: GoImportSpec) {
         super.visitImportSpec(o)
         if (o.isCImport || o.isBlank) {
@@ -26,7 +35,7 @@ class UnsupportedLibrariesException(
         if (!filter.check(importText)) {
             holder.registerProblem(
                 o,
-                { "$importText is not supported by tinyGo" },
+                UnsupportedLibraryMessage(importText),
                 ProblemHighlightType.GENERIC_ERROR,
                 ImportInspection.UNSUPPORTED_LIBRARY_QUICK_FIX
             )
@@ -34,33 +43,7 @@ class UnsupportedLibrariesException(
     }
 }
 
-interface SupportedLibrariesFilter {
-    fun check(name: String): Boolean
-}
-
-class DummyLibraryFilter : SupportedLibrariesFilter {
-    override fun check(name: String): Boolean = true
-}
-
-class LibraryFilter(private val supportedMap: Map<String, Boolean>) : SupportedLibrariesFilter {
-    private val defaultPolicy = true
-    override fun check(name: String): Boolean = supportedMap.getOrDefault(name, defaultPolicy)
-}
-
 class ImportInspection : GoInspectionBase() {
-    private val filter: Lazy<SupportedLibrariesFilter> = lazy {
-        val stream = this.javaClass.classLoader.getResourceAsStream("libraries/latest.yaml")
-        if (stream == null) {
-            thisLogger().warn("Could not load list of supported libraries")
-            DummyLibraryFilter()
-        } else {
-            val data: Map<String, Any> = Yaml().load(stream)
-            val supportedLibraries = data.mapValues { entry ->
-                if (entry.value is Boolean) entry.value as Boolean else true
-            }
-            LibraryFilter(supportedLibraries)
-        }
-    }
 
     companion object {
         val UNSUPPORTED_LIBRARY_QUICK_FIX = object : LocalQuickFix {
@@ -77,6 +60,8 @@ class ImportInspection : GoInspectionBase() {
         problemsHolder: GoProblemsHolder,
         locationInspection: LocalInspectionToolSession,
     ): GoVisitor {
-        return UnsupportedLibrariesException(filter.value, problemsHolder)
+        val project = problemsHolder.manager.project
+        val librariesFilter = project.service<TinyGoSupportedPackages>()
+        return UnsupportedLibrariesException(librariesFilter.supportedPackages, problemsHolder)
     }
 }
