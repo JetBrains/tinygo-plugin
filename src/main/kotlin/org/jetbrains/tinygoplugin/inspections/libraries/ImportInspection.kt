@@ -18,7 +18,8 @@ class UnsupportedLibraryMessage(private val packageName: String) : GoInspectionM
     override fun getTemplate(): String = ""
     override fun toString(): String {
         val tinyGoLink = "https://tinygo.org/lang-support/stdlib/#${packageName.replace('/', '-')}"
-        return """<html>$packageName is not supported by TinyGo. For details see <a href="$tinyGoLink">$packageName</a></html>"""
+        val tinyGoLinkHttp = """<a href="$tinyGoLink">$packageName</a>"""
+        return "<html>$packageName is not supported by TinyGo. For details see $tinyGoLinkHttp</html>"
     }
 }
 
