@@ -7,44 +7,40 @@ import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.ui.CanResetSettingsUI
-import org.jetbrains.tinygoplugin.ui.ResetableProperty
+import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateSettingsPanel
 import javax.swing.JComponent
 
-class TinyGoSettingsService(private val project: Project) : NamedConfigurable<TinyGoConfiguration>(),
-    CanResetSettingsUI {
+class TinyGoSettingsService(private val project: Project) :
+    NamedConfigurable<TinyGoConfiguration>(), ConfigurationProvider<TinyGoConfiguration> {
     companion object {
         val logger: Logger = Logger.getInstance(TinyGoSettingsService::class.java)
     }
 
     // local copy of the settings
-    override var settings: TinyGoConfiguration = TinyGoConfiguration.getInstance(project).deepCopy()
-
-    // list of all UI properties to be resetted
-    override var resetableProperties: MutableCollection<ResetableProperty> = ArrayList()
+    override var tinyGoSettings: TinyGoConfiguration = TinyGoConfiguration.getInstance(project).deepCopy()
 
     private val infoExtractor = TinyGoInfoExtractor(project)
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 
-    override fun isModified(): Boolean = settings.modified(project)
+    override fun isModified(): Boolean = tinyGoSettings.modified(project)
 
     override fun apply() {
         logger.warn("Apply called")
-        settings.saveState(project)
+        tinyGoSettings.saveState(project)
     }
 
     override fun getDisplayName(): String = "TinyGo"
 
     fun callExtractor() {
         val processHistory = GoHistoryProcessListener()
-        infoExtractor.extractTinyGoInfo(settings, processHistory) {
+        infoExtractor.extractTinyGoInfo(tinyGoSettings, processHistory) {
             val output = processHistory.output.joinToString("")
             logger.trace(output)
-            settings.extractTinyGoInfo(output)
+            tinyGoSettings.extractTinyGoInfo(output)
             // update all ui fields
-            resetableProperties.forEach(ResetableProperty::reset)
+            propertiesWrapper.reset()
         }
     }
 
@@ -53,22 +49,22 @@ class TinyGoSettingsService(private val project: Project) : NamedConfigurable<Ti
     }
 
     override fun reset() {
-        settings = TinyGoConfiguration.getInstance(project).deepCopy()
-        resetableProperties.forEach(ResetableProperty::reset)
+        tinyGoSettings = TinyGoConfiguration.getInstance(project).deepCopy()
+        propertiesWrapper.reset()
         super.reset()
     }
 
-    override fun getEditableObject(): TinyGoConfiguration = settings
+    override fun getEditableObject(): TinyGoConfiguration = tinyGoSettings
 
     override fun getBannerSlogan(): String = "Tinygo slogan"
 
     fun propagateGoFlags() {
-        propagateGoFlags(project, settings)
+        propagateGoFlags(project, tinyGoSettings)
     }
 
     override fun createOptionsPanel(): JComponent = generateSettingsPanel(
         propertiesWrapper,
-        fileChosen = { it.canonicalPath ?: settings.tinyGoSDKPath },
+        fileChosen = { it.canonicalPath ?: tinyGoSettings.tinyGoSDKPath },
         this::callExtractor,
         this::propagateGoFlags,
         project

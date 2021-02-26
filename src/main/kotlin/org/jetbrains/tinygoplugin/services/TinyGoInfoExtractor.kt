@@ -65,7 +65,7 @@ internal class TinyGoInfoExtractor(private val project: Project) {
     fun extractTinyGoInfo(
         settings: TinyGoConfiguration,
         processHistory: GoHistoryProcessListener,
-        onFinish: Consumer<in GoExecutor.ExecutionResult?>
+        onFinish: Consumer<in GoExecutor.ExecutionResult?>,
     ) {
         val executor = assembleTinyGoShellCommand(settings)
         executor.executeWithProgress(true, true, processHistory, null, onFinish)

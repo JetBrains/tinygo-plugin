@@ -10,65 +10,78 @@ interface ResetableProperty {
     fun reset()
 }
 
-interface SettingsProvider {
-    val settings: TinyGoConfiguration
-}
-
-interface CanResetSettingsUI : SettingsProvider {
+interface ResetableCollection {
     val resetableProperties: MutableCollection<ResetableProperty>
 }
 
-class TinyGoPropertiesWrapper(val obj: SettingsProvider) {
-    // wrapper around graph property that binds the field to the property in settings
-    inner class MappedGraphProperty<T>(
-        private val prop: GraphProperty<T>,
-        private val objProperty: KMutableProperty1<TinyGoConfiguration, T>,
-    ) : GraphProperty<T> by prop, ResetableProperty {
-        init {
-            prop.afterChange {
-                objProperty.set(obj.settings, it)
-            }
-            prop.afterReset {
-                prop.set(objProperty.get(obj.settings))
-            }
-            if (obj is CanResetSettingsUI) {
-                obj.resetableProperties.add(this)
-            }
-        }
+interface ConfigurationProvider<out Configuration> {
+    val tinyGoSettings: Configuration
+}
 
-        override fun reset() = prop.reset()
+open class MappedGraphProperty<T, Configuration>(
+    private val prop: GraphProperty<T>,
+    private val objProperty: KMutableProperty1<Configuration, T>,
+    configuration: ConfigurationProvider<Configuration>,
+    propertyAggregator: ResetableCollection,
+) : GraphProperty<T> by prop, ResetableProperty {
+    init {
+        prop.afterChange {
+            objProperty.set(configuration.tinyGoSettings, it)
+        }
+        prop.afterReset {
+            prop.set(objProperty.get(configuration.tinyGoSettings))
+        }
+        propertyAggregator.resetableProperties.add(this)
     }
 
-    private val propertyGraph = PropertyGraph()
+    override fun reset() = prop.reset()
+}
+
+open class TinyGoPropertiesWrapper(val obj: ConfigurationProvider<TinyGoConfiguration>) :
+    ResetableProperty,
+    ResetableCollection {
+    // wrapper around graph property that binds the field to the property in settings
+    inner class InnerGraphProperty<T>(
+        prop: GraphProperty<T>,
+        objProperty: KMutableProperty1<TinyGoConfiguration, T>,
+    ) : MappedGraphProperty<T, TinyGoConfiguration>(prop, objProperty, obj, this)
+
+    override val resetableProperties: MutableCollection<ResetableProperty> = HashSet()
+
+    protected val propertyGraph = PropertyGraph()
 
     // set initial string
-    val tinygoSDKPath = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(obj.settings::tinyGoSDKPath),
+    val tinygoSDKPath = InnerGraphProperty(
+        prop = propertyGraph.graphProperty(obj.tinyGoSettings::tinyGoSDKPath),
         objProperty = TinyGoConfiguration::tinyGoSDKPath
     )
-    val target = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(obj.settings::targetPlatform),
+    val target = InnerGraphProperty(
+        prop = propertyGraph.graphProperty(obj.tinyGoSettings::targetPlatform),
         objProperty = TinyGoConfiguration::targetPlatform
     )
 
-    val gc = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(obj.settings::gc),
+    val gc = InnerGraphProperty(
+        prop = propertyGraph.graphProperty(obj.tinyGoSettings::gc),
         objProperty = TinyGoConfiguration::gc
     )
-    val scheduler = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(obj.settings::scheduler),
+    val scheduler = InnerGraphProperty(
+        prop = propertyGraph.graphProperty(obj.tinyGoSettings::scheduler),
         objProperty = TinyGoConfiguration::scheduler
     )
-    val goOS = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(obj.settings::goOS),
+    val goOS = InnerGraphProperty(
+        prop = propertyGraph.graphProperty(obj.tinyGoSettings::goOS),
         objProperty = TinyGoConfiguration::goOS
     )
-    val goArch = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(obj.settings::goArch),
+    val goArch = InnerGraphProperty(
+        prop = propertyGraph.graphProperty(obj.tinyGoSettings::goArch),
         objProperty = TinyGoConfiguration::goArch
     )
-    val goTags = MappedGraphProperty(
-        prop = propertyGraph.graphProperty(obj.settings::goTags),
+    val goTags = InnerGraphProperty(
+        prop = propertyGraph.graphProperty(obj.tinyGoSettings::goTags),
         objProperty = TinyGoConfiguration::goTags
     )
+
+    override fun reset() {
+        resetableProperties.forEach(ResetableProperty::reset)
+    }
 }
