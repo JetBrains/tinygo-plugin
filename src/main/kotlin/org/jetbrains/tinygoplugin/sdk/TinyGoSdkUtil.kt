@@ -12,6 +12,7 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
+import java.nio.file.Paths
 
 fun notifyTinyGoNotConfigured(project: Project?, content: String) {
     val notification = GoNotifications.getGeneralGroup()
@@ -51,33 +52,7 @@ fun suggestSdkDirectoryStr(): String = suggestSdkDirectory()?.canonicalPath ?: "
 
 @Suppress("SpreadOperator")
 fun suggestSdkDirectory(): File? {
-    val tinyGoSdkHomeCandidates: MutableList<String> = arrayListOf()
-    if (GoOsManager.isLinux()) {
-        tinyGoSdkHomeCandidates.add("/usr/local/tinygo")
-    } else if (GoOsManager.isMac()) {
-        val macPorts = "/opt/local/lib/tinygo"
-        val homeBrew = "/usr/local/Cellar/tinygo"
-        val file = FileUtil.findFirstThatExist(macPorts, homeBrew)
-        if (file != null) {
-            val tinyGoSdkDirectories = file.canonicalFile.listFiles { child ->
-                checkDirectoryForTinyGo(child)
-            }
-            if (!tinyGoSdkDirectories.isNullOrEmpty()) {
-                tinyGoSdkHomeCandidates.addAll(
-                    tinyGoSdkDirectories.map { f -> f.path }
-                )
-            }
-        }
-    } else if (GoOsManager.isWindows()) {
-        val winSearchDirs = arrayListOf(
-            "${System.getenv("SCOOP")}\\tinygo",
-            "${System.getenv("SCOOP_GLOBAL")}\\tinygo",
-            "C:\\tinygo",
-            "C:\\Program Files\\tinygo",
-            "C:\\Program Files (x86)\\tinygo"
-        )
-        tinyGoSdkHomeCandidates.addAll(winSearchDirs)
-    }
+    val tinyGoSdkHomeCandidates: Collection<String> = osManager.suggestedDirectories()
 
     return if (GoOsManager.isLinux() || GoOsManager.isMac() || GoOsManager.isWindows()) {
         if (tinyGoSdkHomeCandidates.isNotEmpty()) {
@@ -85,3 +60,80 @@ fun suggestSdkDirectory(): File? {
         } else null
     } else null
 }
+
+interface OSUtils {
+    fun suggestedDirectories(): Collection<String>
+    fun executablePath(tinyGoSDKPath: String): String
+}
+
+internal abstract class OSUtilsImpl : OSUtils {
+    protected abstract fun executableName(): String
+    override fun executablePath(tinyGoSDKPath: String): String {
+        val tinyGoRoot =
+            Paths.get(tinyGoSDKPath).toAbsolutePath().toString()
+        return Paths.get(
+            tinyGoRoot,
+            "bin",
+            executableName()
+        ).toString()
+    }
+}
+
+internal class WindowsUtils : OSUtilsImpl() {
+    override fun suggestedDirectories(): Collection<String> =
+        arrayListOf(
+            "${System.getenv("SCOOP")}\\tinygo",
+            "${System.getenv("SCOOP_GLOBAL")}\\tinygo",
+            "C:\\tinygo",
+            "C:\\Program Files\\tinygo",
+            "C:\\Program Files (x86)\\tinygo"
+        )
+
+    override fun executableName(): String {
+        return "tinygo.exe"
+    }
+}
+
+internal abstract class UnixUtils : OSUtilsImpl() {
+    override fun executableName(): String =
+        "tinygo"
+}
+
+internal class UnknownOSUtils : UnixUtils() {
+    override fun suggestedDirectories(): Collection<String> =
+        emptyList()
+}
+
+internal class MacOSUtils : UnixUtils() {
+    override fun suggestedDirectories(): Collection<String> {
+        val macPorts = "/opt/local/lib/tinygo"
+        val homeBrew = "/usr/local/Cellar/tinygo"
+        val file = FileUtil.findFirstThatExist(macPorts, homeBrew)
+        val tinyGoSdkDirectories = file?.canonicalFile?.listFiles { child ->
+            checkDirectoryForTinyGo(child)
+        }
+        return if (tinyGoSdkDirectories.isNullOrEmpty()) emptyList() else tinyGoSdkDirectories.map { f -> f.path }
+    }
+}
+
+internal class LinuxUtils : UnixUtils() {
+    override fun suggestedDirectories(): Collection<String> = listOf("/usr/local/tinygo")
+}
+
+val osManager: OSUtils
+    get() {
+        return when {
+            GoOsManager.isLinux() -> {
+                LinuxUtils()
+            }
+            GoOsManager.isMac() -> {
+                MacOSUtils()
+            }
+            GoOsManager.isWindows() -> {
+                WindowsUtils()
+            }
+            else -> {
+                UnknownOSUtils()
+            }
+        }
+    }

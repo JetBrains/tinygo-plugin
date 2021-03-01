@@ -8,7 +8,7 @@ import com.intellij.util.Consumer
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import java.nio.file.Paths
+import org.jetbrains.tinygoplugin.sdk.osManager
 
 fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val tagPattern = Regex("""build tags:\s+(.+)\n""")
@@ -37,17 +37,13 @@ internal class TinyGoInfoExtractor(private val project: Project) {
         val logger: Logger = Logger.getInstance(TinyGoInfoExtractor::class.java)
     }
 
-    fun assembleTinyGoShellCommand(settings: TinyGoConfiguration): GoExecutor {
+    private fun assembleTinyGoShellCommand(settings: TinyGoConfiguration): GoExecutor {
         val executor = GoExecutor.`in`(project, null)
         val parameters = tinyGoArguments(settings)
         executor.withParameters(parameters)
         executor.showNotifications(true, false)
-        val tinyGoExec = Paths.get(
-            Paths.get(settings.tinyGoSDKPath).toAbsolutePath().toString(),
-            "bin",
-            "tinygo"
-        )
-        executor.withExePath(tinyGoExec.toString())
+        val tinyGoExec = osManager.executablePath(settings.tinyGoSDKPath)
+        executor.withExePath(tinyGoExec)
         return executor
     }
 

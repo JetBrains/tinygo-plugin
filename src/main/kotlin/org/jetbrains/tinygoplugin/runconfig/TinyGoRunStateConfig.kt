@@ -5,7 +5,7 @@ import com.goide.util.GoExecutor
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.module.Module
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import java.nio.file.Paths
+import org.jetbrains.tinygoplugin.sdk.osManager
 
 class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     GoRunningState<TinyGoRunConfiguration>(env, module, configuration) {
@@ -16,13 +16,10 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
                 configuration.cmdlineOptions +
                 listOf(configuration.runConfig.mainFile)
         val goExecutor = GoExecutor.`in`(configuration.project, null)
-        val tinyGoExecutablePath = Paths.get(
-            Paths.get(configuration.tinyGoSettings.tinyGoSDKPath).toAbsolutePath().toString(),
-            "bin",
-            "tinygo"
-        )
+        val tinyGoExecutablePath =
+            osManager.executablePath(configuration.tinyGoSettings.tinyGoSDKPath)
 
-        return goExecutor.withExePath(tinyGoExecutablePath.toString())
+        return goExecutor.withExePath(tinyGoExecutablePath)
             .withParameters(arguments)
     }
 }

@@ -19,7 +19,8 @@
         <localInspection language="go" groupPath="Go"
                          groupBundle="messages.InspectionsBundle" groupKey="inspection.general.tools.group.name"
                          enabledByDefault="true" level="NON_SWITCHABLE_ERROR"
-                         implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.ImportInspection" displayName="TinyGo filter"/>
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.ImportInspection"
+                         displayName="TinyGo filter"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.goide">

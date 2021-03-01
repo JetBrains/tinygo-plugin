@@ -3,7 +3,9 @@ package org.jetbrains.tinygoplugin.inspections.libraries
 import com.goide.inspections.core.GoInspectionBase
 import com.goide.inspections.core.GoInspectionMessage
 import com.goide.inspections.core.GoProblemsHolder
+import com.goide.psi.GoFile
 import com.goide.psi.GoImportSpec
+import com.goide.psi.GoReferenceExpression
 import com.goide.psi.GoVisitor
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.LocalQuickFix
@@ -27,6 +29,24 @@ class UnsupportedLibrariesException(
     private val filter: SupportedLibrariesFilter,
     private val holder: GoProblemsHolder,
 ) : GoVisitor() {
+
+    override fun visitReferenceExpression(o: GoReferenceExpression) {
+        super.visitReferenceExpression(o)
+        val target = o.resolve()
+        val file = target?.containingFile
+        if (file is GoFile) {
+            val importPath = file.getImportPath(false) ?: return
+            if (!filter.check(importPath)) {
+                holder.registerProblem(
+                    o,
+                    UnsupportedLibraryMessage(importPath),
+                    ProblemHighlightType.GENERIC_ERROR,
+                    ImportInspection.UNSUPPORTED_LIBRARY_QUICK_FIX
+                )
+            }
+        }
+    }
+
     override fun visitImportSpec(o: GoImportSpec) {
         super.visitImportSpec(o)
         if (o.isCImport || o.isBlank) {
