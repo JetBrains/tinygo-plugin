@@ -16,6 +16,12 @@
                              displayName="TinyGo"/>
         <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
         <directoryProjectGenerator implementation="org.jetbrains.tinygoplugin.project.wizard.TinyGoProjectGenerator"/>
+        <localInspection language="go" groupPath="Go"
+                         groupBundle="messages.InspectionsBundle" groupKey="inspection.general.tools.group.name"
+                         enabledByDefault="true"
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.InterfaceInspection"
+                         displayName="TinyGo interface comparison inspection"/>
+
     </extensions>
 
     <extensions defaultExtensionNs="com.goide">
