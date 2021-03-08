@@ -13,7 +13,7 @@ import com.intellij.psi.PsiElement
 class InterfaceComparisonVisitor(
     private val holder: GoProblemsHolder,
 ) : GoVisitor() {
-    private fun elementType(o: PsiElement): Boolean {
+    private fun isInterface(o: PsiElement): Boolean {
         val reference = o.reference?.resolve() ?: return false
         val goType = (reference as GoNamedElementImpl<*>).getGoUnderlyingType(null)
         return goType is GoInterfaceType
@@ -21,19 +21,20 @@ class InterfaceComparisonVisitor(
 
     override fun visitConditionalExpr(o: GoConditionalExpr) {
         super.visitConditionalExpr(o)
-        val equality = o.eq
-        if (equality != null) {
+        if (o.eq != null || o.notEq != null) {
             val children = o.children
             if (children.size != 2) {
                 return
             }
-            val interfaceComparison = children.all { elementType(it) }
+            val interfaceComparison = children.all { isInterface(it) }
             if (interfaceComparison) {
                 holder.registerProblem(
                     o,
                     object : GoInspectionMessage {
                         override fun getTemplate(): String = ""
-                        override fun toString(): String = "InterfaceComparison"
+                        override fun toString(): String = "<html>Two interfaces should not be compared." +
+                            "<p>TinyGo does not support interface comparison and it will always return false. " +
+                            "Only comparison with nil works.</p> </html>"
                     }
                 )
             }
