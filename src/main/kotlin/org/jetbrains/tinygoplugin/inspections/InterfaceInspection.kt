@@ -39,6 +39,7 @@ class InterfaceInspection : GoInspectionBase() {
                 }
             }
 
+            @Suppress("ReturnCount")
             private fun isInterface(o: PsiElement): Boolean {
                 val variableDeclaration = o.reference?.resolve() ?: return false
                 if (variableDeclaration is GoNamedElement) {
