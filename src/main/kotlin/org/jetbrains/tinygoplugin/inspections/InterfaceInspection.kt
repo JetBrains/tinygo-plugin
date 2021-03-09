@@ -1,7 +1,6 @@
 package org.jetbrains.tinygoplugin.inspections
 
 import com.goide.inspections.core.GoInspectionBase
-import com.goide.inspections.core.GoInspectionMessage
 import com.goide.inspections.core.GoProblemsHolder
 import com.goide.psi.GoConditionalExpr
 import com.goide.psi.GoNamedElement
@@ -30,10 +29,7 @@ class InterfaceInspection : GoInspectionBase() {
                     if (interfaceComparison) {
                         holder.registerProblem(
                             o,
-                            object : GoInspectionMessage {
-                                override fun getTemplate(): String = ""
-                                override fun toString(): String = INTERFACE_INSPECTION_ERROR_MESSAGE
-                            }
+                            TinyGoInspectionMessage(INTERFACE_INSPECTION_ERROR_MESSAGE)
                         )
                     }
                 }
