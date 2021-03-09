@@ -4,48 +4,50 @@ import com.goide.inspections.core.GoInspectionBase
 import com.goide.inspections.core.GoInspectionMessage
 import com.goide.inspections.core.GoProblemsHolder
 import com.goide.psi.GoConditionalExpr
-import com.goide.psi.GoInterfaceType
+import com.goide.psi.GoNamedElement
 import com.goide.psi.GoVisitor
-import com.goide.psi.impl.GoNamedElementImpl
+import com.goide.psi.impl.GoTypeUtil
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.psi.PsiElement
 
-class InterfaceComparisonVisitor(
-    private val holder: GoProblemsHolder,
-) : GoVisitor() {
-    private fun isInterface(o: PsiElement): Boolean {
-        val reference = o.reference?.resolve() ?: return false
-        val goType = (reference as GoNamedElementImpl<*>).getGoUnderlyingType(null)
-        return goType is GoInterfaceType
-    }
-
-    override fun visitConditionalExpr(o: GoConditionalExpr) {
-        super.visitConditionalExpr(o)
-        if (o.eq != null || o.notEq != null) {
-            val children = o.children
-            if (children.size != 2) {
-                return
-            }
-            val interfaceComparison = children.all { isInterface(it) }
-            if (interfaceComparison) {
-                holder.registerProblem(
-                    o,
-                    object : GoInspectionMessage {
-                        override fun getTemplate(): String = ""
-                        override fun toString(): String = "<html>Two interfaces should not be compared." +
-                            "<p>TinyGo does not support interface comparison and it will always return false. " +
-                            "Only comparison with nil works.</p> </html>"
-                    }
-                )
-            }
-        }
-    }
-}
-
 class InterfaceInspection : GoInspectionBase() {
-    companion object {}
+    companion object {
+        private const val INTERFACE_INSPECTION_ERROR_MESSAGE = "<html>Two interfaces should not be compared." +
+            "<p>TinyGo does not support interface comparison and it will always return false. " +
+            "Only comparison with nil works.</p> </html>"
+    }
 
     override fun buildGoVisitor(holder: GoProblemsHolder, session: LocalInspectionToolSession): GoVisitor {
-        return InterfaceComparisonVisitor(holder)
+        return object : GoVisitor() {
+            override fun visitConditionalExpr(o: GoConditionalExpr) {
+                super.visitConditionalExpr(o)
+                if (o.eq != null || o.notEq != null) {
+                    val children = o.children
+                    if (children.size != 2) {
+                        return
+                    }
+                    val interfaceComparison = children.all { isInterface(it) }
+                    if (interfaceComparison) {
+                        holder.registerProblem(
+                            o,
+                            object : GoInspectionMessage {
+                                override fun getTemplate(): String = ""
+                                override fun toString(): String = INTERFACE_INSPECTION_ERROR_MESSAGE
+                            }
+                        )
+                    }
+                }
+            }
+
+            private fun isInterface(o: PsiElement): Boolean {
+                val variableDeclaration = o.reference?.resolve() ?: return false
+                if (variableDeclaration is GoNamedElement) {
+                    val goType = variableDeclaration.getGoType(null) ?: return false
+                    val typeSpec = GoTypeUtil.findTypeSpec(goType, null) ?: return false
+                    return GoTypeUtil.isInterface(typeSpec)
+                }
+                return false
+            }
+        }
     }
 }
