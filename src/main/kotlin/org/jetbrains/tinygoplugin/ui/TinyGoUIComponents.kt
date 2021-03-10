@@ -4,66 +4,33 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EnumComboBoxModel
-import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.ui.layout.GrowPolicy
-import com.intellij.ui.layout.LayoutBuilder
-import com.intellij.ui.layout.Row
-import com.intellij.ui.layout.enableIf
 import com.intellij.ui.layout.panel
-import com.intellij.ui.layout.selected
-import org.jetbrains.annotations.Nls
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import javax.swing.JPanel
 import kotlin.reflect.KFunction
 
-private fun LayoutBuilder.filteredRow(
-    @Nls label: String? = null,
-    separated: Boolean = false,
-    filter: ComponentPredicate? = null,
-    init: Row.() -> Unit,
-): Row {
-    val result = row(
-        label = label,
-        separated = separated,
-        init = init
-    )
-    if (filter != null) {
-        result.enableIf(filter)
-    }
-    return result
-}
-
 fun generateTinyGoParametersPanel(
     wrapper: TinyGoPropertiesWrapper,
     fileChosen: ((chosenFile: VirtualFile) -> String),
-    project: Project? = null,
-    filter: ComponentPredicate? = null,
+    project: Project? = null
 ): JPanel = panel {
-    tinyGoSettings(wrapper, fileChosen, project, filter)
-}
-
-private fun LayoutBuilder.tinyGoSettings(
-    wrapper: TinyGoPropertiesWrapper,
-    fileChosen: (chosenFile: VirtualFile) -> String,
-    project: Project?,
-    filter: ComponentPredicate?,
-) {
-    filteredRow("TinyGo Path", filter = filter) {
+    row("TinyGo Path") {
         textFieldWithBrowseButton(
             property = wrapper.tinygoSDKPath, project = project,
             fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor(),
             fileChosen = fileChosen
         )
     }
-    filteredRow("Target platform", filter = filter) {
+    row("Target platform") {
         textField(property = wrapper.target).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
-    filteredRow("Compiler parameters:", filter = filter) {
-        filteredRow("Garbage collector", filter = filter) {
+    row("Compiler parameters:") {
+        row("Garbage collector") {
             comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
         }
-        filteredRow("Scheduler", filter = filter) {
+        row("Scheduler") {
             comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
         }
     }
@@ -74,25 +41,22 @@ fun generateSettingsPanel(
     fileChosen: ((chosenFile: VirtualFile) -> String),
     onDetect: KFunction<Unit>,
     onPropagateGoTags: KFunction<Unit>,
-    project: Project? = null,
+    project: Project? = null
 ): JPanel = panel {
-    lateinit var tinyGoEnabled: ComponentPredicate
     row {
-        val enabledCheckbox = checkBox("TinyGo enabled", property = wrapper.tinyGoEnabled)
-        tinyGoEnabled = enabledCheckbox.selected
+        generateTinyGoParametersPanel(wrapper, fileChosen, project)()
     }
-    tinyGoSettings(wrapper, fileChosen, project, tinyGoEnabled)
-    filteredRow(filter = tinyGoEnabled) {
+    row {
         button("Detect") { onDetect.call() /*extractTinyGOParameters()*/ }
         button("Update gopath") { onPropagateGoTags.call() /*propagateGoFlags()*/ }
     }
-    filteredRow("GOOS", filter = tinyGoEnabled) {
+    row("GOOS") {
         textField(property = wrapper.goOS).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
-    filteredRow("GOARCH", filter = tinyGoEnabled) {
+    row("GOARCH") {
         textField(property = wrapper.goArch).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
-    filteredRow("Go tags", filter = tinyGoEnabled) {
+    row("Go tags") {
         textField(property = wrapper.goTags).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
 }

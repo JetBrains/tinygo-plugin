@@ -40,6 +40,12 @@ internal data class TinyGoConfigurationImpl(
         )
     }
 
+    override var enabled: Boolean
+        get() = projectConfig.enabled || tinyGoSDKPath.isNotEmpty()
+        set(value) {
+            projectConfig.enabled = value
+        }
+
     companion object {
         fun getInstance(p: Project): TinyGoConfigurationImpl = TinyGoConfigurationImpl(
             projectConfig = p.service<ProjectConfigurationImpl>().state,
