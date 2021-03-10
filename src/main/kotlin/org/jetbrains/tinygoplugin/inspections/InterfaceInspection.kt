@@ -12,9 +12,7 @@ import com.intellij.psi.PsiElement
 
 class InterfaceInspection : GoInspectionBase() {
     companion object {
-        private const val INTERFACE_INSPECTION_ERROR_MESSAGE = "<html>Two interfaces should not be compared." +
-            "<p>TinyGo does not support interface comparison and it will always return false. " +
-            "Only comparison with nil works.</p> </html>"
+        const val INTERFACE_INSPECTION_MESSAGE_KEY = "inspection.interface.message"
     }
 
     override fun buildGoVisitor(holder: GoProblemsHolder, session: LocalInspectionToolSession): GoVisitor {
@@ -30,7 +28,7 @@ class InterfaceInspection : GoInspectionBase() {
                     if (interfaceComparison) {
                         holder.registerProblem(
                             o,
-                            TinyGoInspectionMessage(INTERFACE_INSPECTION_ERROR_MESSAGE)
+                            inspectionMessage(INTERFACE_INSPECTION_MESSAGE_KEY)
                         )
                     }
                 }

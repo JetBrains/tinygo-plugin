@@ -16,8 +16,7 @@
                              displayName="TinyGo"/>
         <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
         <directoryProjectGenerator implementation="org.jetbrains.tinygoplugin.project.wizard.TinyGoProjectGenerator"/>
-        <localInspection language="go" groupPath="Go"
-                         bundle="messages.TinyGo" key="inspection.interface.name"
+        <localInspection language="go" bundle="messages.TinyGo" key="inspection.interface.name"
                          groupBundle="messages.TinyGo" groupKey="inspection.bundle.key"
                          enabledByDefault="true"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.InterfaceInspection"/>
