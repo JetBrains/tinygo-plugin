@@ -15,40 +15,39 @@ class InterfaceInspection : GoInspectionBase() {
         const val INTERFACE_INSPECTION_MESSAGE_KEY = "inspection.interface.message"
     }
 
-    override fun buildGoVisitor(holder: GoProblemsHolder, session: LocalInspectionToolSession): GoVisitor {
-        return object : GoVisitor() {
-            override fun visitConditionalExpr(o: GoConditionalExpr) {
-                super.visitConditionalExpr(o)
-                if (o.eq != null || o.notEq != null) {
-                    val children = o.children
-                    if (children.size != 2) {
+    override fun buildGoVisitor(holder: GoProblemsHolder, session: LocalInspectionToolSession): GoVisitor =
+        object : GoVisitor() {
+            override fun visitConditionalExpr(conditionalExpr: GoConditionalExpr) {
+                super.visitConditionalExpr(conditionalExpr)
+                if (conditionalExpr.eq != null || conditionalExpr.notEq != null) {
+                    val arguments = conditionalExpr.children
+                    if (arguments.size != 2) {
                         return
                     }
-                    val interfaceComparison = children.all { isInterface(it) }
+                    val interfaceComparison = arguments.all { isInterface(it) }
                     if (interfaceComparison) {
                         holder.registerProblem(
-                            o,
+                            conditionalExpr,
                             inspectionMessage(INTERFACE_INSPECTION_MESSAGE_KEY)
                         )
                     }
                 }
             }
-
-            @Suppress("ReturnCount")
-            private fun isInterface(o: PsiElement): Boolean {
-                val variableDeclaration = o.reference?.resolve() ?: return false
-                if (variableDeclaration is GoNamedElement) {
-                    val goType = variableDeclaration.getGoType(null) ?: return false
-                    // check if variable is declared with
-                    // var a interface{}
-                    if (goType is GoInterfaceType) {
-                        return true
-                    }
-                    val typeSpec = GoTypeUtil.findTypeSpec(goType, null) ?: return false
-                    return GoTypeUtil.isInterface(typeSpec)
-                }
-                return false
-            }
         }
+}
+
+@Suppress("ReturnCount")
+private fun isInterface(element: PsiElement): Boolean {
+    val variableDeclaration = element.reference?.resolve() ?: return false
+    if (variableDeclaration !is GoNamedElement) {
+        return false
     }
+    val goType = variableDeclaration.getGoType(null) ?: return false
+    // check if variable is declared with
+    // var a interface{}
+    if (goType is GoInterfaceType) {
+        return true
+    }
+    val typeSpec = GoTypeUtil.findTypeSpec(goType, null) ?: return false
+    return GoTypeUtil.isInterface(typeSpec)
 }
