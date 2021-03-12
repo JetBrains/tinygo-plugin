@@ -22,15 +22,15 @@ class TinyGoGopathManager : GoRootsProvider {
         return if (result.exists()) VfsUtil.findFileByIoFile(result.toFile(), true) else null
     }
 
-    override fun getGoPathRoots(project: Project?, p1: Module?): MutableCollection<VirtualFile> {
+    override fun getGoPathRoots(project: Project?, p1: Module?): Collection<VirtualFile> {
         if (project == null) {
             return mutableSetOf()
         }
         val tinyGoRoot = getTinyGoRoot(project, null)
         return if (tinyGoRoot == null) {
-            mutableSetOf()
+            emptyList()
         } else {
-            mutableSetOf(tinyGoRoot)
+            setOf(tinyGoRoot)
         }
     }
 
@@ -40,14 +40,14 @@ class TinyGoGopathManager : GoRootsProvider {
         }
         val tinyGoRoot = getTinyGoRoot(project, "src")
         return if (tinyGoRoot == null) {
-            setOf()
+            emptyList()
         } else {
             setOf(tinyGoRoot)
         }
     }
 
     override fun getGoPathBinRoots(project: Project?, module: Module?): Collection<VirtualFile> {
-        return setOf()
+        return emptyList()
     }
 
     override fun isExternal(): Boolean = true

@@ -21,10 +21,9 @@
                          enabledByDefault="true" level="NON_SWITCHABLE_ERROR"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.ImportInspection"
                          displayName="TinyGo filter"/>
+        <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootProvider"/>
     </extensions>
 
-    <extensions defaultExtensionNs="com.goide">
-        <rootsProvider id="default" implementation="org.jetbrains.tinygoplugin.services.TinyGoGopathManager"/>
-    </extensions>
+
 
 </idea-plugin>
