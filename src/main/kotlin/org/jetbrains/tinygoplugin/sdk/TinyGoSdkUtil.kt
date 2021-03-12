@@ -15,7 +15,6 @@ import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
 import java.io.IOException
-import java.util.stream.Collectors
 
 fun notifyTinyGoNotConfigured(
     project: Project?,
@@ -73,41 +72,47 @@ private fun searchInSystemPath(): Set<String> {
     return tinyGoHomesInSystemPath
 }
 
-@Suppress("SpreadOperator")
-fun suggestSdkDirectories(): Set<File> {
-    val tinyGoSdkHomeCandidates: MutableSet<String> = mutableSetOf()
-    if (GoOsManager.isLinux()) {
-        tinyGoSdkHomeCandidates.add("/usr/local/tinygo")
-    } else if (GoOsManager.isMac()) {
-        val macPorts = "/opt/local/lib/tinygo"
-        val homeBrew = "/usr/local/Cellar/tinygo"
-        val file = FileUtil.findFirstThatExist(macPorts, homeBrew)
-        if (file != null) {
-            val tinyGoSdkDirectories = file.canonicalFile.listFiles { child -> checkDirectoryForTinyGo(child) }
-            if (!tinyGoSdkDirectories.isNullOrEmpty()) {
-                tinyGoSdkHomeCandidates.addAll(tinyGoSdkDirectories.map { f -> f.path })
+private fun filterCandidatesRecursive(searchDirs: Collection<String>): Set<String> {
+    val tinyGoHomes = mutableListOf<String>()
+    for (searchDir in searchDirs) {
+        if (FileUtil.exists(searchDir)) {
+            var candidates = arrayOf(File(searchDir))
+            if (!checkDirectoryForTinyGo(candidates.first())) {
+                candidates = File(searchDir).listFiles { child -> checkDirectoryForTinyGo(child) } ?: emptyArray()
             }
+            tinyGoHomes.addAll(candidates.map { f -> f.path })
         }
-    } else if (GoOsManager.isWindows()) {
-        val winSearchDirs = arrayListOf(
-            "${System.getenv("SCOOP")}\\tinygo",
-            "${System.getenv("SCOOP_GLOBAL")}\\tinygo",
-            "C:\\tinygo",
-            "C:\\Program Files\\tinygo",
-            "C:\\Program Files (x86)\\tinygo"
-        )
-        tinyGoSdkHomeCandidates.addAll(winSearchDirs)
     }
+    return tinyGoHomes.toSet()
+}
 
-    return if (GoOsManager.isLinux() || GoOsManager.isMac() || GoOsManager.isWindows()) {
-        tinyGoSdkHomeCandidates.addAll(searchInSystemPath())
-        for (tinyGoSdkHomeCandidate in tinyGoSdkHomeCandidates) {
-            if (!FileUtil.exists(tinyGoSdkHomeCandidate)) {
-                tinyGoSdkHomeCandidates.remove(tinyGoSdkHomeCandidate)
-            }
+fun suggestSdkDirectories(): Set<File> {
+    val searchDirs = mutableListOf<String>()
+    when {
+        GoOsManager.isLinux() -> {
+            searchDirs.add("/usr/local/tinygo")
         }
-        return tinyGoSdkHomeCandidates.stream().map { path -> File(path) }.collect(Collectors.toSet())
-    } else emptySet()
+        GoOsManager.isMac() -> {
+            val macSearchDirs = arrayListOf(
+                "/opt/local/lib/tinygo",
+                "/usr/local/Cellar/tinygo"
+            )
+            searchDirs.addAll(macSearchDirs)
+        }
+        GoOsManager.isWindows() -> {
+            val winSearchDirs = arrayListOf(
+                "${System.getProperty("user.home")}\\scoop\\apps\\tinygo",
+                "${System.getenv("SCOOP")}\\tinygo",
+                "${System.getenv("SCOOP_GLOBAL")}\\tinygo",
+                "C:\\tinygo",
+                "C:\\Program Files\\tinygo",
+                "C:\\Program Files (x86)\\tinygo"
+            )
+            searchDirs.addAll(winSearchDirs)
+        }
+    }
+    val tinyGoSdkHomes = filterCandidatesRecursive(searchDirs) + searchInSystemPath()
+    return tinyGoSdkHomes.map { tinyGoHome -> File(tinyGoHome) }.toSortedSet()
 }
 
 fun suggestSdkDirectory(): File? = suggestSdkDirectories().firstOrNull()

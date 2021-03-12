@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.sdk
 
+import com.goide.GoOsManager
 import com.intellij.openapi.vfs.VirtualFile
 import java.io.File
 
@@ -11,8 +12,9 @@ private fun checkBin(dir: File): Boolean {
     val binDirCandidates = dir.listDirs("bin")
     return if (!binDirCandidates.isNullOrEmpty()) {
         val binDir = binDirCandidates.first()
+        val executableName = (if (GoOsManager.isWindows()) "tinygo.exe" else "tinygo")
         return binDir.listFiles { child ->
-            child.isFile && child.canExecute() && child.name == "tinygo"
+            child.isFile && child.canExecute() && child.name == executableName
         }?.isNotEmpty() ?: false
     } else false
 }
