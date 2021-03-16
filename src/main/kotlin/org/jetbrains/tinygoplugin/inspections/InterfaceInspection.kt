@@ -9,6 +9,7 @@ import com.goide.psi.GoVisitor
 import com.goide.psi.impl.GoTypeUtil
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.psi.PsiElement
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 
 class InterfaceInspection : GoInspectionBase() {
     companion object {
@@ -18,6 +19,11 @@ class InterfaceInspection : GoInspectionBase() {
     override fun buildGoVisitor(holder: GoProblemsHolder, session: LocalInspectionToolSession): GoVisitor =
         object : GoVisitor() {
             override fun visitConditionalExpr(conditionalExpr: GoConditionalExpr) {
+                val tinyGoConfiguration = TinyGoConfiguration.getInstance(conditionalExpr.project)
+                if (!tinyGoConfiguration.enabled) {
+                    return
+                }
+
                 super.visitConditionalExpr(conditionalExpr)
                 if (conditionalExpr.eq != null || conditionalExpr.notEq != null) {
                     val arguments = conditionalExpr.children
