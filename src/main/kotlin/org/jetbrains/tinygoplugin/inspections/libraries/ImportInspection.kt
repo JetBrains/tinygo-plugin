@@ -17,7 +17,6 @@ import org.jetbrains.tinygoplugin.services.SupportedLibrariesFilter
 import org.jetbrains.tinygoplugin.services.TinyGoSupportedPackages
 
 class UnsupportedLibraryMessage(private val packageName: String) : GoInspectionMessage {
-    override fun getTemplate(): String = ""
     override fun toString(): String {
         val tinyGoLink = "https://tinygo.org/lang-support/stdlib/#${packageName.replace('/', '-')}"
         val tinyGoLinkHttp = """<a href="$tinyGoLink">$packageName</a>"""

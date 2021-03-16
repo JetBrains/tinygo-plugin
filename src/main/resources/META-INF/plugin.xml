@@ -23,7 +23,9 @@
                          displayName="TinyGo filter"/>
         <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootProvider"/>
     </extensions>
-
+    <extensions defaultExtensionNs="com.goide">
+        <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
+    </extensions>
 
 
 </idea-plugin>
