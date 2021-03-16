@@ -6,8 +6,6 @@ import org.jetbrains.tinygoplugin.BUNDLE
 import org.jetbrains.tinygoplugin.TinyGoBundle
 
 class TinyGoInspectionMessage(private val message: String) : GoInspectionMessage {
-    override fun getTemplate(): String = ""
-
     override fun toString(): String = message
 }
 
