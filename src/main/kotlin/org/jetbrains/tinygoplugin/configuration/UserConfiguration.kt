@@ -9,9 +9,13 @@ import com.intellij.util.xmlb.XmlSerializerUtil
 
 interface UserConfiguration {
     var tinyGoSDKPath: String
+    var tinyGoSDKVersion: String?
 }
 
-data class UserConfigurationState(override var tinyGoSDKPath: String = "/") : UserConfiguration
+data class UserConfigurationState(
+    override var tinyGoSDKPath: String = "/",
+    override var tinyGoSDKVersion: String? = null,
+) : UserConfiguration
 
 @State(name = "TinyGoPluginUserConfig", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
 @Service(Service.Level.PROJECT)
