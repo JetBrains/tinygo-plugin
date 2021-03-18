@@ -2,18 +2,25 @@ package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.GoNotifications
 import com.goide.GoOsManager
+import com.goide.configuration.GoSdkConfigurable
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
 
-fun notifyTinyGoNotConfigured(project: Project?, content: String) {
+fun notifyTinyGoNotConfigured(
+    project: Project?,
+    content: String,
+    notificationType: NotificationType = NotificationType.INFORMATION,
+    goSdkConfigurationNeeded: Boolean = false,
+) {
     val notification = GoNotifications.getGeneralGroup()
         .createNotification("TinyGo SDK configuration incomplete", content, NotificationType.INFORMATION)
     notification.addAction(object : NotificationAction("TinyGo settings") {
@@ -62,39 +69,22 @@ private fun checkDirectoryForTinyGo(dir: File): Boolean {
 
 fun suggestSdkDirectoryStr(): String = suggestSdkDirectory()?.canonicalPath ?: ""
 
-@Suppress("SpreadOperator")
-fun suggestSdkDirectory(): File? {
-    val tinyGoSdkHomeCandidates: MutableList<String> = arrayListOf()
-    if (GoOsManager.isLinux()) {
-        tinyGoSdkHomeCandidates.add("/usr/local/tinygo")
-    } else if (GoOsManager.isMac()) {
-        val macPorts = "/opt/local/lib/tinygo"
-        val homeBrew = "/usr/local/Cellar/tinygo"
-        val file = FileUtil.findFirstThatExist(macPorts, homeBrew)
-        if (file != null) {
-            val tinyGoSdkDirectories = file.canonicalFile.listFiles { child ->
-                checkDirectoryForTinyGo(child)
-            }
-            if (!tinyGoSdkDirectories.isNullOrEmpty()) {
-                tinyGoSdkHomeCandidates.addAll(
-                    tinyGoSdkDirectories.map { f -> f.path }
-                )
-            }
-        }
-    } else if (GoOsManager.isWindows()) {
-        val winSearchDirs = arrayListOf(
-            "${System.getenv("SCOOP")}\\tinygo",
-            "${System.getenv("SCOOP_GLOBAL")}\\tinygo",
-            "C:\\tinygo",
-            "C:\\Program Files\\tinygo",
-            "C:\\Program Files (x86)\\tinygo"
-        )
-        tinyGoSdkHomeCandidates.addAll(winSearchDirs)
-    }
+fun suggestSdkDirectories(): Collection<File> {
+    return osManager.suggestedDirectories().asSequence().map { File(it) }.filter(File::exists)
+        .filter(::checkBin).filter(::checkTargets).filter(::checkMachinesSources).toList()
+}
 
-    return if (GoOsManager.isLinux() || GoOsManager.isMac() || GoOsManager.isWindows()) {
-        if (tinyGoSdkHomeCandidates.isNotEmpty()) {
-            FileUtil.findFirstThatExist(*tinyGoSdkHomeCandidates.toTypedArray())
-        } else null
-    } else null
+fun findTinyGoInPath(): File? {
+    val tinygoExec =
+        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(osManager.executableBaseName()) ?: return null
+    // resolve links and go 2 directories up: -> bin -> tinygo
+    return tinygoExec.canonicalFile.parentFile?.parentFile
+}
+
+fun suggestSdkDirectory(): File? {
+    val tinygoPath = findTinyGoInPath()
+    if (tinygoPath != null) {
+        return tinygoPath
+    }
+    return suggestSdkDirectories().firstOrNull()
 }
