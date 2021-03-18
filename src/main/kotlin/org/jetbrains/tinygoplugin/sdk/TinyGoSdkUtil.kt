@@ -1,26 +1,22 @@
 package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.GoNotifications
-import com.goide.GoOsManager
 import com.goide.configuration.GoSdkConfigurable
+import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.FileUtil
-import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
-import java.io.IOException
 
 fun notifyTinyGoNotConfigured(
     project: Project?,
     content: String,
     notificationType: NotificationType = NotificationType.INFORMATION,
-    goSdkConfigurationNeeded: Boolean = false
+    goSdkConfigurationNeeded: Boolean = false,
 ) {
     val notification = GoNotifications.getGeneralGroup()
         .createNotification("TinyGo SDK configuration incomplete", content, notificationType)
@@ -43,76 +39,22 @@ fun notifyTinyGoNotConfigured(
 
 fun suggestSdkDirectoryStr(): String = suggestSdkDirectory()?.canonicalPath ?: ""
 
-private const val TINYGO_EXECUTABLE = "tinygo"
-
-private fun searchInSystemPath(): Set<String> {
-    Logger.getInstance("Detecting TinyGo").info("Started searching TinyGo home in PATH")
-
-    val systemPathValues = System.getenv("PATH").split(":")
-    val tinyGoHomesInSystemPath = mutableSetOf<String>()
-    for (pathDir in systemPathValues) {
-        val candidate = FileUtil.join(pathDir, TINYGO_EXECUTABLE)
-        try {
-            val realTinyGoExec = File(candidate).toPath().toRealPath()
-            if (!realTinyGoExec.exists()) {
-                continue
-            }
-            val realTinyGoBin = realTinyGoExec.parent
-            val realTinyGoHome = realTinyGoBin.parent.toFile()
-            val directoryContainsTinyGo = checkDirectoryForTinyGo(realTinyGoHome)
-            if (directoryContainsTinyGo && tinyGoHomesInSystemPath.add(realTinyGoHome.path)) {
-                Logger.getInstance("Detecting TinyGo").info(
-                    "TinyGo home found: candidate from PATH $candidate located in ${realTinyGoHome.path}"
-                )
-            }
-        } catch (ex: IOException) {
-            Logger.getInstance("Detecting TinyGo").info("$candidate does not exist")
-        }
-    }
-    return tinyGoHomesInSystemPath
+fun suggestSdkDirectories(): Collection<File> {
+    return osManager.suggestedDirectories().asSequence().map { File(it) }.filter(File::exists)
+        .filter(::checkBin).filter(::checkTargets).filter(::checkMachinesSources).toList()
 }
 
-private fun filterCandidatesRecursive(searchDirs: Collection<String>): Set<String> {
-    val tinyGoHomes = mutableListOf<String>()
-    for (searchDir in searchDirs) {
-        if (FileUtil.exists(searchDir)) {
-            var candidates = arrayOf(File(searchDir))
-            if (!checkDirectoryForTinyGo(candidates.first())) {
-                candidates = File(searchDir).listFiles { child -> checkDirectoryForTinyGo(child) } ?: emptyArray()
-            }
-            tinyGoHomes.addAll(candidates.map { f -> f.path })
-        }
-    }
-    return tinyGoHomes.toSet()
+fun findTinyGoInPath(): File? {
+    val tinygoExec =
+        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(osManager.executableBaseName()) ?: return null
+    // resolve links and go 2 directories up: -> bin -> tinygo
+    return tinygoExec.canonicalFile.parentFile?.parentFile
 }
 
-fun suggestSdkDirectories(): Set<File> {
-    val searchDirs = mutableListOf<String>()
-    when {
-        GoOsManager.isLinux() -> {
-            searchDirs.add("/usr/local/tinygo")
-        }
-        GoOsManager.isMac() -> {
-            val macSearchDirs = arrayListOf(
-                "/opt/local/lib/tinygo",
-                "/usr/local/Cellar/tinygo"
-            )
-            searchDirs.addAll(macSearchDirs)
-        }
-        GoOsManager.isWindows() -> {
-            val winSearchDirs = arrayListOf(
-                "${System.getProperty("user.home")}\\scoop\\apps\\tinygo",
-                "${System.getenv("SCOOP")}\\tinygo",
-                "${System.getenv("SCOOP_GLOBAL")}\\tinygo",
-                "C:\\tinygo",
-                "C:\\Program Files\\tinygo",
-                "C:\\Program Files (x86)\\tinygo"
-            )
-            searchDirs.addAll(winSearchDirs)
-        }
+fun suggestSdkDirectory(): File? {
+    val tinygoPath = findTinyGoInPath()
+    if (tinygoPath != null) {
+        return tinygoPath
     }
-    val tinyGoSdkHomes = filterCandidatesRecursive(searchDirs) + searchInSystemPath()
-    return tinyGoSdkHomes.map { tinyGoHome -> File(tinyGoHome) }.toSortedSet()
+    return suggestSdkDirectories().firstOrNull()
 }
-
-fun suggestSdkDirectory(): File? = suggestSdkDirectories().firstOrNull()

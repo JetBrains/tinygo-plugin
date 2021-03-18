@@ -13,11 +13,12 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.util.Consumer
+import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
-import java.nio.file.Paths
+import org.jetbrains.tinygoplugin.sdk.osManager
 import java.time.Duration
 
 fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
@@ -45,19 +46,20 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
 internal class TinyGoInfoExtractor(private val project: Project) {
     companion object {
         val logger: Logger = Logger.getInstance(TinyGoInfoExtractor::class.java)
+        const val GO_NOT_CONFIGURED_MESSAGE = "notifications.tinygoSDK.goSDKNotConfigured"
+        const val DETECTION_TITLE = "notifications.tinygoSDK.detection.title"
+        const val DETECTION_INDICATOR_TEXT = "notifications.tinygoSDK.detection.indicatorText"
+        const val DETECTION_FAIL_MESSAGE = "notifications.tinygoSDK.detection.failMessage"
+        const val DETECTION_ERROR_MESSAGE = "notifications.tinygoSDK.detection.errorMessage"
     }
 
-    fun assembleTinyGoShellCommand(settings: TinyGoConfiguration): GoExecutor {
+    private fun assembleTinyGoShellCommand(settings: TinyGoConfiguration): GoExecutor {
         val executor = GoExecutor.`in`(project, null)
         val parameters = tinyGoArguments(settings)
         executor.withParameters(parameters)
         executor.showNotifications(true, false)
-        val tinyGoExec = Paths.get(
-            Paths.get(settings.tinyGoSDKPath).toAbsolutePath().toString(),
-            "bin",
-            "tinygo"
-        )
-        executor.withExePath(tinyGoExec.toString())
+        val tinyGoExec = osManager.executablePath(settings.tinyGoSDKPath)
+        executor.withExePath(tinyGoExec)
         return executor
     }
 
@@ -81,19 +83,17 @@ internal class TinyGoInfoExtractor(private val project: Project) {
         if (currentGoSdk == GoSdk.NULL) {
             notifyTinyGoNotConfigured(
                 project,
-                "Cannot detect TinyGo settings automatically because " +
-                        "Go SDK is not installed or invalid, please install it or fix the problem " +
-                        "and then configure TinyGo manually.",
+                TinyGoBundle.message(GO_NOT_CONFIGURED_MESSAGE),
                 NotificationType.WARNING,
                 true
             )
             return
         }
-        val detectingTask = object : Task.Backgroundable(project, "Detecting TinyGo parameters") {
+        val detectingTask = object : Task.Backgroundable(project, TinyGoBundle.message(DETECTION_TITLE)) {
             override fun run(indicator: ProgressIndicator) {
                 if (currentGoSdk is GoDownloadingSdk) {
                     indicator.isIndeterminate = true
-                    indicator.text2 = "Waiting until Go SDK will be installed"
+                    indicator.text2 = TinyGoBundle.message(DETECTION_INDICATOR_TEXT)
                     while (GoSdkService.getInstance(project).getSdk(null) is GoDownloadingSdk) {
                         Thread.sleep(Duration.ofSeconds(1).toMillis())
                     }
@@ -105,11 +105,11 @@ internal class TinyGoInfoExtractor(private val project: Project) {
                     } else {
                         notifyTinyGoNotConfigured(
                             project,
-                            "TinyGo parameters extraction failed. Please select correct Go or TinyGo SDK.",
+                            TinyGoBundle.message(DETECTION_FAIL_MESSAGE),
                             NotificationType.ERROR,
                             true
                         )
-                        logger.error("extraction failed", processHistory.output.toString())
+                        logger.error(TinyGoBundle.message(DETECTION_ERROR_MESSAGE), processHistory.output.toString())
                     }
                 }
             }

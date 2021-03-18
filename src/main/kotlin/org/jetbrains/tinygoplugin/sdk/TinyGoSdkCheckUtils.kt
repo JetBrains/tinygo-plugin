@@ -8,7 +8,7 @@ private fun File.listDirs(dirName: String): Array<File>? = listFiles { child ->
     child.isDirectory && child.name == dirName
 }
 
-private fun checkBin(dir: File): Boolean {
+internal fun checkBin(dir: File): Boolean {
     val binDirCandidates = dir.listDirs("bin")
     return if (!binDirCandidates.isNullOrEmpty()) {
         val binDir = binDirCandidates.first()
@@ -19,7 +19,7 @@ private fun checkBin(dir: File): Boolean {
     } else false
 }
 
-private fun checkTargets(dir: File): Boolean {
+internal fun checkTargets(dir: File): Boolean {
     val targetsDirCandidates = dir.listDirs("targets")
     return if (!targetsDirCandidates.isNullOrEmpty()) {
         val targetsDir = targetsDirCandidates.first()
@@ -29,7 +29,7 @@ private fun checkTargets(dir: File): Boolean {
     } else false
 }
 
-private fun checkMachinesSources(srcDir: File): Boolean {
+internal fun checkMachinesSources(srcDir: File): Boolean {
     val machinesDirCandidates = srcDir.listDirs("machine")
     return if (!machinesDirCandidates.isNullOrEmpty()) {
         val machinesDir = machinesDirCandidates.first()
@@ -42,7 +42,7 @@ private fun checkMachinesSources(srcDir: File): Boolean {
     } else false
 }
 
-private fun checkSources(dir: File): Boolean {
+internal fun checkSources(dir: File): Boolean {
     val sourcesDirCandidates = dir.listDirs("src")
     return if (!sourcesDirCandidates.isNullOrEmpty()) {
         val sourcesDir = sourcesDirCandidates.first()
