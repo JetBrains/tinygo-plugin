@@ -24,7 +24,6 @@ class TinyGoProjectGeneratorPeer :
 
     init {
         tinyGoSettings.tinyGoSDKPath = suggestSdkDirectoryStr()
-        tinyGoSettings.enabled = true
     }
 
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
