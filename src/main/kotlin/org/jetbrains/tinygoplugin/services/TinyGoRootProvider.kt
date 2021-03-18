@@ -1,14 +1,16 @@
 package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoSyntheticLibrary
-import com.goide.sdk.GoSdkUtil
 import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.AdditionalLibraryRootsProvider
 import com.intellij.openapi.roots.SyntheticLibrary
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons.TinyGoLibraryIcon
+import java.nio.file.Paths
 import javax.swing.Icon
 
 class TinyGoRootLibrary(private val moduleName: String, private val sourceRoots: Collection<VirtualFile>) :
@@ -35,13 +37,7 @@ class TinyGoRootLibrary(private val moduleName: String, private val sourceRoots:
 
 class TinyGoRootProvider : AdditionalLibraryRootsProvider() {
     override fun getAdditionalProjectLibraries(project: Project): Collection<SyntheticLibrary> {
-        val settings = TinyGoConfiguration.getInstance(project)
-        if (!settings.enabled) {
-            return emptyList()
-        }
-        val tinyGoGoPathManager = TinyGoGopathManager()
-        return GoSdkUtil.getGoModules(project).map { tinyGoGoPathManager.getGoPathSourcesRoots(project, it) }
-            .map { TinyGoRootLibrary("tinygo", it) }.toSet()
+        return listOf(TinyGoRootLibrary("tinygo", getRootsToWatch(project)))
     }
 
     override fun getRootsToWatch(project: Project): Collection<VirtualFile> {
@@ -49,8 +45,18 @@ class TinyGoRootProvider : AdditionalLibraryRootsProvider() {
         if (!settings.enabled) {
             return emptyList()
         }
-        val tinyGoGoPathManager = TinyGoGopathManager()
-        return GoSdkUtil.getGoModules(project).map { tinyGoGoPathManager.getGoPathSourcesRoots(project, it) }
-            .flatten().toSet()
+        val tinyGoSources = getTinyGoSources(project) ?: return emptyList()
+        return listOf(tinyGoSources)
     }
+}
+
+internal fun getTinyGoSources(project: Project): VirtualFile? {
+    val settings = TinyGoConfiguration.getInstance(project)
+    val tinyGoSDKPath = settings.tinyGoSDKPath
+    if (tinyGoSDKPath.isEmpty() || !settings.enabled) {
+        return null
+    }
+    val result = Paths.get(tinyGoSDKPath, "src")
+
+    return if (result.exists()) VfsUtil.findFileByIoFile(result.toFile(), true) else null
 }
