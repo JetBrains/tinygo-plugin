@@ -13,6 +13,7 @@ import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.TinyGoBundle
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.inspections.inspectionMessage
 import org.jetbrains.tinygoplugin.services.UnsupportedPackageProvider
 
@@ -31,7 +32,7 @@ class ImportInspection : GoInspectionBase() {
             override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
                 val element = descriptor.psiElement
                 val importDeclaration = element.parent
-                val importCount = importDeclaration.children.filter { it is GoImportSpec }.size
+                val importCount = importDeclaration.children.filterIsInstance<GoImportSpec>().size
                 // check if it is declared with
                 // import "encoding/json"
                 element.delete()
@@ -51,6 +52,9 @@ class ImportInspection : GoInspectionBase() {
         return object : GoVisitor() {
             override fun visitReferenceExpression(o: GoReferenceExpression) {
                 super.visitReferenceExpression(o)
+                if (!TinyGoConfiguration.getInstance(o.project).enabled) {
+                    return
+                }
                 val target = o.resolve()
                 val file = target?.containingFile
                 if (file is GoFile) {
@@ -68,7 +72,7 @@ class ImportInspection : GoInspectionBase() {
 
             override fun visitImportSpec(o: GoImportSpec) {
                 super.visitImportSpec(o)
-                if (o.isCImport || o.isBlank) {
+                if (o.isCImport || o.isBlank || !TinyGoConfiguration.getInstance(o.project).enabled) {
                     return
                 }
                 val importPath = o.path
