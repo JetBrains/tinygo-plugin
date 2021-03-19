@@ -15,7 +15,7 @@ class UnsupportedPackageProvider(private val project: Project) {
     private fun loadUnsupportedLibraries(version: String): Set<String> {
         val stream = this.javaClass.classLoader.getResourceAsStream("libraries/$version.yaml")
         if (stream == null) {
-            thisLogger().warn("Could not load list of supported libraries")
+            thisLogger().warn("Cannot load a list of supported libraries for $version")
             return emptySet()
         }
         val data: Map<String, Any> = Yaml().load(stream)
