@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NonNls
 import org.jetbrains.annotations.PropertyKey
 
 @NonNls
-private const val BUNDLE = "messages.TinyGo"
+const val BUNDLE = "messages.TinyGo"
 
 object TinyGoBundle : AbstractBundle(BUNDLE) {
 
