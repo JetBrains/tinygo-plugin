@@ -32,12 +32,12 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     TinyGoInfoExtractor.logger.warn("extraction finished")
 }
 
-internal class TinyGoInfoExtractor(private val project: Project) {
+class TinyGoInfoExtractor(private val project: Project) {
     companion object {
         val logger: Logger = Logger.getInstance(TinyGoInfoExtractor::class.java)
     }
 
-    fun assembleTinyGoShellCommand(settings: TinyGoConfiguration): GoExecutor {
+    private fun assembleTinyGoShellCommand(settings: TinyGoConfiguration): GoExecutor {
         val executor = GoExecutor.`in`(project, null)
         val parameters = tinyGoArguments(settings)
         executor.withParameters(parameters)
