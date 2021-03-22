@@ -13,8 +13,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.workspaceModel.ide.configLocation
-import com.intellij.workspaceModel.ide.impl.virtualFile
 import org.jdom.Element
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
@@ -46,9 +44,9 @@ class TinyGoRunConfiguration(
 
     init {
         val tinyGoSettings = TinyGoConfiguration.getInstance(project).deepCopy()
-        val mainLocation = project.configLocation
-        val mainFile = mainLocation?.baseDirectoryUrl?.virtualFile
-        val mainPath = mainFile?.canonicalPath ?: ""
+        val projectFile = project.workspaceFile
+        val workspaceFolder = projectFile?.parent?.parent
+        val mainPath = workspaceFolder?.canonicalPath ?: ""
         runConfig =
             RunSettings(tinyGoSettings, "", mainPath)
         cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()

@@ -31,7 +31,7 @@ open class TinyGoSdk(
 
     override fun getSrcDir(): VirtualFile? = sdkRoot?.findChild("src")
 
-    override fun getGoExecutable(): VirtualFile? = getTinyGoExecutable(sdkRoot)
+    override fun getExecutable(): VirtualFile? = getTinyGoExecutable(sdkRoot)
 
     override fun getRootsToAttach(): MutableCollection<VirtualFile> {
         val srcDir = srcDir

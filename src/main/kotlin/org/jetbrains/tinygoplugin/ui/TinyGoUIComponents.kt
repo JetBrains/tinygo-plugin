@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.layout.GrowPolicy
+import com.intellij.ui.layout.LayoutBuilder
 import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -14,8 +15,16 @@ import kotlin.reflect.KFunction
 fun generateTinyGoParametersPanel(
     wrapper: TinyGoPropertiesWrapper,
     fileChosen: ((chosenFile: VirtualFile) -> String),
-    project: Project? = null
+    project: Project? = null,
 ): JPanel = panel {
+    tinyGoSettings(wrapper, fileChosen, project)
+}
+
+private fun LayoutBuilder.tinyGoSettings(
+    wrapper: TinyGoPropertiesWrapper,
+    fileChosen: (chosenFile: VirtualFile) -> String,
+    project: Project?,
+) {
     row("TinyGo Path") {
         textFieldWithBrowseButton(
             property = wrapper.tinygoSDKPath, project = project,
@@ -41,10 +50,10 @@ fun generateSettingsPanel(
     fileChosen: ((chosenFile: VirtualFile) -> String),
     onDetect: KFunction<Unit>,
     onPropagateGoTags: KFunction<Unit>,
-    project: Project? = null
+    project: Project? = null,
 ): JPanel = panel {
     row {
-        generateTinyGoParametersPanel(wrapper, fileChosen, project)()
+        tinyGoSettings(wrapper, fileChosen, project)
     }
     row {
         button("Detect") { onDetect.call() /*extractTinyGOParameters()*/ }

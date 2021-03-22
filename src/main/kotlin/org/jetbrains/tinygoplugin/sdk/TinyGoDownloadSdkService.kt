@@ -4,7 +4,10 @@ import com.goide.GoNotifications
 import com.goide.GoOsManager
 import com.goide.sdk.GoSdk
 import com.goide.util.GoUtil
+import com.intellij.notification.Notification
+import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.diagnostic.Logger
@@ -13,27 +16,22 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.util.io.FileUtil
+import com.intellij.openapi.util.text.StringUtil
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.platform.templates.github.DownloadUtil
 import com.intellij.platform.templates.github.ZipUtil
+import com.intellij.refactoring.RefactoringBundle
 import com.intellij.util.PathUtil
 import com.intellij.util.io.Decompressor
 import java.io.IOException
 import java.io.UncheckedIOException
+import java.lang.Exception
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.util.Collections
-import com.intellij.openapi.actionSystem.AnActionEvent
-
-import com.intellij.refactoring.RefactoringBundle
-
-import com.intellij.notification.Notification
-import com.intellij.notification.NotificationAction
-import com.intellij.openapi.util.text.StringUtil
-import java.lang.Exception
 
 @Service
 @Suppress("NestedBlockDepth")
@@ -71,11 +69,11 @@ class TinyGoDownloadSdkService private constructor() {
                 try {
                     indicator.isIndeterminate = false
                     val extension = if (GoOsManager.isWindows()) ".zip" else ".tar.gz"
-                    val fileName = "tinygo${sdk.version}.${GoUtil.systemOS()}-${GoUtil.systemArch()}${extension}"
+                    val fileName = "tinygo${sdk.version}.${GoUtil.systemOS()}-${GoUtil.systemArch()}$extension"
                     val downloadedArchive = Files.createTempFile("for-actual-downloading-", extension)
                     DownloadUtil.downloadContentToFile(
                         indicator,
-                        "https://github.com/tinygo-org/tinygo/releases/download/v${sdk.version}/${fileName}",
+                        "https://github.com/tinygo-org/tinygo/releases/download/v${sdk.version}/$fileName",
                         downloadedArchive.toFile()
                     )
                     indicator.text2 = ""
