@@ -1,28 +1,30 @@
 package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.GoNotifications
-import com.goide.GoOsManager
-import com.goide.configuration.GoSdkConfigurable
+import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.io.FileUtil
-import com.intellij.util.io.exists
+import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
+
+const val CONFIGURATION_INCOMPLETE_NOTIFICATION = "notifications.tinygoSDK.configuration.incomplete"
 
 fun notifyTinyGoNotConfigured(
     project: Project?,
     content: String,
-    notificationType: NotificationType = NotificationType.INFORMATION,
-    goSdkConfigurationNeeded: Boolean = false,
 ) {
     val notification = GoNotifications.getGeneralGroup()
-        .createNotification("TinyGo SDK configuration incomplete", content, NotificationType.INFORMATION)
+        .createNotification(
+            TinyGoBundle.message(CONFIGURATION_INCOMPLETE_NOTIFICATION),
+            content,
+            NotificationType.INFORMATION
+        )
     notification.addAction(object : NotificationAction("TinyGo settings") {
         override fun actionPerformed(e: AnActionEvent, notification: Notification) {
             ShowSettingsUtil.getInstance().editConfigurable(project, TinyGoSettingsService(project!!))
@@ -35,36 +37,13 @@ fun getTinyGoExecutable(sdkRoot: VirtualFile?): VirtualFile? {
     if (sdkRoot != null && sdkRoot.isValid && sdkRoot.isDirectory) {
         val sdkBinDir = sdkRoot.findChild("bin")
         if (sdkBinDir != null && sdkBinDir.isValid && sdkBinDir.isDirectory) {
-            val sdkTinyGoExecutable = sdkBinDir.findChild("tinygo")
+            val sdkTinyGoExecutable = sdkBinDir.findChild(osManager.executableName())
             if (sdkTinyGoExecutable != null && sdkTinyGoExecutable.isValid) {
                 return sdkTinyGoExecutable
             }
         }
     }
     return null
-}
-
-fun checkDirectoryForTinyGo(dir: VirtualFile): Boolean {
-    val path = dir.canonicalPath
-    if (path != null) {
-        val file = File(path)
-        return checkDirectoryForTinyGo(file)
-    }
-    return false
-}
-
-private fun checkDirectoryForTinyGo(dir: File): Boolean {
-    if (dir.isDirectory) {
-        val binDirCandidates = dir.listFiles { child -> child.isDirectory && child.name.endsWith("bin") }
-        if (binDirCandidates != null && binDirCandidates.isNotEmpty()) {
-            val binDir = binDirCandidates.first()
-            // research if other criteria possible
-            return binDir?.listFiles { child ->
-                child.isFile && child.canExecute() && child.name.endsWith("tinygo")
-            }?.isNotEmpty() ?: false
-        }
-    }
-    return false
 }
 
 fun suggestSdkDirectoryStr(): String = suggestSdkDirectory()?.canonicalPath ?: ""
@@ -77,7 +56,7 @@ fun suggestSdkDirectories(): Collection<File> {
 fun findTinyGoInPath(): File? {
     val tinygoExec =
         PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(osManager.executableBaseName()) ?: return null
-    // resolve links and go 2 directories up: -> bin -> tinygo
+    // resolve links and go 2 directories up: $tinygoRoot/bin/tinygo -> $tinygoRoot/bin -> $tinygoRoot
     return tinygoExec.canonicalFile.parentFile?.parentFile
 }
 

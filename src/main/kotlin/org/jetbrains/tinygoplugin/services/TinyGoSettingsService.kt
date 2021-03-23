@@ -34,9 +34,7 @@ class TinyGoSettingsService(private val project: Project) :
     override fun getDisplayName(): String = "TinyGo"
 
     fun callExtractor() {
-        val processHistory = GoHistoryProcessListener()
-        infoExtractor.extractTinyGoInfo(tinyGoSettings, processHistory) {
-            val output = processHistory.output.joinToString("")
+        infoExtractor.extractTinyGoInfo(tinyGoSettings) { _, output ->
             logger.trace(output)
             tinyGoSettings.extractTinyGoInfo(output)
             // update all ui fields

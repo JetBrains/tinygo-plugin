@@ -9,6 +9,7 @@ import com.intellij.ui.layout.LayoutBuilder
 import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
+import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
 import javax.swing.JPanel
 import kotlin.reflect.KFunction
 
@@ -31,6 +32,9 @@ private fun LayoutBuilder.tinyGoSettings(
             fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor(),
             fileChosen = fileChosen
         )
+    }
+    row("TinyGo SDK") {
+        TinyGoSdkChooserCombo()()
     }
     row("Target platform") {
         textField(property = wrapper.target).growPolicy(GrowPolicy.MEDIUM_TEXT)

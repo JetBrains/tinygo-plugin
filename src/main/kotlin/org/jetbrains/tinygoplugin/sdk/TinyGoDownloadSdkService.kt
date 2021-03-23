@@ -46,19 +46,29 @@ class TinyGoDownloadSdkService private constructor() {
     val downloadingTinyGoSdks: MutableSet<TinyGoDownloadingSdk> = mutableSetOf()
 
     fun downloadTinyGoSdk(sdk: TinyGoDownloadingSdk) {
-        if (downloadingTinyGoSdks.add(sdk)) {
+        if (sdk.isDownloaded) {
+            return
+        }
+        val registered = synchronized(downloadingTinyGoSdks) {
+            downloadingTinyGoSdks.add(sdk)
+        }
+        if (registered) {
             startDownloading(sdk)
         }
     }
 
     private fun startDownloading(sdk: TinyGoDownloadingSdk) {
+
         val downloadTask: Task.Backgroundable = object : Task.Backgroundable(null, "Downloading TinyGo SDK", true) {
             override fun onFinished() {
-                downloadingTinyGoSdks.remove(sdk)
+                synchronized(downloadingTinyGoSdks) {
+                    downloadingTinyGoSdks.remove(sdk)
+                }
                 val localSdk = sdk.toLocalTinyGoSdk()
                 if (localSdk == GoSdk::NULL) {
                     return
                 }
+                TinyGoSdkList.getInstance().addSdk(localSdk)
                 sdk.isDownloaded = true
                 GoNotifications.getGeneralGroup()
                     .createNotification("Downloaded SDK", null, null, NotificationType.INFORMATION)
