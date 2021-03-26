@@ -50,9 +50,6 @@ class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoRunConfig
 
     override fun createEditor(): JComponent {
         return panel {
-            row("TinyGo path") {
-                textField(properties.tinygoSDKPath).enabled(false)
-            }
             row("Target") {
                 textField(properties.target).enabled(false)
             }

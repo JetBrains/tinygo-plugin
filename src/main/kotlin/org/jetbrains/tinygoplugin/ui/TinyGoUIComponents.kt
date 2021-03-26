@@ -1,40 +1,40 @@
 package org.jetbrains.tinygoplugin.ui
 
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.ui.EnumComboBoxModel
+import com.intellij.ui.layout.Cell
+import com.intellij.ui.layout.CellBuilder
 import com.intellij.ui.layout.GrowPolicy
 import com.intellij.ui.layout.LayoutBuilder
+import com.intellij.ui.layout.PropertyBinding
 import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
+import org.jetbrains.tinygoplugin.configuration.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
 import javax.swing.JPanel
 import kotlin.reflect.KFunction
 
 fun generateTinyGoParametersPanel(
     wrapper: TinyGoPropertiesWrapper,
-    fileChosen: ((chosenFile: VirtualFile) -> String),
-    project: Project? = null,
 ): JPanel = panel {
-    tinyGoSettings(wrapper, fileChosen, project)
+    tinyGoSettings(wrapper)
+}
+
+fun Cell.tinyGoSdkComboChooser(property: GraphProperty<TinyGoSdk>): CellBuilder<TinyGoSdkChooserCombo> {
+    return component(TinyGoSdkChooserCombo()).withBinding(
+        { component -> component.sdk },
+        { component, value -> component.selectSdkByUrl(value.homeUrl) },
+        PropertyBinding(property::get, property::set)
+    )
+        .withGraphProperty(property)
 }
 
 private fun LayoutBuilder.tinyGoSettings(
     wrapper: TinyGoPropertiesWrapper,
-    fileChosen: (chosenFile: VirtualFile) -> String,
-    project: Project?,
 ) {
-    row("TinyGo Path") {
-        textFieldWithBrowseButton(
-            property = wrapper.tinygoSDKPath, project = project,
-            fileChooserDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor(),
-            fileChosen = fileChosen
-        )
-    }
     row("TinyGo SDK") {
-        TinyGoSdkChooserCombo()()
+        tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath)
     }
     row("Target platform") {
         textField(property = wrapper.target).growPolicy(GrowPolicy.MEDIUM_TEXT)
@@ -51,13 +51,11 @@ private fun LayoutBuilder.tinyGoSettings(
 
 fun generateSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
-    fileChosen: ((chosenFile: VirtualFile) -> String),
     onDetect: KFunction<Unit>,
     onPropagateGoTags: KFunction<Unit>,
-    project: Project? = null,
-): JPanel = panel {
+) = panel {
     row {
-        tinyGoSettings(wrapper, fileChosen, project)
+        tinyGoSettings(wrapper)
     }
     row {
         button("Detect") { onDetect.call() /*extractTinyGOParameters()*/ }

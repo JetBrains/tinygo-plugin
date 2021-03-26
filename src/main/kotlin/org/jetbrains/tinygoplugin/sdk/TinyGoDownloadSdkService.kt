@@ -24,6 +24,7 @@ import com.intellij.platform.templates.github.ZipUtil
 import com.intellij.refactoring.RefactoringBundle
 import com.intellij.util.PathUtil
 import com.intellij.util.io.Decompressor
+import org.jetbrains.tinygoplugin.configuration.TinyGoSdkList
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.lang.Exception

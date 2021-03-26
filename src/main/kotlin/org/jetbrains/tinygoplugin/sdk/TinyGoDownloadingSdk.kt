@@ -4,6 +4,7 @@ import com.goide.sdk.download.GoDownloadingSdk
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
+import org.jetbrains.tinygoplugin.configuration.TinyGoSdk
 import java.util.Objects
 
 class TinyGoDownloadingSdk(tinyGoVersion: String?, targetPath: String?) :

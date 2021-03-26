@@ -3,23 +3,20 @@ package org.jetbrains.tinygoplugin.services
 import com.goide.project.GoRootsProvider
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import java.nio.file.Paths
+import org.jetbrains.tinygoplugin.configuration.nullSdk
 
 class TinyGopathManager : GoRootsProvider {
 
     private fun getTinyGoRoot(project: Project, subfolder: String? = null): VirtualFile? {
         val settings = TinyGoConfiguration.getInstance(project)
         val tinyGoSDKPath = settings.tinyGoSDKPath
-        if (tinyGoSDKPath.isEmpty()) {
+        if (tinyGoSDKPath == nullSdk) {
             return null
         }
-        val result = if (subfolder == null) Paths.get(tinyGoSDKPath) else Paths.get(tinyGoSDKPath, subfolder)
-
-        return if (result.exists()) VfsUtil.findFileByIoFile(result.toFile(), true) else null
+        val root = tinyGoSDKPath.sdkRoot
+        return if (subfolder == null) root else root?.findChild(subfolder)
     }
 
     override fun getGoPathRoots(project: Project?, p1: Module?): MutableCollection<VirtualFile> {

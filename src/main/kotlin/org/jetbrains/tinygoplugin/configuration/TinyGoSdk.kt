@@ -1,4 +1,4 @@
-package org.jetbrains.tinygoplugin.sdk
+package org.jetbrains.tinygoplugin.configuration
 
 import com.goide.sdk.GoBasedSdk
 import com.intellij.openapi.project.Project
@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.warn
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
+import org.jetbrains.tinygoplugin.sdk.getTinyGoExecutable
 import org.jetbrains.tinygoplugin.services.TinyGoExecutable
 import java.net.URL
 import java.util.Objects
