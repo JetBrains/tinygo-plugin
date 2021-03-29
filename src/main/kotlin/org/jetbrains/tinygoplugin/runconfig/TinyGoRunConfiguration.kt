@@ -3,6 +3,7 @@ package org.jetbrains.tinygoplugin.runconfig
 import com.goide.GoFileType
 import com.goide.execution.GoModuleBasedConfiguration
 import com.goide.execution.GoRunConfigurationBase
+import com.goide.util.GoExecutor
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
@@ -14,7 +15,11 @@ import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import org.jdom.Element
+import org.jetbrains.tinygoplugin.configuration.GarbageCollector
+import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
+import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 
@@ -42,6 +47,8 @@ class TinyGoRunConfiguration(
     override val tinyGoSettings: RunSettings
         get() = runConfig
 
+    val executablePath: VirtualFile? = TinyGoConfiguration.getInstance(project).tinyGoSDKPath.executable
+
     init {
         val tinyGoSettings = TinyGoConfiguration.getInstance(project).deepCopy()
         val projectFile = project.workspaceFile
@@ -49,7 +56,14 @@ class TinyGoRunConfiguration(
         val mainPath = workspaceFolder?.canonicalPath ?: ""
         runConfig =
             RunSettings(tinyGoSettings, "", mainPath)
-        cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
+        if (runConfig.gc == GarbageCollector.AUTO_DETECT || runConfig.scheduler == Scheduler.AUTO_DETECT) {
+            TinyGoInfoExtractor(project).extractTinyGoInfo(runConfig) { _: GoExecutor.ExecutionResult?, output: String ->
+                runConfig.extractTinyGoInfo(output)
+                cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
+            }
+        } else {
+            cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
+        }
     }
 
     private fun mainFile(): VirtualFile? {
