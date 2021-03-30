@@ -9,10 +9,10 @@ import com.intellij.ui.layout.LayoutBuilder
 import com.intellij.ui.layout.PropertyBinding
 import com.intellij.ui.layout.applyToComponent
 import com.intellij.ui.layout.panel
-import com.sun.java.accessibility.util.AWTEventMonitor.addItemListener
+import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
-import org.jetbrains.tinygoplugin.configuration.TinyGoSdk
+import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
 import java.awt.event.ItemEvent
 import java.util.concurrent.atomic.AtomicBoolean
@@ -66,20 +66,25 @@ fun Cell.tinyGoSdkComboChooser(property: GraphProperty<TinyGoSdk>): CellBuilder<
         .applyToComponent { bind(property) }
 }
 
+private const val SDK_LABEL = "ui.sdk"
+private const val TARGET_LABEL = "ui.target"
+private const val COMPILER_PARAMETERS_LABEL = "ui.compiler"
+private const val GC_LABEL = "ui.gc"
+private const val SCHEDULER_LABEL = "ui.scheduler"
 private fun LayoutBuilder.tinyGoSettings(
     wrapper: TinyGoPropertiesWrapper,
 ) {
-    row("TinyGo SDK") {
+    row(TinyGoBundle.message(SDK_LABEL)) {
         tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath)
     }
-    row("Target platform") {
+    row(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
         textField(property = wrapper.target).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
-    row("Compiler parameters:") {
-        row("Garbage collector") {
+    row(TinyGoBundle.message(TARGET_LABEL)) {
+        row(TinyGoBundle.message(GC_LABEL)) {
             comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
         }
-        row("Scheduler") {
+        row(TinyGoBundle.message(SCHEDULER_LABEL)) {
             comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
         }
     }

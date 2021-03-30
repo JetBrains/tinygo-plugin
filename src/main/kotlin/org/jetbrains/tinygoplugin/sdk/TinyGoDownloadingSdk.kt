@@ -4,7 +4,6 @@ import com.goide.sdk.download.GoDownloadingSdk
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
-import org.jetbrains.tinygoplugin.configuration.TinyGoSdk
 import java.util.Objects
 
 class TinyGoDownloadingSdk(tinyGoVersion: String?, targetPath: String?) :
@@ -19,14 +18,14 @@ class TinyGoDownloadingSdk(tinyGoVersion: String?, targetPath: String?) :
 
     override fun isValid(): Boolean = true
 
-    fun toLocalTinyGoSdk(): TinyGoSdk = TinyGoSdk(tinyGoHomeUrl, tinyGoVersion)
+    fun toLocalTinyGoSdk(): TinyGoSdk = TinyGoSdk(tinyGoHomeUrl, sdkVersion)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
         val sdk = other as GoDownloadingSdk
-        return tinyGoVersion.equals(sdk.version) && tinyGoHomeUrl == sdk.homeUrl
+        return sdkVersion.equals(sdk.version) && tinyGoHomeUrl == sdk.homeUrl
     }
 
-    override fun hashCode(): Int = Objects.hash(tinyGoVersion, tinyGoHomeUrl)
+    override fun hashCode(): Int = Objects.hash(sdkVersion, tinyGoHomeUrl)
 }

@@ -16,7 +16,7 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
             listOf(configuration.command) +
                 configuration.cmdlineOptions +
                 listOf(configuration.runConfig.mainFile)
-        val tinyGoExecutablePath = configuration.executablePath
+        val tinyGoExecutablePath = configuration.executable
         if (tinyGoExecutablePath == null) {
             notifyTinyGoNotConfigured(configuration.project, "TinyGo SDK is not set. Please configure TinyGo SDK")
             throw ExecutionException("TinyGo SDK is not set. Please configure TinyGo SDK")

@@ -116,7 +116,7 @@ class TinyGoInfoExtractor(private val project: Project) {
                         Thread.sleep(Duration.ofSeconds(1).toMillis())
                     }
                 }
-                executor.execute(settings.tinyGoSDKPath.sdkRoot!!.path, tinyGoArguments(settings), onFinish)
+                executor.execute(settings.sdk.sdkRoot!!.path, tinyGoArguments(settings), onFinish)
             }
         }
         ProgressManager.getInstance()

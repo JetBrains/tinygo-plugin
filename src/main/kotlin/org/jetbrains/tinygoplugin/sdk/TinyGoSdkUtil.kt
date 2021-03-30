@@ -55,9 +55,9 @@ fun suggestSdkDirectories(): Collection<File> {
 
 fun findTinyGoInPath(): File? {
     val tinygoExec =
-        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(osManager.executableBaseName()) ?: return null
+        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(osManager.executableBaseName())
     // resolve links and go 2 directories up: $tinygoRoot/bin/tinygo -> $tinygoRoot/bin -> $tinygoRoot
-    return tinygoExec.canonicalFile.parentFile?.parentFile
+    return tinygoExec?.canonicalFile?.parentFile?.parentFile
 }
 
 fun suggestSdkDirectory(): File? {

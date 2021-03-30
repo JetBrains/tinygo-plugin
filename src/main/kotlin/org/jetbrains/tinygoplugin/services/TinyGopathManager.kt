@@ -5,13 +5,13 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.configuration.nullSdk
+import org.jetbrains.tinygoplugin.sdk.nullSdk
 
 class TinyGopathManager : GoRootsProvider {
 
     private fun getTinyGoRoot(project: Project, subfolder: String? = null): VirtualFile? {
         val settings = TinyGoConfiguration.getInstance(project)
-        val tinyGoSDKPath = settings.tinyGoSDKPath
+        val tinyGoSDKPath = settings.sdk
         if (tinyGoSDKPath == nullSdk) {
             return null
         }

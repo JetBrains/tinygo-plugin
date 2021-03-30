@@ -18,10 +18,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.text.VersionComparatorUtil
 import org.jetbrains.tinygoplugin.TinyGoBundle
-import org.jetbrains.tinygoplugin.configuration.TinyGoSdk
 import org.jetbrains.tinygoplugin.configuration.TinyGoSdkList
-import org.jetbrains.tinygoplugin.configuration.computeVersion
-import org.jetbrains.tinygoplugin.configuration.nullSdk
 import java.io.IOException
 import java.util.function.Consumer
 
@@ -68,11 +65,13 @@ class TinyGoDownloaderDialog : GoSdkDownloaderDialog<TinyGoSdk> {
 }
 
 const val TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE = "tinygoSDK.local.fileDescriptor"
+const val TINYGO_LOCAL_ERROR_INVALID_DIR = "tinygoSDK.local.error"
+const val TINYGO_LOCAL_ERROR_INVALID_DIR_MESSAGE = "tinygoSDK.local.error.message"
 
 class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>) : DumbAwareAction({ "Local..." }) {
 
     override fun actionPerformed(e: AnActionEvent) {
-        val selectedDir = combo.sdk.root()
+        val selectedDir = combo.sdk.sdkRoot
         val suggestedDirectory = suggestSdkDirectory()
         var preselection = selectedDir
         if (preselection == null && suggestedDirectory != null) {
@@ -83,7 +82,7 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
                 if (files.isNotEmpty()) {
                     val valid = checkDirectoryForTinyGo(files[0])
                     if (!valid) {
-                        throw Exception("Selected directory is not a valid TinyGo SDK")
+                        throw Exception(TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR))
                     }
                 }
             }
@@ -103,7 +102,7 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
             } else {
                 Messages.showErrorDialog(
                     combo,
-                    "Error message",
+                    TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR_MESSAGE),
                     TinyGoBundle.message(TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE)
                 )
             }

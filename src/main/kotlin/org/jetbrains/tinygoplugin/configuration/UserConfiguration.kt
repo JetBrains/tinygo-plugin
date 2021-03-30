@@ -6,56 +6,65 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.StoragePathMacros
 import com.intellij.util.xmlb.XmlSerializerUtil
+import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
+import org.jetbrains.tinygoplugin.sdk.nullSdk
+import org.jetbrains.tinygoplugin.sdk.unknownVersion
 
 interface UserConfiguration {
-    var tinyGoSDKPath: TinyGoSdk
+    var sdk: TinyGoSdk
 }
 
-interface UserConfigurationStorage {
-    var sdk: TinyGoSdkSerialized
+internal interface UserConfigurationStorage {
+    var sdkStorage: TinyGoSdkStorage
 }
 
-data class UserConfigurationState(override var sdk: TinyGoSdkSerialized = TinyGoSdkSerialized("", unknownVersion)) :
+internal data class UserConfigurationStorageImpl(
+    override var sdkStorage: TinyGoSdkStorage = TinyGoSdkStorage(
+        "",
+        unknownVersion
+    ),
+) :
     UserConfigurationStorage
 
-fun TinyGoSdk.serialized(): TinyGoSdkSerialized {
-    return TinyGoSdkSerialized(this.homeUrl, this.sdkVersion)
+internal fun TinyGoSdk.toStorage(): TinyGoSdkStorage {
+    return TinyGoSdkStorage(this.homeUrl, this.sdkVersion)
 }
 
-fun TinyGoSdkSerialized.deserialized(): TinyGoSdk {
+internal fun TinyGoSdkStorage.toImpl(): TinyGoSdk {
     val homeUrl = if (sdkUrl.isEmpty()) null else sdkUrl
-    return TinyGoSdk(homeUrl, this.version.toString())
+    return TinyGoSdk(homeUrl, this.version)
 }
 
-class UserConfigurationAPI : UserConfigurationStorage, UserConfiguration {
+internal class UserConfigurationStorageWrapper : UserConfigurationStorage, UserConfiguration {
     internal fun updateState() {
-        tinyGoSdk = state.sdk.deserialized()
+        tinyGoSdk = state.sdkStorage.toImpl()
     }
 
-    override var tinyGoSDKPath: TinyGoSdk
+    private var tinyGoSdk: TinyGoSdk = nullSdk
+    var state: UserConfigurationStorageImpl = UserConfigurationStorageImpl()
+
+    override var sdk: TinyGoSdk
         get() = tinyGoSdk
         set(value) {
             tinyGoSdk = value
-            state.sdk = value.serialized()
+            state.sdkStorage = value.toStorage()
         }
-    private var tinyGoSdk: TinyGoSdk = nullSdk
-    var state: UserConfigurationState = UserConfigurationState()
-    override var sdk: TinyGoSdkSerialized
-        get() = state.sdk
+    override var sdkStorage: TinyGoSdkStorage
+        get() = state.sdkStorage
         set(value) {
-            state.sdk = value
-            tinyGoSdk = state.sdk.deserialized()
+            state.sdkStorage = value
+            tinyGoSdk = state.sdkStorage.toImpl()
         }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is UserConfigurationAPI) return false
+        if (other !is UserConfigurationStorageWrapper) return false
         return state == other.state
     }
 
-    fun copy(): UserConfigurationAPI {
-        val result = UserConfigurationAPI()
-        result.sdk = sdk.copy()
+    fun copy(): UserConfigurationStorageWrapper {
+        val result = UserConfigurationStorageWrapper()
+        result.sdkStorage = sdkStorage.copy()
         return result
     }
 
@@ -65,15 +74,13 @@ class UserConfigurationAPI : UserConfigurationStorage, UserConfiguration {
 }
 @State(name = "TinyGoPluginUserConfig", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
 @Service(Service.Level.PROJECT)
-internal class UserConfigurationImpl : PersistentStateComponent<UserConfigurationState> {
-//    var userConfigurationState = UserConfigurationState()
+internal class UserConfigurationImpl : PersistentStateComponent<UserConfigurationStorageImpl> {
+    var myState = UserConfigurationStorageWrapper()
 
-    var userConfiguration = UserConfigurationAPI()
+    override fun getState(): UserConfigurationStorageImpl = myState.state
 
-    override fun getState(): UserConfigurationState = userConfiguration.state
-
-    override fun loadState(state: UserConfigurationState) {
-        XmlSerializerUtil.copyBean(state, this.userConfiguration.state)
-        this.userConfiguration.updateState()
+    override fun loadState(state: UserConfigurationStorageImpl) {
+        XmlSerializerUtil.copyBean(state, this.myState.state)
+        this.myState.updateState()
     }
 }

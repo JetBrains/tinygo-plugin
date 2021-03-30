@@ -1,6 +1,7 @@
-package org.jetbrains.tinygoplugin.configuration
+package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.sdk.GoBasedSdk
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtil
@@ -8,7 +9,6 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.warn
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
-import org.jetbrains.tinygoplugin.sdk.getTinyGoExecutable
 import org.jetbrains.tinygoplugin.services.TinyGoExecutable
 import java.net.URL
 import java.util.Objects
@@ -40,7 +40,7 @@ data class TinyGoSdkVersion(
     var patch: Int = 0,
 ) {
     companion object {
-        private const val maxVersion = 100
+        private const val MAX_VERSION = 1024
     }
 
     fun isAtLeast(version: TinyGoSdkVersion): Boolean {
@@ -52,7 +52,7 @@ data class TinyGoSdkVersion(
     }
 
     private fun toInt(): Int {
-        return patch + minor * maxVersion + major * maxVersion * maxVersion
+        return patch + minor * MAX_VERSION + major * MAX_VERSION * MAX_VERSION
     }
 
     override fun toString(): String {
@@ -63,16 +63,17 @@ data class TinyGoSdkVersion(
 @Suppress("TooManyFunctions")
 open class TinyGoSdk(
     protected val tinyGoHomeUrl: String?,
-    protected val tinyGoVersion: String?,
+    internal var sdkVersion: TinyGoSdkVersion = unknownVersion,
 ) : GoBasedSdk {
 
-    val sdkRoot: VirtualFile? = if (tinyGoHomeUrl != null) {
-        VfsUtil.findFileByURL(URL(tinyGoHomeUrl))
-    } else {
-        null
-    }
+    constructor(tinyGoHomeUrl: String?, tinyGoVersion: String?) : this(
+        tinyGoHomeUrl,
+        tinyGoSdkVersion(tinyGoVersion)
+    )
 
-    internal var sdkVersion: TinyGoSdkVersion = tinyGoSdkVersion(tinyGoVersion)
+    val sdkRoot: VirtualFile? by lazy {
+        tinyGoHomeUrl?.let { VfsUtil.findFileByURL(URL(it)) }
+    }
 
     override fun getIcon(): Icon = TinyGoPluginIcons.TinyGoIcon
 
@@ -82,14 +83,11 @@ open class TinyGoSdk(
 
     override fun getSrcDir(): VirtualFile? = sdkRoot?.findChild("src")
 
-    fun root(): VirtualFile? = sdkRoot
-
-    // TODO: move function here
     override fun getExecutable(): VirtualFile? = getTinyGoExecutable(sdkRoot)
 
     override fun isValid(): Boolean {
         val sources = srcDir
-        return sources != null && sources.isValid && sources.isInLocalFileSystem && sources.isDirectory
+        return sources != null && sources.isDirectory && sources.isValid && sources.isInLocalFileSystem
     }
 
     override fun getName(): String = "TinyGo $version"
@@ -104,16 +102,18 @@ open class TinyGoSdk(
     override fun hashCode(): Int = Objects.hash(tinyGoHomeUrl)
 }
 
+const val TINY_GO_VERSION_REGEX = """tinygo version (\d+.\d+.\d+)"""
 fun TinyGoSdk.computeVersion(project: Project, onFinish: () -> Unit) {
     val sdkRoot = this.sdkRoot?.canonicalPath ?: return
     TinyGoExecutable(project).execute(sdkRoot, listOf("version")) { _, output ->
-        val re = """tinygo version (\d+.\d+.\d+)"""
-        val match = re.toRegex().find(output)
+        val match = TINY_GO_VERSION_REGEX.toRegex().find(output)
         if (match != null) {
             sdkVersion = tinyGoSdkVersion(match.groupValues[1])
+        } else {
+            thisLogger().warn("Cannot determine TinyGoSdk version")
         }
         onFinish()
     }
 }
 
-val nullSdk = TinyGoSdk(null, unknownVersion.toString())
+val nullSdk = TinyGoSdk(null, unknownVersion)
