@@ -19,6 +19,7 @@ import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.sdk.nullSdk
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
@@ -62,13 +63,15 @@ class TinyGoRunConfiguration(
         val mainPath = workspaceFolder?.canonicalPath ?: ""
         runConfig =
             RunSettings(tinyGoSettings, "", mainPath)
-        if (runConfig.gc == GarbageCollector.AUTO_DETECT || runConfig.scheduler == Scheduler.AUTO_DETECT) {
-            TinyGoInfoExtractor(project).extractTinyGoInfo(runConfig) { _: GoExecutor.ExecutionResult?, output: String ->
-                runConfig.extractTinyGoInfo(output)
+        if (tinyGoSettings.sdk != nullSdk) {
+            if (runConfig.gc == GarbageCollector.AUTO_DETECT || runConfig.scheduler == Scheduler.AUTO_DETECT) {
+                TinyGoInfoExtractor(project).extractTinyGoInfo(runConfig) { _: GoExecutor.ExecutionResult?, output: String ->
+                    runConfig.extractTinyGoInfo(output)
+                    cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
+                }
+            } else {
                 cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
             }
-        } else {
-            cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
         }
     }
 
@@ -122,6 +125,6 @@ class TinyGoRunConfiguration(
             (filePath ?: project.workspaceFile?.parent?.parent?.canonicalPath ?: "")
         val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
         runConfig.cmdlineOptions = arguments ?: ""
-        if (arguments == null) cmdlineOptions = runConfig.assembleCommandLineArguments()
+        if (arguments == null && runConfig.sdk != nullSdk) cmdlineOptions = runConfig.assembleCommandLineArguments()
     }
 }
