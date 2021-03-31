@@ -3,13 +3,6 @@ import org.jetbrains.changelog.closure
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-// TODO [AK] remove the block below when switching to the 0.7.0 release
-buildscript {
-    dependencies {
-        classpath("org.jetbrains.intellij.plugins:structure-base:3.139")
-        classpath("org.jetbrains.intellij.plugins:structure-intellij:3.139")
-    }
-}
 
 plugins {
     // Java support
