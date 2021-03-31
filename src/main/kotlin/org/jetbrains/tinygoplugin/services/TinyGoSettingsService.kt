@@ -1,7 +1,6 @@
 package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoModuleSettings
-import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
@@ -34,9 +33,7 @@ class TinyGoSettingsService(private val project: Project) :
     override fun getDisplayName(): String = "TinyGo"
 
     fun callExtractor() {
-        val processHistory = GoHistoryProcessListener()
-        infoExtractor.extractTinyGoInfo(tinyGoSettings, processHistory) {
-            val output = processHistory.output.joinToString("")
+        infoExtractor.extractTinyGoInfo(tinyGoSettings) { _, output ->
             logger.trace(output)
             tinyGoSettings.extractTinyGoInfo(output)
             // update all ui fields
@@ -64,10 +61,8 @@ class TinyGoSettingsService(private val project: Project) :
 
     override fun createOptionsPanel(): JComponent = generateSettingsPanel(
         propertiesWrapper,
-        fileChosen = { it.canonicalPath ?: tinyGoSettings.tinyGoSDKPath },
-        this::callExtractor,
-        this::propagateGoFlags,
-        project
+        onDetect = this::callExtractor,
+        onPropagateGoTags = this::propagateGoFlags
     )
 }
 

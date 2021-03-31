@@ -5,12 +5,9 @@ import com.goide.wizard.GoProjectGeneratorPeer
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.LabeledComponent
-import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.util.ui.UI.PanelFactory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.sdk.checkDirectoryForTinyGo
-import org.jetbrains.tinygoplugin.sdk.suggestSdkDirectoryStr
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateTinyGoParametersPanel
@@ -21,10 +18,6 @@ class TinyGoProjectGeneratorPeer :
     GoProjectGeneratorPeer<TinyGoNewProjectSettings>(),
     ConfigurationProvider<TinyGoConfiguration> {
     override var tinyGoSettings: TinyGoConfiguration = TinyGoConfiguration.getInstance()
-
-    init {
-        tinyGoSettings.tinyGoSDKPath = suggestSdkDirectoryStr()
-    }
 
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 
@@ -44,13 +37,6 @@ class TinyGoProjectGeneratorPeer :
             decorateSettingsPanelForUI(
                 generateTinyGoParametersPanel(
                     propertiesWrapper,
-                    {
-                        if (checkDirectoryForTinyGo(it)) it.canonicalPath!!
-                        else {
-                            Messages.showErrorDialog("Selected TinyGo path is invalid", "Invalid TinyGo")
-                            suggestSdkDirectoryStr()
-                        }
-                    },
                 )
             ),
         )

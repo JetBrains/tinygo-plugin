@@ -2,10 +2,11 @@ package org.jetbrains.tinygoplugin.runconfig
 
 import com.goide.execution.GoRunningState
 import com.goide.util.GoExecutor
+import com.intellij.execution.ExecutionException
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.module.Module
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.sdk.osManager
+import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 
 class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     GoRunningState<TinyGoRunConfiguration>(env, module, configuration) {
@@ -15,11 +16,14 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
             listOf(configuration.command) +
                 configuration.cmdlineOptions +
                 listOf(configuration.runConfig.mainFile)
-        val goExecutor = GoExecutor.`in`(configuration.project, null)
-        val tinyGoExecutablePath =
-            osManager.executablePath(configuration.tinyGoSettings.tinyGoSDKPath)
+        val tinyGoExecutablePath = configuration.executable
+        if (tinyGoExecutablePath == null) {
+            notifyTinyGoNotConfigured(configuration.project, "TinyGo SDK is not set. Please configure TinyGo SDK")
+            throw ExecutionException("TinyGo SDK is not set. Please configure TinyGo SDK")
+        }
 
-        return goExecutor.withExePath(tinyGoExecutablePath)
+        return GoExecutor.`in`(configuration.project, null)
+            .withExePath(tinyGoExecutablePath.path)
             .withParameters(arguments)
     }
 }
