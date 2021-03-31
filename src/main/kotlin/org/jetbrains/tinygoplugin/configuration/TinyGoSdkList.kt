@@ -34,7 +34,7 @@ class TinyGoSdkList : PersistentStateComponent<TinyGoSdkListStorage> {
         fun getInstance(): TinyGoSdkList = ApplicationManager.getApplication().getService(TinyGoSdkList::class.java)
     }
 
-    private var state = TinyGoSdkListStorage()
+    internal var storedSdks = TinyGoSdkListStorage()
 
     @Transient
     @JvmField
@@ -42,26 +42,27 @@ class TinyGoSdkList : PersistentStateComponent<TinyGoSdkListStorage> {
 
     override fun getState(): TinyGoSdkListStorage {
         saveLoadedSdk()
-        return state
+        return storedSdks
     }
 
     override fun loadState(state: TinyGoSdkListStorage) {
-        XmlSerializerUtil.copyBean(state, this.state)
+        XmlSerializerUtil.copyBean(state, this.storedSdks)
         loadedSdks = state.savedSdks.map { TinyGoSdk(it.sdkUrl, it.version.toString()) }.toMutableList()
     }
 
     fun addSdk(sdk: TinyGoSdk) =
         lockStorage {
-            val added = state.savedSdks.add(sdk.homeUrl, sdk.sdkVersion)
+            val added = storedSdks.savedSdks.add(sdk.homeUrl, sdk.sdkVersion)
             if (added) {
                 loadedSdks.add(sdk)
             }
         }
 
     private fun saveLoadedSdk() = lockStorage {
-        loadedSdks.forEach { state.savedSdks.add(it.homeUrl, it.sdkVersion) }
+        loadedSdks.forEach { storedSdks.savedSdks.add(it.homeUrl, it.sdkVersion) }
     }
 }
 
 internal inline fun TinyGoSdkList.lockStorage(block: () -> Unit): Unit =
-    synchronized(state, block)
+    synchronized(storedSdks, block)
+
