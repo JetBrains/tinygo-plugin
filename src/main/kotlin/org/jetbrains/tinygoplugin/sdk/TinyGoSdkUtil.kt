@@ -8,7 +8,6 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
@@ -33,19 +32,6 @@ fun notifyTinyGoNotConfigured(
     notification.notify(project)
 }
 
-fun getTinyGoExecutable(sdkRoot: VirtualFile?): VirtualFile? {
-    if (sdkRoot != null && sdkRoot.isValid && sdkRoot.isDirectory) {
-        val sdkBinDir = sdkRoot.findChild("bin")
-        if (sdkBinDir != null && sdkBinDir.isValid && sdkBinDir.isDirectory) {
-            val sdkTinyGoExecutable = sdkBinDir.findChild(osManager.executableName())
-            if (sdkTinyGoExecutable != null && sdkTinyGoExecutable.isValid) {
-                return sdkTinyGoExecutable
-            }
-        }
-    }
-    return null
-}
-
 fun suggestSdkDirectoryStr(): String = suggestSdkDirectory()?.canonicalPath ?: ""
 
 fun suggestSdkDirectories(): Collection<File> {
@@ -55,9 +41,9 @@ fun suggestSdkDirectories(): Collection<File> {
 
 fun findTinyGoInPath(): File? {
     val tinygoExec =
-        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(osManager.executableBaseName())
-    // resolve links and go 2 directories up: $tinygoRoot/bin/tinygo -> $tinygoRoot/bin -> $tinygoRoot
-    return tinygoExec?.canonicalFile?.parentFile?.parentFile
+        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(osManager.executableBaseName()) ?: return null
+    // resolve links and go 2 directories up: -> bin -> tinygo
+    return tinygoExec.canonicalFile.parentFile?.parentFile
 }
 
 fun suggestSdkDirectory(): File? {

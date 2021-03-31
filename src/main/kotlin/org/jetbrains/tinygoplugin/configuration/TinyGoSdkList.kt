@@ -5,7 +5,6 @@ import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import com.intellij.util.text.VersionComparatorUtil
 import com.intellij.util.xmlb.XmlSerializerUtil
 import com.intellij.util.xmlb.annotations.Transient
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
@@ -15,7 +14,7 @@ import org.jetbrains.tinygoplugin.sdk.unknownVersion
 data class TinyGoSdkStorage(var sdkUrl: String = "", var version: TinyGoSdkVersion = unknownVersion) :
     Comparable<TinyGoSdkStorage> {
     override fun compareTo(other: TinyGoSdkStorage): Int {
-        return VersionComparatorUtil.COMPARATOR.reversed().compare(version.toString(), other.version.toString())
+        return -version.toString().compareTo(other.version.toString())
     }
 }
 
