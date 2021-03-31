@@ -52,8 +52,8 @@ class TinyGoImportResolver : GoImportResolver {
         if (importPath.isEmpty()) {
             return emptyList()
         }
-        val tinyGoSdk = File(TinyGoConfiguration.getInstance(project).tinyGoSDKPath)
-        val tinyGoSdkSrc = VfsUtil.findFile(tinyGoSdk.toPath(), false)?.findChild("src")
+        val tinyGoSdk = TinyGoConfiguration.getInstance(project).sdk
+        val tinyGoSdkSrc = tinyGoSdk.srcDir
         val importFile = tinyGoSdkSrc?.findFileByRelativePath(importPath)
         return if (importFile != null) {
             GoPackage.`in`(PsiManager.getInstance(project).findDirectory(importFile), module)

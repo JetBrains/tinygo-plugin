@@ -2,12 +2,14 @@ package org.jetbrains.tinygoplugin.configuration
 
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import org.jetbrains.tinygoplugin.sdk.nullSdk
 
 interface TinyGoConfiguration : UserConfiguration, ProjectConfiguration {
     fun deepCopy(): TinyGoConfiguration
     fun saveState(p: Project)
     fun modified(p: Project): Boolean
     val enabled: Boolean
+
     companion object {
         fun getInstance(p: Project): TinyGoConfiguration = TinyGoConfigurationImpl.getInstance(p)
 
@@ -28,7 +30,7 @@ internal data class TinyGoConfigurationImpl(
     override fun modified(p: Project): Boolean {
         val currentSettings = getInstance(p)
         return currentSettings.projectConfig != projectConfig ||
-            currentSettings.userConfig != userConfig
+                currentSettings.userConfig != userConfig
     }
 
     override fun deepCopy(): TinyGoConfigurationImpl {
@@ -41,7 +43,7 @@ internal data class TinyGoConfigurationImpl(
     }
 
     override val enabled: Boolean
-        get() = tinyGoSDKPath.isNotEmpty()
+        get() = sdk != nullSdk
 
     companion object {
         fun getInstance(p: Project): TinyGoConfigurationImpl = TinyGoConfigurationImpl(

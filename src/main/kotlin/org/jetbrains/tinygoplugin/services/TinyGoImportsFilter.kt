@@ -6,13 +6,15 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
+import org.jetbrains.tinygoplugin.sdk.unknownVersion
 import org.yaml.snakeyaml.Yaml
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 @Service
 class UnsupportedPackageProvider(private val project: Project) {
-    private fun loadUnsupportedLibraries(version: String): Set<String> {
+    private fun loadUnsupportedLibraries(version: TinyGoSdkVersion): Set<String> {
         val stream = this.javaClass.classLoader.getResourceAsStream("libraries/$version.yaml")
         if (stream == null) {
             thisLogger().warn("Cannot load a list of supported libraries for $version")
@@ -24,10 +26,13 @@ class UnsupportedPackageProvider(private val project: Project) {
         }.filterValues { !it }.keys
     }
 
-    private val unsupportedLibrariesCache: ConcurrentMap<String, Set<String>> = ConcurrentHashMap()
+    private val unsupportedLibrariesCache: ConcurrentMap<TinyGoSdkVersion, Set<String>> = ConcurrentHashMap()
     fun unsupportedLibraries(): Set<String> {
         val settings = TinyGoConfiguration.getInstance(project)
-        val version = settings.tinyGoSDKVersion ?: "latest"
+        val version = settings.sdk.sdkVersion
+        if (version == unknownVersion) {
+            return emptySet()
+        }
         return unsupportedLibrariesCache.computeIfAbsent(version, this::loadUnsupportedLibraries)
     }
 }

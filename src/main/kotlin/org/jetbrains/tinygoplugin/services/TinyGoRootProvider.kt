@@ -46,18 +46,8 @@ class TinyGoRootProvider : AdditionalLibraryRootsProvider() {
         if (!settings.enabled) {
             return emptyList()
         }
-        val tinyGoSources = getTinyGoSources(project) ?: return emptyList()
+        val tinyGoSdk = settings.sdk
+        val tinyGoSources = tinyGoSdk.srcDir ?: return emptyList()
         return listOf(tinyGoSources)
     }
-}
-
-internal fun getTinyGoSources(project: Project): VirtualFile? {
-    val settings = TinyGoConfiguration.getInstance(project)
-    val tinyGoSDKPath = settings.tinyGoSDKPath
-    if (tinyGoSDKPath.isEmpty() || !settings.enabled) {
-        return null
-    }
-    val result = Paths.get(tinyGoSDKPath, "src")
-
-    return if (result.exists()) VfsUtil.findFileByIoFile(result.toFile(), true) else null
 }
