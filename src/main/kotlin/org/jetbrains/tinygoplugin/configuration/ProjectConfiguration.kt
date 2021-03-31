@@ -28,11 +28,11 @@ data class ProjectConfigurationState(
 @Service(Service.Level.PROJECT)
 internal class ProjectConfigurationImpl :
     PersistentStateComponent<ProjectConfigurationState> {
-    var projectState = ProjectConfigurationState()
+    var myState = ProjectConfigurationState()
 
     override fun loadState(state: ProjectConfigurationState) {
-        XmlSerializerUtil.copyBean(state, projectState)
+        XmlSerializerUtil.copyBean(state, myState)
     }
 
-    override fun getState(): ProjectConfigurationState = projectState
+    override fun getState(): ProjectConfigurationState = myState
 }

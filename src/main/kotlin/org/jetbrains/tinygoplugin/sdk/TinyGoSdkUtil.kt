@@ -1,7 +1,6 @@
 package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.GoNotifications
-import com.goide.configuration.GoSdkConfigurable
 import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
@@ -9,31 +8,27 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
+import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
+
+const val CONFIGURATION_INCOMPLETE_NOTIFICATION = "notifications.tinygoSDK.configuration.incomplete"
 
 fun notifyTinyGoNotConfigured(
     project: Project?,
     content: String,
-    notificationType: NotificationType = NotificationType.INFORMATION,
-    goSdkConfigurationNeeded: Boolean = false,
 ) {
     val notification = GoNotifications.getGeneralGroup()
-        .createNotification("TinyGo SDK configuration incomplete", content, notificationType)
-    if (project != null) {
-        if (goSdkConfigurationNeeded) {
-            notification.addAction(object : NotificationAction("Go SDK settings") {
-                override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-                    ShowSettingsUtil.getInstance().editConfigurable(project, GoSdkConfigurable(project, true))
-                }
-            })
+        .createNotification(
+            TinyGoBundle.message(CONFIGURATION_INCOMPLETE_NOTIFICATION),
+            content,
+            NotificationType.INFORMATION
+        )
+    notification.addAction(object : NotificationAction("TinyGo settings") {
+        override fun actionPerformed(e: AnActionEvent, notification: Notification) {
+            ShowSettingsUtil.getInstance().editConfigurable(project, TinyGoSettingsService(project!!))
         }
-        notification.addAction(object : NotificationAction("TinyGo settings") {
-            override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-                ShowSettingsUtil.getInstance().editConfigurable(project, TinyGoSettingsService(project))
-            }
-        })
-    }
+    })
     notification.notify(project)
 }
 

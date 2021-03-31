@@ -3,6 +3,7 @@ package org.jetbrains.tinygoplugin.runconfig
 import com.goide.GoFileType
 import com.goide.execution.GoModuleBasedConfiguration
 import com.goide.execution.GoRunConfigurationBase
+import com.goide.util.GoExecutor
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
@@ -14,9 +15,20 @@ import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import org.jdom.Element
+import org.jetbrains.tinygoplugin.TinyGoBundle
+import org.jetbrains.tinygoplugin.configuration.GarbageCollector
+import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.sdk.nullSdk
+import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
+import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
+
+private const val ERROR_SDK_NOT_SET = "run.configuration.errors.sdk"
+private const val ERROR_MAIN_FILE_NOT_FOUND = "run.configuration.errors.main"
+private const val ERROR_NOT_GO_FILE = "run.configuration.errors.type"
+private const val CONFIGURATION_EDITOR_NAME = "run.configuration.editor.name"
 
 class TinyGoRunConfiguration(
     project: Project,
@@ -42,6 +54,8 @@ class TinyGoRunConfiguration(
     override val tinyGoSettings: RunSettings
         get() = runConfig
 
+    val executable: VirtualFile? = TinyGoConfiguration.getInstance(project).sdk.executable
+
     init {
         val tinyGoSettings = TinyGoConfiguration.getInstance(project).deepCopy()
         val projectFile = project.workspaceFile
@@ -49,7 +63,16 @@ class TinyGoRunConfiguration(
         val mainPath = workspaceFolder?.canonicalPath ?: ""
         runConfig =
             RunSettings(tinyGoSettings, "", mainPath)
-        cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
+        if (tinyGoSettings.sdk != nullSdk) {
+            if (runConfig.gc == GarbageCollector.AUTO_DETECT || runConfig.scheduler == Scheduler.AUTO_DETECT) {
+                TinyGoInfoExtractor(project).extractTinyGoInfo(runConfig) { _: GoExecutor.ExecutionResult?, output: String ->
+                    runConfig.extractTinyGoInfo(output)
+                    cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
+                }
+            } else {
+                cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
+            }
+        }
     }
 
     private fun mainFile(): VirtualFile? {
@@ -65,20 +88,23 @@ class TinyGoRunConfiguration(
 
     @Throws(RuntimeConfigurationException::class)
     override fun checkConfiguration() {
-        val main = mainFile() ?: throw RuntimeConfigurationException("Main file does not exists")
+        if (executable == null) {
+            throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_SDK_NOT_SET))
+        }
+        val main = mainFile() ?: throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_MAIN_FILE_NOT_FOUND))
         if (!main.isValid) {
-            throw RuntimeConfigurationException("Main file does not exists")
+            throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_MAIN_FILE_NOT_FOUND))
         }
         val mainFiletype = main.fileType
         if (mainFiletype !is GoFileType) {
-            throw RuntimeConfigurationException("Selected file is not a go file")
+            throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_NOT_GO_FILE))
         }
     }
 
     override fun createSettingsEditorGroup(): SettingsEditorGroup<TinyGoRunConfiguration> {
         val result = SettingsEditorGroup<TinyGoRunConfiguration>()
         val editor: SettingsEditor<TinyGoRunConfiguration> = TinyGoRunConfigurationEditor(this)
-        result.addEditor("TinyGo $command", editor)
+        result.addEditor(TinyGoBundle.message(CONFIGURATION_EDITOR_NAME, command), editor)
         return result
     }
 
@@ -96,9 +122,9 @@ class TinyGoRunConfiguration(
         super.readExternal(element)
         val filePath = JDOMExternalizerUtil.readCustomField(element, MAIN_FILE)
         runConfig.mainFile =
-            (filePath ?: project.workspaceFile!!.parent.parent.canonicalPath.toString())
+            (filePath ?: project.workspaceFile?.parent?.parent?.canonicalPath ?: "")
         val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
         runConfig.cmdlineOptions = arguments ?: ""
-        if (arguments == null) cmdlineOptions = runConfig.assembleCommandLineArguments()
+        if (arguments == null && runConfig.sdk != nullSdk) cmdlineOptions = runConfig.assembleCommandLineArguments()
     }
 }

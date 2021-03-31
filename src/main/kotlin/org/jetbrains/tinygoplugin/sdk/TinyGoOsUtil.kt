@@ -2,25 +2,25 @@ package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.GoOsManager
 import com.intellij.openapi.util.io.FileUtil
-import java.nio.file.Paths
+import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
+import java.io.File
 
 interface OSUtils {
     fun suggestedDirectories(): Collection<String>
-    fun executablePath(tinyGoSDKPath: String): String
     fun executableName(): String
     fun executableBaseName(): String = "tinygo"
+    fun executableVFile(sdkRoot: VirtualFile?): VirtualFile?
+    fun executablePath(tinyGoSDKPath: String): String {
+        val file = VfsUtil.findFileByIoFile(File(tinyGoSDKPath), false) ?: return ""
+        return executableVFile(file)?.canonicalPath ?: ""
+    }
 }
 
 internal abstract class OSUtilsImpl : OSUtils {
-    override fun executablePath(tinyGoSDKPath: String): String {
-        val tinyGoRoot =
-            Paths.get(tinyGoSDKPath).toAbsolutePath().toString()
-        return Paths.get(
-            tinyGoRoot,
-            "bin",
-            executableName()
-        ).toString()
-    }
+
+    override fun executableVFile(sdkRoot: VirtualFile?): VirtualFile? =
+        sdkRoot?.findChild("bin")?.findChild(executableName())
 }
 
 internal class WindowsUtils : OSUtilsImpl() {
