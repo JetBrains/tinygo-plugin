@@ -95,8 +95,11 @@ class TinyGoRunConfiguration(
         if (!main.isValid) {
             throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_MAIN_FILE_NOT_FOUND))
         }
+        if (!main.isDirectory && runConfig.buildType == BuildType.FOLDER) {
+            throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_NOT_GO_FILE))
+        }
         val mainFiletype = main.fileType
-        if (mainFiletype !is GoFileType) {
+        if (mainFiletype !is GoFileType && runConfig.buildType == BuildType.FILE) {
             throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_NOT_GO_FILE))
         }
     }
