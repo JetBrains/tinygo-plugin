@@ -24,6 +24,7 @@ class TinyGoRunConfigurationProducer : GoRunConfigurationProducerBase<TinyGoRunC
         val module = findModule(contextFile, context) ?: return false
         prepareConfigurationFromContext(configuration, module)
         configuration.name = "TinyGo ${module.name}"
+        configuration.runConfig.mainFile = files[0].path
         return true
     }
 
@@ -33,7 +34,12 @@ class TinyGoRunConfigurationProducer : GoRunConfigurationProducerBase<TinyGoRunC
     ): Boolean {
         val element = getContextElement(context)
         val contextFile = element?.containingFile
+        val files = getFilesFromContext(context, contextFile)
+        if (files.isEmpty()) {
+            return false
+        }
         val module = findModule(contextFile, context) ?: return false
-        return configuration.name == "TinyGo ${module.name}"
+        return configuration.runConfig.mainFile == files[0].path &&
+                configuration.name == "TinyGo ${module.name}"
     }
 }

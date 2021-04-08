@@ -27,8 +27,10 @@
                          level="WARNING"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.InterfaceInspection"/>
         <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootProvider"/>
-        <runConfigurationProducer id="GoApplicationRunConfigurationProducer"
+        <runConfigurationProducer id="TinyGoFlashConfigurationProducer"
                                   implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationProducer"/>
+        <runLineMarkerContributor language="go"
+                                  implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoRunLineMarkerContributor"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>

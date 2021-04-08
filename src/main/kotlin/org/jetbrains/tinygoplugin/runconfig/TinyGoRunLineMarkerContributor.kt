@@ -1,0 +1,37 @@
+package org.jetbrains.tinygoplugin.runconfig
+
+import com.goide.GoConstants
+import com.goide.GoTypes
+import com.goide.execution.GoRunLineMarkerProvider
+import com.goide.execution.GoRunUtil
+import com.goide.psi.GoFunctionDeclaration
+import com.goide.util.GoUtil
+import com.intellij.execution.lineMarker.ExecutorAction
+import com.intellij.lang.injection.InjectedLanguageManager
+import com.intellij.psi.PsiElement
+import com.intellij.util.Function
+import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
+
+private val TOOLTIP_PROVIDER =
+    Function { _: PsiElement? -> "Flash TinyGo" }
+
+class TinyGoRunLineMarkerContributor : GoRunLineMarkerProvider() {
+
+    override fun getInfo(e: PsiElement): Info? {
+        if (e.node.elementType === GoTypes.IDENTIFIER) {
+            val parent = e.parent
+            val file = e.containingFile
+            if (InjectedLanguageManager.getInstance(e.project).isInjectedFragment(file)) {
+                return null
+            }
+            if (GoUtil.isInProject(file) && GoRunUtil.isMainGoFile(file) && parent is GoFunctionDeclaration) {
+                if (GoConstants.MAIN == parent.name) {
+                    return Info(TinyGoPluginIcons.TinyGoIcon,
+                        TOOLTIP_PROVIDER,
+                        *ExecutorAction.getActions(1))
+                }
+            }
+        }
+        return null
+    }
+}
