@@ -27,6 +27,8 @@
                          level="WARNING"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.InterfaceInspection"/>
         <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootProvider"/>
+        <runConfigurationProducer id="GoApplicationRunConfigurationProducer"
+                                  implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationProducer"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
