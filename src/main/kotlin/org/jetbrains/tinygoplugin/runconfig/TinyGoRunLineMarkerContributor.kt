@@ -10,7 +10,9 @@ import com.intellij.execution.lineMarker.ExecutorAction
 import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.psi.PsiElement
 import com.intellij.util.Function
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
+import org.jetbrains.tinygoplugin.sdk.nullSdk
 
 private val TOOLTIP_PROVIDER =
     Function { _: PsiElement? -> "Flash TinyGo" }
@@ -24,6 +26,8 @@ class TinyGoRunLineMarkerContributor : GoRunLineMarkerProvider() {
             if (InjectedLanguageManager.getInstance(e.project).isInjectedFragment(file)) {
                 return null
             }
+            val settings = TinyGoConfiguration.getInstance(e.project)
+            if (settings.sdk == nullSdk) return null
             if (GoUtil.isInProject(file) && GoRunUtil.isMainGoFile(file) && parent is GoFunctionDeclaration) {
                 if (GoConstants.MAIN == parent.name) {
                     // TODO: Investigate order parameter
