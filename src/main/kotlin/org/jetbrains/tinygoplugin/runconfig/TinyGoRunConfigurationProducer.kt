@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.runconfig
 
 import com.goide.execution.GoRunConfigurationProducerBase
+import com.goide.execution.GoRunUtil
 import com.intellij.execution.actions.ConfigurationContext
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.util.Ref
@@ -21,6 +22,7 @@ class TinyGoRunConfigurationProducer : GoRunConfigurationProducerBase<TinyGoRunC
         if (files.isEmpty()) {
             return false
         }
+        if (!GoRunUtil.isMainGoFile(contextFile)) return false
         val module = findModule(contextFile, context) ?: return false
         prepareConfigurationFromContext(configuration, module)
         configuration.name = "TinyGo ${module.name}"
