@@ -4,6 +4,7 @@ import com.goide.inspections.core.GoInspectionBase
 import com.goide.inspections.core.GoProblemsHolder
 import com.goide.psi.GoGoStatement
 import com.goide.psi.GoVisitor
+import com.goide.util.GoExecutor
 import com.goide.util.GoHistoryProcessListener
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.LocalQuickFix
@@ -27,12 +28,11 @@ class GoInspection : GoInspectionBase() {
             override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
                 val settings = TinyGoConfiguration.getInstance(project)
                 settings.scheduler = Scheduler.AUTO_DETECT
-                val processHistory = GoHistoryProcessListener()
-                TinyGoInfoExtractor(project).extractTinyGoInfo(settings, processHistory) {
-                    val output = processHistory.output.joinToString("")
+                TinyGoInfoExtractor(project).extractTinyGoInfo(settings) { _: GoExecutor.ExecutionResult?, output: String ->
                     settings.extractTinyGoInfo(output)
                     settings.saveState(project)
                     propagateGoFlags(project, settings)
+                    settings.saveState(project)
                 }
             }
         }

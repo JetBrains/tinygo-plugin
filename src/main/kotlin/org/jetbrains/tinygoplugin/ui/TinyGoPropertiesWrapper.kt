@@ -52,8 +52,8 @@ open class TinyGoPropertiesWrapper(val obj: ConfigurationProvider<TinyGoConfigur
 
     // set initial string
     val tinygoSDKPath = InnerGraphProperty(
-        prop = propertyGraph.graphProperty(obj.tinyGoSettings::tinyGoSDKPath),
-        objProperty = TinyGoConfiguration::tinyGoSDKPath
+        prop = propertyGraph.graphProperty(obj.tinyGoSettings::sdk),
+        objProperty = TinyGoConfiguration::sdk
     )
     val target = InnerGraphProperty(
         prop = propertyGraph.graphProperty(obj.tinyGoSettings::targetPlatform),

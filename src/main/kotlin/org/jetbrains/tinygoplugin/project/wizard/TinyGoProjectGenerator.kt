@@ -1,7 +1,6 @@
 package org.jetbrains.tinygoplugin.project.wizard
 
 import com.goide.GoIcons
-import com.goide.util.GoHistoryProcessListener
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
 import com.intellij.openapi.module.Module
@@ -24,9 +23,7 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
     override fun validate(baseDirPath: String): ValidationResult = ValidationResult.OK
 
     private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
-        val processHistory = GoHistoryProcessListener()
-        TinyGoInfoExtractor(project).extractTinyGoInfo(tinyGoSettings, processHistory) {
-            val output = processHistory.output.joinToString("")
+        TinyGoInfoExtractor(project).extractTinyGoInfo(tinyGoSettings) { _, output ->
             tinyGoSettings.extractTinyGoInfo(output)
             tinyGoSettings.saveState(project)
             propagateGoFlags(project, tinyGoSettings)
@@ -37,7 +34,7 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
         project: Project,
         baseDir: VirtualFile,
         newProjectSettings: TinyGoNewProjectSettings,
-        module: Module
+        module: Module,
     ) {
         newProjectSettings.tinyGoSettings.saveState(project)
         extractTinyGoSettings(project, newProjectSettings.tinyGoSettings)

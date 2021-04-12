@@ -9,7 +9,7 @@ class TinyGoInspectionMessage(private val message: String) : GoInspectionMessage
     override fun toString(): String = message
 }
 
-fun inspectionMessage(@PropertyKey(resourceBundle = BUNDLE) key: String): GoInspectionMessage {
-    val message = TinyGoBundle.message(key)
+fun inspectionMessage(@PropertyKey(resourceBundle = BUNDLE) key: String, vararg args: Any): GoInspectionMessage {
+    val message = TinyGoBundle.message(key, *args)
     return TinyGoInspectionMessage(message)
 }

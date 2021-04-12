@@ -1,14 +1,30 @@
 package org.jetbrains.tinygoplugin.services
 
+import com.goide.sdk.GoSdk
+import com.goide.sdk.GoSdkService
+import com.goide.sdk.download.GoDownloadingSdk
 import com.goide.util.GoExecutor
 import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.Task
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.util.Consumer
+import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import java.nio.file.Paths
+import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
+import org.jetbrains.tinygoplugin.sdk.osManager
+import java.time.Duration
+import java.util.function.BiConsumer
+
+private const val GO_NOT_CONFIGURED_MESSAGE = "notifications.tinygoSDK.goSDKNotConfigured"
+private const val DETECTION_TITLE = "notifications.tinygoSDK.detection.title"
+private const val DETECTION_INDICATOR_TEXT = "notifications.tinygoSDK.detection.indicatorText"
+private const val DETECTION_FAIL_MESSAGE = "notifications.tinygoSDK.detection.failMessage"
+private const val DETECTION_ERROR_MESSAGE = "notifications.tinygoSDK.detection.errorMessage"
 
 fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val tagPattern = Regex("""build tags:\s+(.+)\n""")
@@ -32,24 +48,41 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     TinyGoInfoExtractor.logger.warn("extraction finished")
 }
 
+class TinyGoExecutable(private val project: Project) {
+    fun execute(
+        sdkRoot: String,
+        arguments: List<String>,
+        onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
+    ) {
+        val processHistory = GoHistoryProcessListener()
+        val tinyGoExec = osManager.executablePath(sdkRoot)
+        val executor = GoExecutor.`in`(project, null)
+            .withExePath(tinyGoExec)
+            .withParameters(arguments)
+            .showNotifications(true, false)
+        executor.executeWithProgress(true, true, processHistory, null) {
+            if (it.status.ordinal == 0) {
+                onFinish.accept(it, processHistory.output.joinToString(""))
+            } else {
+                notifyTinyGoNotConfigured(
+                    project,
+                    TinyGoBundle.message(DETECTION_FAIL_MESSAGE)
+                )
+                TinyGoInfoExtractor.logger.error(
+                    TinyGoBundle.message(DETECTION_ERROR_MESSAGE),
+                    processHistory.output.toString()
+                )
+            }
+        }
+    }
+}
+
 class TinyGoInfoExtractor(private val project: Project) {
     companion object {
         val logger: Logger = Logger.getInstance(TinyGoInfoExtractor::class.java)
     }
 
-    private fun assembleTinyGoShellCommand(settings: TinyGoConfiguration): GoExecutor {
-        val executor = GoExecutor.`in`(project, null)
-        val parameters = tinyGoArguments(settings)
-        executor.withParameters(parameters)
-        executor.showNotifications(true, false)
-        val tinyGoExec = Paths.get(
-            Paths.get(settings.tinyGoSDKPath).toAbsolutePath().toString(),
-            "bin",
-            "tinygo"
-        )
-        executor.withExePath(tinyGoExec.toString())
-        return executor
-    }
+    private val executor = TinyGoExecutable(project)
 
     private fun tinyGoArguments(settings: TinyGoConfiguration): List<String> {
         val parameters = mutableListOf("info", "-target", settings.targetPlatform)
@@ -64,10 +97,29 @@ class TinyGoInfoExtractor(private val project: Project) {
 
     fun extractTinyGoInfo(
         settings: TinyGoConfiguration,
-        processHistory: GoHistoryProcessListener,
-        onFinish: Consumer<in GoExecutor.ExecutionResult?>,
+        onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
-        val executor = assembleTinyGoShellCommand(settings)
-        executor.executeWithProgress(true, true, processHistory, null, onFinish)
+        val currentGoSdk = GoSdkService.getInstance(project).getSdk(null)
+        if (currentGoSdk == GoSdk.NULL) {
+            notifyTinyGoNotConfigured(
+                project,
+                TinyGoBundle.message(GO_NOT_CONFIGURED_MESSAGE)
+            )
+            return
+        }
+        val detectingTask = object : Task.Backgroundable(project, TinyGoBundle.message(DETECTION_TITLE)) {
+            override fun run(indicator: ProgressIndicator) {
+                if (currentGoSdk is GoDownloadingSdk) {
+                    indicator.isIndeterminate = true
+                    indicator.text2 = TinyGoBundle.message(DETECTION_INDICATOR_TEXT)
+                    while (GoSdkService.getInstance(project).getSdk(null) is GoDownloadingSdk) {
+                        Thread.sleep(Duration.ofSeconds(1).toMillis())
+                    }
+                }
+                executor.execute(settings.sdk.sdkRoot!!.path, tinyGoArguments(settings), onFinish)
+            }
+        }
+        ProgressManager.getInstance()
+            .runProcessWithProgressAsynchronously(detectingTask, BackgroundableProcessIndicator(detectingTask))
     }
 }
