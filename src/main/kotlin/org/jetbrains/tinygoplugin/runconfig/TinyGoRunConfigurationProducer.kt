@@ -30,6 +30,7 @@ class TinyGoRunConfigurationProducer : GoRunConfigurationProducerBase<TinyGoRunC
         prepareConfigurationFromContext(configuration, module)
         configuration.name = "TinyGo ${module.name}"
         configuration.runConfig.mainFile = file.path
+        configuration.cmdlineOptions = configuration.runConfig.assembleCommandLineArguments()
         return true
     }
 
