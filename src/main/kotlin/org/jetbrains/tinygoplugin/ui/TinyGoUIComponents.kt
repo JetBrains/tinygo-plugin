@@ -1,5 +1,7 @@
 package org.jetbrains.tinygoplugin.ui
 
+import com.intellij.json.JsonFileType
+import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.layout.Cell
@@ -7,6 +9,7 @@ import com.intellij.ui.layout.CellBuilder
 import com.intellij.ui.layout.GrowPolicy
 import com.intellij.ui.layout.LayoutBuilder
 import com.intellij.ui.layout.PropertyBinding
+import com.intellij.ui.layout.Row
 import com.intellij.ui.layout.applyToComponent
 import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.TinyGoBundle
@@ -14,6 +17,7 @@ import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
+import org.jetbrains.tinygoplugin.services.tinygoTargets
 import java.awt.event.ItemEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JPanel
@@ -78,14 +82,40 @@ private fun LayoutBuilder.tinyGoSettings(
         tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath)
     }
     row(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
-        textField(property = wrapper.target).growPolicy(GrowPolicy.MEDIUM_TEXT)
-    }
-    row(TinyGoBundle.message(TARGET_LABEL)) {
+        row(TinyGoBundle.message(TARGET_LABEL)) {
+            targetChooser(wrapper)
+        }
         row(TinyGoBundle.message(GC_LABEL)) {
             comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
         }
         row(TinyGoBundle.message(SCHEDULER_LABEL)) {
             comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
+        }
+
+    }
+}
+
+private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper) {
+    val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false).withFileFilter {
+        it.fileType == JsonFileType.INSTANCE
+    }
+    textFieldWithHistoryWithBrowseButton(
+        { wrapper.target.get() },
+        { wrapper.target.set(it) },
+        "Select target file",
+        null,
+        jsonChooser,
+    ).applyToComponent {
+        text = wrapper.target.get()
+        wrapper.target.afterChange {
+            text = it
+        }
+        childComponent.addActionListener {
+            wrapper.target.set(text)
+        }
+        childComponent.history = tinygoTargets(wrapper.tinygoSDKPath.get())
+        wrapper.tinygoSDKPath.afterChange {
+            childComponent.history = tinygoTargets(it)
         }
     }
 }
