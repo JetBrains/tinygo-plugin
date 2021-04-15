@@ -75,6 +75,8 @@ private const val TARGET_LABEL = "ui.target"
 private const val COMPILER_PARAMETERS_LABEL = "ui.compiler"
 private const val GC_LABEL = "ui.gc"
 private const val SCHEDULER_LABEL = "ui.scheduler"
+private const val targetBrowseDialogTitle = "ui.target.dialogTitle"
+
 private fun LayoutBuilder.tinyGoSettings(
     wrapper: TinyGoPropertiesWrapper,
 ) {
@@ -103,7 +105,7 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder
     textFieldWithHistoryWithBrowseButton(
         { wrapper.target.get() },
         { wrapper.target.set(it) },
-        "Select target file",
+        TinyGoBundle.message(targetBrowseDialogTitle),
         null,
         jsonChooser,
     ).applyToComponent {
