@@ -78,12 +78,13 @@ private const val SCHEDULER_LABEL = "ui.scheduler"
 private fun LayoutBuilder.tinyGoSettings(
     wrapper: TinyGoPropertiesWrapper,
 ) {
+    lateinit var tinyGoSdkComboChooser: CellBuilder<TinyGoSdkChooserCombo>
     row(TinyGoBundle.message(SDK_LABEL)) {
-        tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath)
+        tinyGoSdkComboChooser = tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath)
     }
     row(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
         row(TinyGoBundle.message(TARGET_LABEL)) {
-            targetChooser(wrapper)
+            targetChooser(wrapper, tinyGoSdkComboChooser)
         }
         row(TinyGoBundle.message(GC_LABEL)) {
             comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
@@ -95,7 +96,7 @@ private fun LayoutBuilder.tinyGoSettings(
     }
 }
 
-private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper) {
+private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder<TinyGoSdkChooserCombo>) {
     val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false).withFileFilter {
         it.fileType == JsonFileType.INSTANCE
     }
@@ -111,11 +112,13 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper) {
             text = it
         }
         childComponent.addActionListener {
-            wrapper.target.set(text)
+            if (childComponent.isShowing) {
+                wrapper.target.set(text)
+            }
         }
         childComponent.history = tinygoTargets(wrapper.tinygoSDKPath.get())
-        wrapper.tinygoSDKPath.afterChange {
-            childComponent.history = tinygoTargets(it)
+        sdk.component.addChangedListener {
+            childComponent.history = tinygoTargets(sdk.component.sdk)
         }
     }
 }
