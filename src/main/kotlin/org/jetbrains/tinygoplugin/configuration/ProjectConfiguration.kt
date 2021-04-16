@@ -13,6 +13,7 @@ interface ProjectConfiguration {
     var goTags: String
     var goArch: String
     var goOS: String
+    var userTargets: List<String>
 }
 
 data class ProjectConfigurationState(
@@ -22,6 +23,7 @@ data class ProjectConfigurationState(
     override var goTags: String = "",
     override var goArch: String = "",
     override var goOS: String = "",
+    override var userTargets: List<String> = emptyList(),
 ) : ProjectConfiguration
 
 @State(name = "TinyGoPlugin", storages = [Storage("tinygoSettings.xml")])

@@ -81,6 +81,12 @@ open class TinyGoPropertiesWrapper(val obj: ConfigurationProvider<TinyGoConfigur
         objProperty = TinyGoConfiguration::goTags
     )
 
+    var userTargets: List<String>
+        get() = obj.tinyGoSettings.userTargets
+        set(value) {
+            obj.tinyGoSettings.userTargets = value
+        }
+
     override fun reset() {
         resetableProperties.forEach(ResetableProperty::reset)
     }

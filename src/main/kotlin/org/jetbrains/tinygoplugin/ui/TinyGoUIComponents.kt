@@ -17,7 +17,6 @@ import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
-import org.jetbrains.tinygoplugin.services.tinygoTargets
 import java.awt.event.ItemEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JPanel
@@ -118,9 +117,9 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder
                 wrapper.target.set(text)
             }
         }
-        childComponent.history = tinygoTargets(wrapper.tinygoSDKPath.get())
+        childComponent.history = wrapper.userTargets
         sdk.component.addChangedListener {
-            childComponent.history = tinygoTargets(sdk.component.sdk)
+            childComponent.history = wrapper.userTargets
         }
     }
 }
