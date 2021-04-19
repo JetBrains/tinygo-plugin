@@ -5,6 +5,8 @@ import com.goide.util.GoExecutor
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.module.Module
+import org.jetbrains.tinygoplugin.configuration.GarbageCollector
+import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 
@@ -41,12 +43,9 @@ data class RunSettings(
 }
 
 fun TinyGoConfiguration.assembleCommandLineArguments(): Collection<String> {
-    /* ktlint-disable */
-    return listOf(
-        "-target", targetPlatform,
-        "-scheduler", scheduler.cmd,
-        "-gc", gc.cmd,
-        "-size", "full"
-    )
-    /* ktlint-enable */
+    val gcArg: List<String> =
+        if (gc == GarbageCollector.AUTO_DETECT) emptyList() else listOf("-gc", gc.cmd)
+    val schedulerArg: List<String> =
+        if (scheduler == Scheduler.AUTO_DETECT) emptyList() else listOf("-scheduler", scheduler.cmd)
+    return listOf("-target", targetPlatform) + schedulerArg + gcArg
 }

@@ -2,6 +2,7 @@ package org.jetbrains.tinygoplugin.runconfig
 
 import com.goide.execution.GoConfigurationFactoryBase
 import com.intellij.execution.configurations.ConfigurationType
+import com.intellij.execution.configurations.ConfigurationType.CONFIGURATION_TYPE_EP
 import com.intellij.execution.configurations.ConfigurationTypeBase
 import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.project.Project
@@ -30,8 +31,16 @@ class TinyGoConfigurationFactory(
 
 class TinyGoRunConfigurationType :
     ConfigurationTypeBase(TINYGO_CONFIGURATION_ID, CONFIGURATION_NAME, DESCRIPTION, TinyGoPluginIcons.TinyGoIcon) {
+    val runFactory = TinyGoConfigurationFactory(this, TinyGoRunCommand())
+    val flashFactory = TinyGoConfigurationFactory(this, TinyGoFlashCommand())
+
     init {
-        addFactory(TinyGoConfigurationFactory(this, TinyGoRunCommand()))
-        addFactory(TinyGoConfigurationFactory(this, TinyGoFlashCommand()))
+        addFactory(runFactory)
+        addFactory(flashFactory)
+    }
+
+    companion object {
+        fun getInstance(): TinyGoRunConfigurationType =
+            CONFIGURATION_TYPE_EP.findExtensionOrFail(TinyGoRunConfigurationType::class.java)
     }
 }

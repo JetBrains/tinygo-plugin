@@ -5,6 +5,7 @@ import com.goide.execution.GoModuleBasedConfiguration
 import com.goide.execution.GoRunConfigurationBase
 import com.goide.util.GoExecutor
 import com.intellij.execution.configurations.ConfigurationFactory
+import com.intellij.execution.configurations.RunnerSettings
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.module.Module
@@ -57,23 +58,17 @@ class TinyGoRunConfiguration(
     val executable: VirtualFile? = TinyGoConfiguration.getInstance(project).sdk.executable
 
     init {
-        val tinyGoSettings = TinyGoConfiguration.getInstance(project).deepCopy()
+        val tinyGoSettings = TinyGoConfiguration.getInstance(project)
         val projectFile = project.workspaceFile
         val workspaceFolder = projectFile?.parent?.parent
         val mainPath = workspaceFolder?.canonicalPath ?: ""
         runConfig =
             RunSettings(tinyGoSettings, "", mainPath)
         if (tinyGoSettings.sdk != nullSdk) {
-            if (runConfig.gc == GarbageCollector.AUTO_DETECT || runConfig.scheduler == Scheduler.AUTO_DETECT) {
-                TinyGoInfoExtractor(project).extractTinyGoInfo(runConfig) { _: GoExecutor.ExecutionResult?, output: String ->
-                    runConfig.extractTinyGoInfo(output)
-                    cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
-                }
-            } else {
-                cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
-            }
+            cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
         }
     }
+
 
     private fun mainFile(): VirtualFile? {
         if (runConfig.mainFile.isEmpty()) {
