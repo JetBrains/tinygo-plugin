@@ -40,7 +40,8 @@ class SettingsWithHistory(val settings: TinyGoConfiguration, val project: Projec
             }
         }
     override var userTargets: List<String>
-        get() = settings.userTargets + predefinedTargets.toList()
+        get() = settings.userTargets.mapNotNull { absoluteOrRelativePath(it, project) }
+            .map { it.path } + predefinedTargets.toList()
         set(value) {
             settings.userTargets = value
         }
