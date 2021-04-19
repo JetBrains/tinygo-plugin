@@ -65,4 +65,3 @@ class TinyGoSdkList : PersistentStateComponent<TinyGoSdkListStorage> {
 
 internal inline fun TinyGoSdkList.lockStorage(block: () -> Unit): Unit =
     synchronized(storedSdks, block)
-

@@ -83,7 +83,7 @@ open class TinyGoSdk(
 
     override fun getSrcDir(): VirtualFile? = sdkRoot?.findChild("src")
 
-    override fun getExecutable(): VirtualFile? = getTinyGoExecutable(sdkRoot)
+    override fun getExecutable(): VirtualFile? = osManager.executableVFile(sdkRoot)
 
     override fun isValid(): Boolean {
         val sources = srcDir
@@ -96,11 +96,13 @@ open class TinyGoSdk(
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
         val sdk = other as TinyGoSdk
-        return FileUtil.comparePaths(sdk.homeUrl, homeUrl) == 0
+        return FileUtil.comparePaths(urlToPath(sdk.tinyGoHomeUrl), urlToPath(tinyGoHomeUrl)) == 0
     }
 
     override fun hashCode(): Int = Objects.hash(tinyGoHomeUrl)
 }
+
+private fun urlToPath(url: String?): String? = url?.let { URL(it).path }
 
 const val TINY_GO_VERSION_REGEX = """tinygo version (\d+.\d+.\d+)"""
 fun TinyGoSdk.computeVersion(project: Project, onFinish: () -> Unit) {

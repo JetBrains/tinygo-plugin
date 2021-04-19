@@ -16,10 +16,21 @@
                              displayName="TinyGo"/>
         <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
         <directoryProjectGenerator implementation="org.jetbrains.tinygoplugin.project.wizard.TinyGoProjectGenerator"/>
-    </extensions>
+        <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootProvider"/>
+        <localInspection language="go" groupKey="inspection.bundle.key"
+                         bundle="messages.TinyGo" key="inspection.import.name"
+                         groupBundle="messages.TinyGo" enabledByDefault="true"
+                         level="ERROR"
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.ImportInspection"/>
+        <localInspection language="go" groupKey="inspection.bundle.key"
+                         bundle="messages.TinyGo" key="inspection.interface.name"
+                         groupBundle="messages.TinyGo" enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.InterfaceInspection"/>
 
+    </extensions>
     <extensions defaultExtensionNs="com.goide">
-        <rootsProvider id="default" implementation="org.jetbrains.tinygoplugin.services.TinyGopathManager"/>
+        <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
+        <importsFilter implementation="org.jetbrains.tinygoplugin.services.TinyGoImportsFilter"/>
     </extensions>
-
 </idea-plugin>
