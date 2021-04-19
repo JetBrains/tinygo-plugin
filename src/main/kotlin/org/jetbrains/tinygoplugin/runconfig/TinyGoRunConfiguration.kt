@@ -18,7 +18,10 @@ import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
+import org.jetbrains.tinygoplugin.configuration.SettingsWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.absoluteOrRelativePath
+import org.jetbrains.tinygoplugin.configuration.toRelativePath
 import org.jetbrains.tinygoplugin.sdk.nullSdk
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
@@ -57,7 +60,7 @@ class TinyGoRunConfiguration(
     val executable: VirtualFile? = TinyGoConfiguration.getInstance(project).sdk.executable
 
     init {
-        val tinyGoSettings = TinyGoConfiguration.getInstance(project).deepCopy()
+        val tinyGoSettings = SettingsWithHistory(project)
         val projectFile = project.workspaceFile
         val workspaceFolder = projectFile?.parent?.parent
         val mainPath = workspaceFolder?.canonicalPath ?: ""
@@ -114,15 +117,15 @@ class TinyGoRunConfiguration(
 
     override fun writeExternal(element: Element) {
         super.writeExternal(element)
-        JDOMExternalizerUtil.writeCustomField(element, MAIN_FILE, runConfig.mainFile)
+        JDOMExternalizerUtil.writeCustomField(element, MAIN_FILE, toRelativePath(runConfig.mainFile, project))
         JDOMExternalizerUtil.writeCustomField(element, CMD_OPTIONS, runConfig.cmdlineOptions)
     }
 
     override fun readExternal(element: Element) {
         super.readExternal(element)
-        val filePath = JDOMExternalizerUtil.readCustomField(element, MAIN_FILE)
+        val filePath = JDOMExternalizerUtil.readCustomField(element, MAIN_FILE) ?: ""
         runConfig.mainFile =
-            (filePath ?: project.workspaceFile?.parent?.parent?.canonicalPath ?: "")
+            absoluteOrRelativePath(filePath, project)?.path ?: project.basePath ?: ""
         val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
         runConfig.cmdlineOptions = arguments ?: ""
         if (arguments == null && runConfig.sdk != nullSdk) cmdlineOptions = runConfig.assembleCommandLineArguments()
