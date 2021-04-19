@@ -36,5 +36,4 @@
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
         <importsFilter implementation="org.jetbrains.tinygoplugin.services.TinyGoImportsFilter"/>
     </extensions>
-
 </idea-plugin>
