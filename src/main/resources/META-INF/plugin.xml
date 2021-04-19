@@ -16,6 +16,12 @@
                              displayName="TinyGo"/>
         <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
         <directoryProjectGenerator implementation="org.jetbrains.tinygoplugin.project.wizard.TinyGoProjectGenerator"/>
+        <localInspection language="go" groupKey="inspection.bundle.key"
+                         bundle="messages.TinyGo" key="inspection.interface.name"
+                         groupBundle="messages.TinyGo" enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.InterfaceInspection"/>
+
     </extensions>
 
     <extensions defaultExtensionNs="com.goide">

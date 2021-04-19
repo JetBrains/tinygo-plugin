@@ -7,6 +7,7 @@ interface TinyGoConfiguration : UserConfiguration, ProjectConfiguration {
     fun deepCopy(): TinyGoConfiguration
     fun saveState(p: Project)
     fun modified(p: Project): Boolean
+    val enabled: Boolean
 
     companion object {
         fun getInstance(p: Project): TinyGoConfiguration = TinyGoConfigurationImpl.getInstance(p)
@@ -39,6 +40,9 @@ internal data class TinyGoConfigurationImpl(
             userConfig = userConfigurationCopy,
         )
     }
+
+    override val enabled: Boolean
+        get() = tinyGoSDKPath.isNotEmpty()
 
     companion object {
         fun getInstance(p: Project): TinyGoConfigurationImpl = TinyGoConfigurationImpl(
