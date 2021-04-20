@@ -26,11 +26,20 @@
                          groupBundle="messages.TinyGo" enabledByDefault="true"
                          level="WARNING"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.InterfaceInspection"/>
+        <localInspection language="go" groupKey="inspection.bundle.key"
+                         bundle="messages.TinyGo" key="inspection.go.name"
+                         groupBundle="messages.TinyGo" enabledByDefault="true"
+                         level="ERROR"
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.GoInspection"/>
+
         <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootProvider"/>
+        <runConfigurationProducer id="TinyGoFlashConfigurationProducer"
+                                  implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationProducer"/>
+        <runLineMarkerContributor language="go"
+                                  implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoRunLineMarkerContributor"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
         <importsFilter implementation="org.jetbrains.tinygoplugin.services.TinyGoImportsFilter"/>
     </extensions>
-
 </idea-plugin>
