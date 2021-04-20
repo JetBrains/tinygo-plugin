@@ -20,7 +20,6 @@ import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
 import java.awt.event.ItemEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JPanel
-import kotlin.reflect.KFunction
 
 fun generateTinyGoParametersPanel(
     wrapper: TinyGoPropertiesWrapper,
@@ -111,6 +110,10 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder
         text = wrapper.target.get()
         wrapper.target.afterChange {
             text = it
+            val historyIndex = childComponent.history.indexOf(it)
+            if (historyIndex >= 0) {
+                childComponent.selectedIndex = historyIndex
+            }
         }
         childComponent.addActionListener {
             if (childComponent.isShowing) {
@@ -126,15 +129,9 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder
 
 fun generateSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
-    onDetect: KFunction<Unit>,
-    onPropagateGoTags: KFunction<Unit>,
 ) = panel {
     row {
         tinyGoSettings(wrapper)
-    }
-    row {
-        button("Detect") { onDetect.call() /*extractTinyGOParameters()*/ }
-        button("Update gopath") { onPropagateGoTags.call() /*propagateGoFlags()*/ }
     }
     row("GOOS") {
         textField(property = wrapper.goOS).growPolicy(GrowPolicy.MEDIUM_TEXT)
@@ -143,6 +140,7 @@ fun generateSettingsPanel(
         textField(property = wrapper.goArch).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
     row("Go tags") {
-        textField(property = wrapper.goTags).growPolicy(GrowPolicy.MEDIUM_TEXT)
+        expandableTextField(wrapper.goTags).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
+
 }

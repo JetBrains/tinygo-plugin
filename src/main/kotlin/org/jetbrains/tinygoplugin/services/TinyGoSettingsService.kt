@@ -12,6 +12,19 @@ import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateSettingsPanel
 import javax.swing.JComponent
 
+class TinyGoConfigurationWithTagUpdate(private val settings: TinyGoConfiguration, private val callback: () -> Unit) :
+    TinyGoConfiguration by settings {
+    override var targetPlatform: String
+        get() = settings.targetPlatform
+        set(value) {
+            if (settings.targetPlatform != value) {
+                settings.targetPlatform = value
+                if (value.isNotEmpty()) {
+                    callback()
+                }
+            }
+        }
+}
 
 class TinyGoSettingsService(private val project: Project) :
     NamedConfigurable<TinyGoConfiguration>(), ConfigurationProvider<TinyGoConfiguration> {
@@ -20,7 +33,8 @@ class TinyGoSettingsService(private val project: Project) :
     }
 
     // local copy of the settings
-    override var tinyGoSettings: TinyGoConfiguration = ConfigurationWithHistory(project)
+    override var tinyGoSettings: TinyGoConfiguration =
+        TinyGoConfigurationWithTagUpdate(ConfigurationWithHistory(project), this::callExtractor)
 
     private val infoExtractor = TinyGoInfoExtractor(project)
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
@@ -30,6 +44,7 @@ class TinyGoSettingsService(private val project: Project) :
     override fun apply() {
         logger.warn("Apply called")
         tinyGoSettings.saveState(project)
+        propagateGoFlags()
     }
 
     override fun getDisplayName(): String = "TinyGo"
@@ -48,7 +63,7 @@ class TinyGoSettingsService(private val project: Project) :
     }
 
     override fun reset() {
-        tinyGoSettings = ConfigurationWithHistory(project)
+        tinyGoSettings = TinyGoConfigurationWithTagUpdate(ConfigurationWithHistory(project), this::callExtractor)
         propertiesWrapper.reset()
         super.reset()
     }
@@ -61,11 +76,7 @@ class TinyGoSettingsService(private val project: Project) :
         propagateGoFlags(project, tinyGoSettings)
     }
 
-    override fun createOptionsPanel(): JComponent = generateSettingsPanel(
-        propertiesWrapper,
-        onDetect = this::callExtractor,
-        onPropagateGoTags = this::propagateGoFlags
-    )
+    override fun createOptionsPanel(): JComponent = generateSettingsPanel(propertiesWrapper)
 }
 
 fun propagateGoFlags(project: Project, settings: TinyGoConfiguration) {

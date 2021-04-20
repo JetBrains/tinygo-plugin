@@ -17,7 +17,7 @@ class ConfigurationWithHistory(
         set(value) {
             if (value != settings.sdk) {
                 settings.sdk = value
-                predefinedTargets = tinygoTargets(value).toSet()
+                predefinedTargets = tinygoTargets(value)
             }
         }
     override var targetPlatform: String
@@ -40,10 +40,10 @@ class ConfigurationWithHistory(
         }
     override var userTargets: List<String>
         get() = settings.userTargets.map { pathConverter.toAbsolute(it) }
-            .filter(String::isNotEmpty) + predefinedTargets.toList()
+            .filter(String::isNotEmpty) + predefinedTargets
         set(value) {
             settings.userTargets = value
         }
-    var predefinedTargets: Set<String> = tinygoTargets(settings.sdk).toSet()
+    var predefinedTargets: List<String> = tinygoTargets(settings.sdk)
 }
 
