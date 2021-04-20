@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.util.ui.UI.PanelFactory
+import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -17,7 +18,7 @@ import javax.swing.JPanel
 class TinyGoProjectGeneratorPeer :
     GoProjectGeneratorPeer<TinyGoNewProjectSettings>(),
     ConfigurationProvider<TinyGoConfiguration> {
-    override var tinyGoSettings: TinyGoConfiguration = TinyGoConfiguration.getInstance()
+    override var tinyGoSettings: TinyGoConfiguration = ConfigurationWithHistory()
 
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 

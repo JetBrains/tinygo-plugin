@@ -5,7 +5,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
-import org.jetbrains.tinygoplugin.configuration.SettingsWithHistory
+import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -20,7 +20,7 @@ class TinyGoSettingsService(private val project: Project) :
     }
 
     // local copy of the settings
-    override var tinyGoSettings: TinyGoConfiguration = SettingsWithHistory(project)
+    override var tinyGoSettings: TinyGoConfiguration = ConfigurationWithHistory(project)
 
     private val infoExtractor = TinyGoInfoExtractor(project)
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
@@ -48,7 +48,7 @@ class TinyGoSettingsService(private val project: Project) :
     }
 
     override fun reset() {
-        tinyGoSettings = SettingsWithHistory(project)
+        tinyGoSettings = ConfigurationWithHistory(project)
         propertiesWrapper.reset()
         super.reset()
     }

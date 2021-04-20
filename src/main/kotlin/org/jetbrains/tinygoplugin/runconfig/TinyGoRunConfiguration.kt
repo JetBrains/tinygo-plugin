@@ -18,7 +18,7 @@ import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
-import org.jetbrains.tinygoplugin.configuration.SettingsWithHistory
+import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.absoluteOrRelativePath
 import org.jetbrains.tinygoplugin.configuration.toRelativePath
@@ -60,7 +60,7 @@ class TinyGoRunConfiguration(
     val executable: VirtualFile? = TinyGoConfiguration.getInstance(project).sdk.executable
 
     init {
-        val tinyGoSettings = SettingsWithHistory(project)
+        val tinyGoSettings = ConfigurationWithHistory(project)
         val projectFile = project.workspaceFile
         val workspaceFolder = projectFile?.parent?.parent
         val mainPath = workspaceFolder?.canonicalPath ?: ""

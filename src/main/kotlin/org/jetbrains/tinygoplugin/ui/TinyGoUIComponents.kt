@@ -83,7 +83,7 @@ private fun LayoutBuilder.tinyGoSettings(
     row(TinyGoBundle.message(SDK_LABEL)) {
         tinyGoSdkComboChooser = tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath)
     }
-    row(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
+    titledRow(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
         row(TinyGoBundle.message(TARGET_LABEL)) {
             targetChooser(wrapper, tinyGoSdkComboChooser)
         }
