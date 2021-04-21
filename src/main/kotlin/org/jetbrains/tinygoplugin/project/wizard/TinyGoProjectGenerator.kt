@@ -1,6 +1,8 @@
 package org.jetbrains.tinygoplugin.project.wizard
 
 import com.goide.GoIcons
+import com.goide.vgo.wizard.VgoModuleBuilder
+import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
 import com.intellij.openapi.module.Module
@@ -8,6 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.services.propagateGoFlags
@@ -38,6 +41,13 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
     ) {
         newProjectSettings.tinyGoSettings.saveState(project)
         extractTinyGoSettings(project, newProjectSettings.tinyGoSettings)
+        val gomodSupportIntroduced = TinyGoSdkVersion(0, 14, 0)
+        if (newProjectSettings.tinyGoSettings.sdk.sdkVersion.isAtLeast(gomodSupportIntroduced)) {
+            VgoModuleBuilder.vgoModuleCreated(module,
+                VgoNewProjectSettings(newProjectSettings.goSdk, emptyMap(), true),
+                true,
+                baseDir.path)
+        }
     }
 
     override fun createPeer(): ProjectGeneratorPeer<TinyGoNewProjectSettings> = TinyGoProjectGeneratorPeer()
