@@ -32,14 +32,15 @@
                          level="ERROR"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.GoInspection"/>
 
-        <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootProvider"/>
+        <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoLibraryProvider"/>
         <runConfigurationProducer id="TinyGoFlashConfigurationProducer"
                                   implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationProducer"/>
         <runLineMarkerContributor language="go"
                                   implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoRunLineMarkerContributor"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
-        <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
+        <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before default"/>
         <importsFilter implementation="org.jetbrains.tinygoplugin.services.TinyGoImportsFilter"/>
+        <rootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootsProvider" order="before default"/>
     </extensions>
 </idea-plugin>

@@ -5,12 +5,9 @@ import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.AdditionalLibraryRootsProvider
 import com.intellij.openapi.roots.SyntheticLibrary
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons.TinyGoLibraryIcon
-import java.nio.file.Paths
 import javax.swing.Icon
 
 class TinyGoRootLibrary(private val moduleName: String, private val sourceRoots: Collection<VirtualFile>) :
@@ -35,7 +32,7 @@ class TinyGoRootLibrary(private val moduleName: String, private val sourceRoots:
     override fun getIcon(unused: Boolean): Icon = TinyGoLibraryIcon
 }
 
-class TinyGoRootProvider : AdditionalLibraryRootsProvider() {
+class TinyGoLibraryProvider : AdditionalLibraryRootsProvider() {
     override fun getAdditionalProjectLibraries(project: Project): Collection<SyntheticLibrary> {
         val tinygoRoots = getRootsToWatch(project)
         return if (tinygoRoots.isEmpty()) emptyList() else listOf(TinyGoRootLibrary("TinyGo", tinygoRoots))
