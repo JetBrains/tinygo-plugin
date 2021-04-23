@@ -1,10 +1,17 @@
 package org.jetbrains.tinygoplugin.services
 
+import com.goide.GoLibrariesUtil
+import com.goide.project.GoBuildTargetSettings
 import com.goide.project.GoModuleSettings
+import com.goide.sdk.GoSdkService
+import com.goide.util.GoUtil
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.NamedConfigurable
+import com.intellij.openapi.util.EmptyRunnable
+import com.intellij.util.messages.MessageBus
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
@@ -81,8 +88,21 @@ class TinyGoSettingsService(private val project: Project) :
 
     override fun apply() {
         logger.warn("Apply called")
+        val oldSdk = TinyGoConfiguration.getInstance(project).sdk
         tinyGoSettings.saveState(project)
         propagateGoFlags()
+        if (oldSdk != tinyGoSettings.sdk) {
+            if (!project.isDisposed) {
+                ApplicationManager.getApplication().assertIsDispatchThread()
+                GoSdkService.getInstance(project).incModificationCount()
+                GoUtil.cleanResolveCache(project)
+                GoLibrariesUtil.updateLibraries(project, EmptyRunnable.getInstance(), null)
+                val messageBus: MessageBus = project.getMessageBus()
+                val modules = ModuleManager.getInstance(project).modules
+                modules.filter { GoBuildTargetSettings.DEFAULT == GoModuleSettings.getInstance(it).buildTargetSettings.goVersion }
+                    .forEach { messageBus.syncPublisher(GoModuleSettings.BUILD_TARGET_TOPIC).changed(it, true) }
+            }
+        }
     }
 
     override fun getDisplayName(): String = "TinyGo"
