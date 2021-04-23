@@ -1,9 +1,22 @@
 package main
 
-import "machine"
+import (
+    "machine"
+    "time"
+)
+
+const (
+	upTime = time.Second * 5
+	downTime = time.Second
+)
 
 func main() {
     led := machine.LED
     led.Configure(machine.PinConfig{Mode: machine.PinOutput})
-    led.High()#[[$END$]]#
+    for {
+        led.High()
+        time.Sleep(upTime)
+        led.Low()
+        time.Sleep(downTime)
+    }#[[$END$]]#
 }
