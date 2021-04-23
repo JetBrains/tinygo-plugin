@@ -12,8 +12,27 @@ import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateSettingsPanel
 import javax.swing.JComponent
 
-class TinyGoConfigurationWithTagUpdate(private val settings: TinyGoConfiguration, private val callback: () -> Unit) :
+class TinyGoConfigurationWithTagUpdate(
+    private val settings: TinyGoConfiguration,
+    project: Project,
+    private val callback: () -> Unit,
+) :
     TinyGoConfiguration by settings {
+
+    constructor(project: Project, callback: () -> Unit) : this(ConfigurationWithHistory(project), project, callback)
+
+    init {
+        val moduleSettings = goSettings(project)
+        if (moduleSettings == null) {
+            TinyGoSettingsService.logger.warn("Could not find go module settings")
+        } else {
+            val buildSettings = moduleSettings.buildTargetSettings
+            settings.goArch = buildSettings.arch
+            settings.goOS = buildSettings.os
+            settings.goTags = buildSettings.customFlags.joinToString(" ")
+        }
+    }
+
     override var targetPlatform: String
         get() = settings.targetPlatform
         set(value) {
@@ -24,6 +43,25 @@ class TinyGoConfigurationWithTagUpdate(private val settings: TinyGoConfiguration
                 }
             }
         }
+
+    private fun goSettings(project: Project): GoModuleSettings? =
+        ModuleManager.getInstance(project).modules.mapNotNull {
+            it?.getService(GoModuleSettings::class.java)
+        }.firstOrNull()
+
+    override fun modified(project: Project): Boolean {
+        val moduleSettings = goSettings(project)
+        if (moduleSettings != null) {
+            val buildSettings = moduleSettings.buildTargetSettings
+            if (settings.goArch != buildSettings.arch ||
+                settings.goOS != buildSettings.os ||
+                settings.goTags != buildSettings.customFlags.joinToString(" ")
+            ) {
+                return true
+            }
+        }
+        return settings.modified(project)
+    }
 }
 
 class TinyGoSettingsService(private val project: Project) :
@@ -34,7 +72,7 @@ class TinyGoSettingsService(private val project: Project) :
 
     // local copy of the settings
     override var tinyGoSettings: TinyGoConfiguration =
-        TinyGoConfigurationWithTagUpdate(ConfigurationWithHistory(project), this::callExtractor)
+        TinyGoConfigurationWithTagUpdate(project, this::callExtractor)
 
     private val infoExtractor = TinyGoInfoExtractor(project)
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
@@ -63,7 +101,7 @@ class TinyGoSettingsService(private val project: Project) :
     }
 
     override fun reset() {
-        tinyGoSettings = TinyGoConfigurationWithTagUpdate(ConfigurationWithHistory(project), this::callExtractor)
+        tinyGoSettings = TinyGoConfigurationWithTagUpdate(project, this::callExtractor)
         propertiesWrapper.reset()
         super.reset()
     }
