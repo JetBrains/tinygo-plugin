@@ -8,7 +8,7 @@ import java.util.Objects
 
 class TinyGoDownloadingSdk(tinyGoVersion: String?, targetPath: String?) :
     TinyGoSdk(
-        tinyGoHomeUrl = VfsUtilCore.pathToUrl(FileUtil.join(targetPath, tinyGoVersion)),
+        tinyGoHomeUrl = VfsUtilCore.pathToUrl(FileUtil.join(targetPath, "tinygo-v$tinyGoVersion")),
         tinyGoVersion = tinyGoVersion,
     ) {
 
