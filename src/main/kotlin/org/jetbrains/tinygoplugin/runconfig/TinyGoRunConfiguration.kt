@@ -48,16 +48,14 @@ class TinyGoRunConfiguration(
 
     val command = runType.command
     var runConfig: RunSettings
-    var cmdlineOptions: Collection<String>
-        get() = runConfig.cmdlineOptions.split(' ').map(String::trim).filterNot(String::isEmpty)
-        set(value) {
-            runConfig.cmdlineOptions = value.joinToString(" ")
-        }
+    val cmdlineOptions: List<String>
+        get() = runConfig.cmdlineOptions
 
     override val tinyGoSettings: RunSettings
         get() = runConfig
 
-    val executable: VirtualFile? = TinyGoConfiguration.getInstance(project).sdk.executable
+    val executable: VirtualFile?
+        get() = TinyGoConfiguration.getInstance(project).sdk.executable
 
     init {
         val tinyGoSettings = ConfigurationWithHistory(project)
@@ -66,16 +64,6 @@ class TinyGoRunConfiguration(
         val mainPath = workspaceFolder?.canonicalPath ?: ""
         runConfig =
             RunSettings(tinyGoSettings, "", mainPath)
-        if (tinyGoSettings.sdk != nullSdk) {
-            if (runConfig.gc == GarbageCollector.AUTO_DETECT || runConfig.scheduler == Scheduler.AUTO_DETECT) {
-                TinyGoInfoExtractor(project).extractTinyGoInfo(runConfig) { _: GoExecutor.ExecutionResult?, output: String ->
-                    runConfig.extractTinyGoInfo(output)
-                    cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
-                }
-            } else {
-                cmdlineOptions = tinyGoSettings.assembleCommandLineArguments()
-            }
-        }
     }
 
     private fun mainFile(): VirtualFile? {
@@ -118,7 +106,7 @@ class TinyGoRunConfiguration(
     override fun writeExternal(element: Element) {
         super.writeExternal(element)
         JDOMExternalizerUtil.writeCustomField(element, MAIN_FILE, toRelativePath(runConfig.mainFile, project))
-        JDOMExternalizerUtil.writeCustomField(element, CMD_OPTIONS, runConfig.cmdlineOptions)
+        JDOMExternalizerUtil.writeCustomField(element, CMD_OPTIONS, runConfig.userArguments)
     }
 
     override fun readExternal(element: Element) {
@@ -127,7 +115,6 @@ class TinyGoRunConfiguration(
         runConfig.mainFile =
             absoluteOrRelativePath(filePath, project)?.path ?: project.basePath ?: ""
         val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
-        runConfig.cmdlineOptions = arguments ?: ""
-        if (arguments == null && runConfig.sdk != nullSdk) cmdlineOptions = runConfig.assembleCommandLineArguments()
+        runConfig.userArguments = arguments ?: ""
     }
 }

@@ -28,8 +28,8 @@ class RunConfigurationWrapper(private val configurationProvider: ConfigurationPr
     )
 
     val cmdLineArguments = RunConfigurationProperty(
-        prop = propertyGraph.graphProperty(configurationProvider.tinyGoSettings::cmdlineOptions),
-        objProperty = RunSettings::cmdlineOptions
+        prop = propertyGraph.graphProperty(configurationProvider.tinyGoSettings::userArguments),
+        objProperty = RunSettings::userArguments
     )
 }
 
