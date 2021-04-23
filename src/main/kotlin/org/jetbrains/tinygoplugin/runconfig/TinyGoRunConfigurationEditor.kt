@@ -31,14 +31,7 @@ class RunConfigurationWrapper(private val configurationProvider: ConfigurationPr
         prop = propertyGraph.graphProperty(configurationProvider.tinyGoSettings::cmdlineOptions),
         objProperty = RunSettings::cmdlineOptions
     )
-    val buildType =
-        RunConfigurationProperty(
-            prop = propertyGraph.graphProperty(configurationProvider.tinyGoSettings::buildType),
-            objProperty = RunSettings::buildType
-        )
 }
-
-enum class BuildType { FOLDER, FILE }
 
 class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoRunConfiguration) :
     SettingsEditor<TinyGoRunConfiguration>() {
@@ -67,21 +60,11 @@ class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoRunConfig
                 textField(properties.cmdLineArguments).growPolicy(GrowPolicy.MEDIUM_TEXT)
             }
             row("Path to main") {
-                row {
-                    val box = comboBox(CollectionComboBoxModel(listOf(BuildType.FOLDER, BuildType.FILE)),
-                        property = properties.buildType)
-                    val fileChooserDescriptor = FileChooserDescriptor(true, false, false, false, false, false)
-                    val folderChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
-                    textFieldWithBrowseButton(
-                        property = properties.mainFile,
-                        fileChooserDescriptor = fileChooserDescriptor
-                    ).visibleIf(box.predicate(BuildType.FILE))
-
-                    textFieldWithBrowseButton(
-                        property = properties.mainFile,
-                        fileChooserDescriptor = folderChooserDescriptor
-                    ).visibleIf(box.predicate(BuildType.FOLDER))
-                }
+                val fileChooserDescriptor = FileChooserDescriptor(true, true, false, false, false, false)
+                textFieldWithBrowseButton(
+                    property = properties.mainFile,
+                    fileChooserDescriptor = fileChooserDescriptor
+                )
             }
         }
     }

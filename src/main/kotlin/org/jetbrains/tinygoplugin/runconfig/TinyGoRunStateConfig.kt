@@ -34,7 +34,6 @@ data class RunSettings(
     val tinyGoConfiguration: TinyGoConfiguration,
     var cmdlineOptions: String,
     var mainFile: String,
-    var buildType: BuildType = BuildType.FILE,
 ) : TinyGoConfiguration by tinyGoConfiguration {
     override fun deepCopy(): RunSettings = RunSettings(
         tinyGoConfiguration.deepCopy(),
