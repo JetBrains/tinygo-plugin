@@ -46,4 +46,3 @@ class ConfigurationWithHistory(
         }
     var predefinedTargets: List<String> = tinygoTargets(settings.sdk)
 }
-

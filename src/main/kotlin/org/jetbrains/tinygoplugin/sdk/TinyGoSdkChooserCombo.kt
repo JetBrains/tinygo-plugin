@@ -82,7 +82,7 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
                 if (files.isNotEmpty()) {
                     val valid = checkDirectoryForTinyGo(files[0])
                     if (!valid) {
-                        throw Exception(TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR))
+                        throw IllegalArgumentException(TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR))
                     }
                 }
             }

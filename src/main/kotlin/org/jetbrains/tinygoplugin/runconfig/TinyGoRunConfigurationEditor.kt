@@ -4,7 +4,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.options.SettingsEditor
-import com.intellij.ui.CollectionComboBoxModel
 import com.intellij.ui.layout.CellBuilder
 import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.ui.layout.GrowPolicy

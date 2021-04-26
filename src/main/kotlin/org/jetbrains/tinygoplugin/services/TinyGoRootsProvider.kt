@@ -18,6 +18,7 @@ class TinyGoRootsProvider : GoRootsProvider {
     override fun getGoPathBinRoots(p0: Project?, p1: Module?): MutableCollection<VirtualFile> = Collections.emptyList()
 
     override fun isExternal(): Boolean = false
+    @Suppress("ReturnCount")
     override fun getVendorDirectoriesInResolveScope(
         project: Project,
         module: Module?,

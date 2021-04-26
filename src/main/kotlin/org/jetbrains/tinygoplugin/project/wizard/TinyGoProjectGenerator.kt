@@ -16,6 +16,9 @@ import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.services.propagateGoFlags
 import javax.swing.Icon
 
+@Suppress("MagicNumber")
+val tinyGoVersionWithModules = TinyGoSdkVersion(0, 14, 0)
+
 class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
     override fun getDescription(): String = "TinyGo project"
 
@@ -41,8 +44,7 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
     ) {
         newProjectSettings.tinyGoSettings.saveState(project)
         extractTinyGoSettings(project, newProjectSettings.tinyGoSettings)
-        val gomodSupportIntroduced = TinyGoSdkVersion(0, 14, 0)
-        if (newProjectSettings.tinyGoSettings.sdk.sdkVersion.isAtLeast(gomodSupportIntroduced)) {
+        if (newProjectSettings.tinyGoSettings.sdk.sdkVersion.isAtLeast(tinyGoVersionWithModules)) {
             VgoModuleBuilder.vgoModuleCreated(module,
                 VgoNewProjectSettings(newProjectSettings.goSdk, emptyMap(), true),
                 true,

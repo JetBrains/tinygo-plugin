@@ -13,6 +13,7 @@ class TinyGoRunConfigurationProducer : GoRunConfigurationProducerBase<TinyGoRunC
     override fun getConfigurationFactory(): ConfigurationFactory =
         TinyGoRunConfigurationType.getInstance().flashFactory
 
+    @Suppress("ReturnCount")
     override fun setupConfigurationFromContext(
         configuration: TinyGoRunConfiguration,
         context: ConfigurationContext,

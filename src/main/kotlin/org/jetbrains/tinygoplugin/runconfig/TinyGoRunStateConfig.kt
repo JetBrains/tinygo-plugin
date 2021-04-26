@@ -15,7 +15,11 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
     GoRunningState<TinyGoRunConfiguration>(env, module, configuration) {
     // override the function to supply GoExecutor with tinygo
     override fun createRunExecutor(): GoExecutor {
-        val arguments = configuration.cmdlineOptions + listOf(configuration.runConfig.mainFile)
+        val arguments =
+            listOf(configuration.command) +
+                    configuration.cmdlineOptions +
+                    listOf("-size", "full") +
+                    listOf(configuration.runConfig.mainFile)
         val tinyGoExecutablePath = configuration.executable
         if (tinyGoExecutablePath == null) {
             notifyTinyGoNotConfigured(configuration.project, "TinyGo SDK is not set. Please configure TinyGo SDK")

@@ -18,7 +18,7 @@ private val TOOLTIP_PROVIDER =
     Function { _: PsiElement? -> "Flash TinyGo" }
 
 class TinyGoRunLineMarkerContributor : GoRunLineMarkerProvider() {
-
+    @Suppress("MagicNumber", "ReturnCount")
     override fun getInfo(e: PsiElement): Info? {
         if (e.node.elementType === GoTypes.IDENTIFIER) {
             val parent = e.parent
@@ -30,7 +30,6 @@ class TinyGoRunLineMarkerContributor : GoRunLineMarkerProvider() {
             if (settings.sdk == nullSdk) return null
             if (GoUtil.isInProject(file) && GoRunUtil.isMainGoFile(file) && parent is GoFunctionDeclaration) {
                 if (GoConstants.MAIN == parent.name) {
-                    // TODO: Investigate order parameter
                     val actions = ExecutorAction.getActions(1)
                     return Info(TinyGoPluginIcons.TinyGoIcon,
                         TOOLTIP_PROVIDER,

@@ -3,7 +3,6 @@ package org.jetbrains.tinygoplugin.runconfig
 import com.goide.GoFileType
 import com.goide.execution.GoModuleBasedConfiguration
 import com.goide.execution.GoRunConfigurationBase
-import com.goide.util.GoExecutor
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
@@ -16,15 +15,10 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
-import org.jetbrains.tinygoplugin.configuration.GarbageCollector
-import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.absoluteOrRelativePath
 import org.jetbrains.tinygoplugin.configuration.toRelativePath
-import org.jetbrains.tinygoplugin.sdk.nullSdk
-import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
-import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 

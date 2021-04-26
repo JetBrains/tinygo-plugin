@@ -8,13 +8,11 @@ import com.goide.util.GoUtil
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiManager
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.ResolveState
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import java.io.File
 
 class TinyGoImportResolver : GoImportResolver {
     override fun resolve(

@@ -14,13 +14,15 @@ import java.net.URL
 import java.util.Objects
 import javax.swing.Icon
 
+@Suppress("ReturnCount", "MagicNumber")
 fun tinyGoSdkVersion(versionString: String?): TinyGoSdkVersion {
     val logger = getLogger<TinyGoSdkVersion>()
     val numbers = versionString?.split('.')
     if (numbers == null) {
         logger.warn { "Null version provided" }
         return unknownVersion
-    } else if (numbers.size != 3) {
+    }
+    if (numbers.size != 3) {
         logger.warn { "Could not parse version: $versionString" }
         return unknownVersion
     }

@@ -73,7 +73,7 @@ private const val TARGET_LABEL = "ui.target"
 private const val COMPILER_PARAMETERS_LABEL = "ui.compiler"
 private const val GC_LABEL = "ui.gc"
 private const val SCHEDULER_LABEL = "ui.scheduler"
-private const val targetBrowseDialogTitle = "ui.target.dialogTitle"
+private const val TARGET_BROWSE_DIALOG_TITLE = "ui.target.dialogTitle"
 
 private fun LayoutBuilder.tinyGoSettings(
     wrapper: TinyGoPropertiesWrapper,
@@ -92,7 +92,6 @@ private fun LayoutBuilder.tinyGoSettings(
         row(TinyGoBundle.message(SCHEDULER_LABEL)) {
             comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
         }
-
     }
 }
 
@@ -103,7 +102,7 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder
     textFieldWithHistoryWithBrowseButton(
         { wrapper.target.get() },
         { wrapper.target.set(it) },
-        TinyGoBundle.message(targetBrowseDialogTitle),
+        TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE),
         null,
         jsonChooser,
     ).applyToComponent {
@@ -142,5 +141,4 @@ fun generateSettingsPanel(
     row("Go tags") {
         expandableTextField(wrapper.goTags).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
-
 }

@@ -99,8 +99,9 @@ class TinyGoSettingsService(private val project: Project) :
                 GoLibrariesUtil.updateLibraries(project, EmptyRunnable.getInstance(), null)
                 val messageBus: MessageBus = project.getMessageBus()
                 val modules = ModuleManager.getInstance(project).modules
-                modules.filter { GoBuildTargetSettings.DEFAULT == GoModuleSettings.getInstance(it).buildTargetSettings.goVersion }
-                    .forEach { messageBus.syncPublisher(GoModuleSettings.BUILD_TARGET_TOPIC).changed(it, true) }
+                modules.filter {
+                    GoBuildTargetSettings.DEFAULT == GoModuleSettings.getInstance(it).buildTargetSettings.goVersion
+                }.forEach { messageBus.syncPublisher(GoModuleSettings.BUILD_TARGET_TOPIC).changed(it, true) }
             }
         }
     }
