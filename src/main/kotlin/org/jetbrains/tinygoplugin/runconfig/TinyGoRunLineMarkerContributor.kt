@@ -31,9 +31,11 @@ class TinyGoRunLineMarkerContributor : GoRunLineMarkerProvider() {
             if (GoUtil.isInProject(file) && GoRunUtil.isMainGoFile(file) && parent is GoFunctionDeclaration) {
                 if (GoConstants.MAIN == parent.name) {
                     val actions = ExecutorAction.getActions(1)
-                    return Info(TinyGoPluginIcons.TinyGoIcon,
+                    return Info(
+                        TinyGoPluginIcons.TinyGoIcon,
                         TOOLTIP_PROVIDER,
-                        actions[0], actions[actions.size - 1])
+                        actions[0], actions[actions.size - 1]
+                    )
                 }
             }
         }

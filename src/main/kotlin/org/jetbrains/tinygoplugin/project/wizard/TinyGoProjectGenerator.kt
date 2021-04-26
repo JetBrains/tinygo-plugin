@@ -45,10 +45,12 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
         newProjectSettings.tinyGoSettings.saveState(project)
         extractTinyGoSettings(project, newProjectSettings.tinyGoSettings)
         if (newProjectSettings.tinyGoSettings.sdk.sdkVersion.isAtLeast(tinyGoVersionWithModules)) {
-            VgoModuleBuilder.vgoModuleCreated(module,
+            VgoModuleBuilder.vgoModuleCreated(
+                module,
                 VgoNewProjectSettings(newProjectSettings.goSdk, emptyMap(), true),
                 true,
-                baseDir.path)
+                baseDir.path
+            )
         }
     }
 

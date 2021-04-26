@@ -9,8 +9,10 @@ class ConfigurationWithHistory(
     private val pathConverter: PathConverter = object : PathConverter {},
 ) :
     TinyGoConfiguration by settings {
-    constructor(project: Project) : this(TinyGoConfiguration.getInstance(project).deepCopy(),
-        ProjectPathConverter(project))
+    constructor(project: Project) : this(
+        TinyGoConfiguration.getInstance(project).deepCopy(),
+        ProjectPathConverter(project)
+    )
 
     override var sdk: TinyGoSdk
         get() = settings.sdk

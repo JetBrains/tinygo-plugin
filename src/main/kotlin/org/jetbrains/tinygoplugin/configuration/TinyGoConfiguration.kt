@@ -29,8 +29,7 @@ internal data class TinyGoConfigurationImpl(
 
     override fun modified(project: Project): Boolean {
         val currentSettings = getInstance(project)
-        return currentSettings.projectConfig != projectConfig ||
-                currentSettings.userConfig != userConfig
+        return currentSettings.projectConfig != projectConfig || currentSettings.userConfig != userConfig
     }
 
     override fun deepCopy(): TinyGoConfigurationImpl {
