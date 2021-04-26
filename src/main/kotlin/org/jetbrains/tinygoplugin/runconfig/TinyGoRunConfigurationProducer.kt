@@ -43,6 +43,6 @@ class TinyGoRunConfigurationProducer : GoRunConfigurationProducerBase<TinyGoRunC
         val file = contextFile?.virtualFile ?: return false
         val module = findModule(contextFile, context) ?: return false
         return configuration.runConfig.mainFile == file.path &&
-                configuration.name.startsWith("TinyGo ${module.name}")
+            configuration.name.startsWith("TinyGo ${module.name}")
     }
 }
