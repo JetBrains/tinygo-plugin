@@ -1,8 +1,10 @@
 package org.jetbrains.tinygoplugin.ui
 
 import com.intellij.json.JsonFileType
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
+import com.intellij.openapi.util.Disposer
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.layout.Cell
 import com.intellij.ui.layout.CellBuilder
@@ -23,8 +25,9 @@ import javax.swing.JPanel
 
 fun generateTinyGoParametersPanel(
     wrapper: TinyGoPropertiesWrapper,
+    parent: Disposable,
 ): JPanel = panel {
-    tinyGoSettings(wrapper)
+    tinyGoSettings(wrapper, parent)
 }
 
 private fun AtomicBoolean.lockOrSkip(action: () -> Unit) {
@@ -54,10 +57,14 @@ fun TinyGoSdkChooserCombo.bind(property: GraphProperty<TinyGoSdk>) {
     }
 }
 
-fun Cell.tinyGoSdkComboChooser(property: GraphProperty<TinyGoSdk>): CellBuilder<TinyGoSdkChooserCombo> {
+fun Cell.tinyGoSdkComboChooser(
+    property: GraphProperty<TinyGoSdk>,
+    parentDisposable: Disposable,
+): CellBuilder<TinyGoSdkChooserCombo> {
     return component(TinyGoSdkChooserCombo())
         .applyToComponent {
             selectSdkByUrl(property.get().homeUrl)
+            Disposer.register(parentDisposable, this)
         }
         .withBinding(
             { component -> component.sdk },
@@ -77,10 +84,11 @@ private const val TARGET_BROWSE_DIALOG_TITLE = "ui.target.dialogTitle"
 
 private fun LayoutBuilder.tinyGoSettings(
     wrapper: TinyGoPropertiesWrapper,
+    parentDisposable: Disposable,
 ) {
     lateinit var tinyGoSdkComboChooser: CellBuilder<TinyGoSdkChooserCombo>
     row(TinyGoBundle.message(SDK_LABEL)) {
-        tinyGoSdkComboChooser = tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath)
+        tinyGoSdkComboChooser = tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath, parentDisposable)
     }
     titledRow(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
         row(TinyGoBundle.message(TARGET_LABEL)) {
@@ -128,9 +136,10 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder
 
 fun generateSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
+    parentDisposable: Disposable,
 ) = panel {
     row {
-        tinyGoSettings(wrapper)
+        tinyGoSettings(wrapper, parentDisposable)
     }
     row("GOOS") {
         textField(property = wrapper.goOS).growPolicy(GrowPolicy.MEDIUM_TEXT)

@@ -36,9 +36,7 @@ class TinyGoProjectGeneratorPeer :
         panel.add(createGridPanel(locationComponent, sdkCombo).resize().createPanel())
         panel.add(
             decorateSettingsPanelForUI(
-                generateTinyGoParametersPanel(
-                    propertiesWrapper,
-                )
+                generateTinyGoParametersPanel(propertiesWrapper, parentDisposable)
             ),
         )
         return panel
