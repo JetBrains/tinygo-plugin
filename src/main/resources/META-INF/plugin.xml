@@ -8,7 +8,11 @@
     <depends>com.intellij.modules.platform</depends>
     <!-- Requires the Go plugin -->
     <depends>org.jetbrains.plugins.go</depends>
-
+    <actions>
+        <action class="org.jetbrains.tinygoplugin.services.CreateFileAction">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
+        </action>
+    </actions>
 
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable parentId="go" instance="org.jetbrains.tinygoplugin.services.TinyGoSettingsService"
