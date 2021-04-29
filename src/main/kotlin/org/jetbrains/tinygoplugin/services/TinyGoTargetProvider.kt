@@ -1,15 +1,29 @@
 package org.jetbrains.tinygoplugin.services
 
-import com.intellij.json.JsonFileType
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.nullSdk
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.*
+import java.util.stream.Collectors
 
-fun tinygoTargets(sdk: TinyGoSdk): List<String> {
+fun tinyGoTargets(sdk: TinyGoSdk): Set<String> {
     if (sdk == nullSdk) {
-        return mutableListOf()
+        return emptySet()
     }
-    val targetsFolder = sdk.sdkRoot?.findChild("targets") ?: return mutableListOf()
-    return targetsFolder.children.filter { it.fileType == JsonFileType.INSTANCE }
-        .map(VirtualFile::getNameWithoutExtension).sorted().toList()
+    val sdkPath = sdk.sdkRoot?.toNioPath() ?: return emptySet()
+    val targetsFolder = Paths.get(sdkPath.toString(), "targets")
+    if (!targetsFolder.exists()) {
+        return emptySet()
+    }
+    return Files.list(targetsFolder).map {
+        it.fileName.toString()
+    }.filter {
+        it.endsWith(".json")
+    }.map {
+        it.substringBeforeLast(".json")
+    }.collect(Collectors.toCollection {
+        TreeSet()
+    }) as TreeSet<String>
 }

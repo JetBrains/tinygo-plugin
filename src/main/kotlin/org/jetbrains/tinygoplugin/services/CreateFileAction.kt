@@ -33,16 +33,11 @@ class CreateFileAction :
         if (tinyGoSettings.sdk != nullSdk) {
 
             builder.setTitle(message(TINYGO_TEMPLATE_DIALOG_NAME))
-            val examples = cachedExamples(project, tinyGoSettings.sdk.sdkRoot!!)
+            val examples = availableExamples(project, tinyGoSettings.sdk.sdkRoot!!)
             examples.forEach {
                 builder.addKind(it, TinyGoPluginIcons.TinyGoIcon, it)
             }
         }
-    }
-
-    private val exampleCache: ConcurrentMap<VirtualFile, Collection<String>> = ConcurrentHashMap()
-    private fun cachedExamples(project: Project, sdkPath: VirtualFile) = exampleCache.computeIfAbsent(sdkPath) {
-        availableExamples(project, sdkPath)
     }
 
     private fun availableExamples(project: Project, sdkPath: VirtualFile): Collection<String> {

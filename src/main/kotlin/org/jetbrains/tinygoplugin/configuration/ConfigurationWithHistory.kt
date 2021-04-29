@@ -2,7 +2,7 @@ package org.jetbrains.tinygoplugin.configuration
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
-import org.jetbrains.tinygoplugin.services.tinygoTargets
+import org.jetbrains.tinygoplugin.services.tinyGoTargets
 
 class ConfigurationWithHistory(
     val settings: TinyGoConfiguration = TinyGoConfiguration.getInstance(),
@@ -19,7 +19,7 @@ class ConfigurationWithHistory(
         set(value) {
             if (value != settings.sdk) {
                 settings.sdk = value
-                predefinedTargets = tinygoTargets(value)
+                predefinedTargets = tinyGoTargets(value)
             }
         }
     override var targetPlatform: String
@@ -34,7 +34,7 @@ class ConfigurationWithHistory(
             var newTarget = value
             if (!predefinedTargets.contains(newTarget)) {
                 newTarget = pathConverter.toRelative(value).ifEmpty { value }
-                if (!userTargets.contains(newTarget)) {
+                if (!settings.userTargets.contains(newTarget)) {
                     settings.userTargets += newTarget
                 }
             }
@@ -46,5 +46,5 @@ class ConfigurationWithHistory(
         set(value) {
             settings.userTargets = value
         }
-    var predefinedTargets: List<String> = tinygoTargets(settings.sdk)
+    var predefinedTargets: Set<String> = tinyGoTargets(settings.sdk)
 }
