@@ -43,8 +43,8 @@
                                   implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoRunLineMarkerContributor"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
-        <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before default"/>
+        <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
         <importsFilter implementation="org.jetbrains.tinygoplugin.services.TinyGoImportsFilter"/>
-        <rootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootsProvider" order="before default"/>
+        <rootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootsProvider" order="before vgo"/>
     </extensions>
 </idea-plugin>

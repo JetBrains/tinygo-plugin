@@ -5,9 +5,10 @@ import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.nullSdk
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.*
+import java.util.TreeSet
 import java.util.stream.Collectors
 
+@Suppress("ReturnCount")
 fun tinyGoTargets(sdk: TinyGoSdk): Set<String> {
     if (sdk == nullSdk) {
         return emptySet()
@@ -17,13 +18,15 @@ fun tinyGoTargets(sdk: TinyGoSdk): Set<String> {
     if (!targetsFolder.exists()) {
         return emptySet()
     }
-    return Files.list(targetsFolder).map {
-        it.fileName.toString()
-    }.filter {
-        it.endsWith(".json")
-    }.map {
-        it.substringBeforeLast(".json")
-    }.collect(Collectors.toCollection {
-        TreeSet()
-    }) as TreeSet<String>
+    return Files.list(targetsFolder).use { targetStream ->
+        targetStream.map {
+            it.fileName.toString()
+        }.filter {
+            it.endsWith(".json")
+        }.map {
+            it.substringBeforeLast(".json")
+        }.collect(Collectors.toCollection {
+            TreeSet()
+        }) as TreeSet<String>
+    }
 }

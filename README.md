@@ -34,8 +34,6 @@ Only development version is available at the moment.
   
 [comment]: <> (- Manually:)
 
-[comment]: <> (  Download the [latest release]&#40;https://github.com/pleomaxx3002/tinygo-plugin/releases/latest&#41; and install it manually using)
-
 [comment]: <> (  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>)
 
 
@@ -50,9 +48,6 @@ Use ktlint plugin to format code
 ## Usage
 
 1. Go to `Preferences->Go->TinyGo`.
-1. Insert correct path to tinygo executable.
-1. Add target platform
-1. (Optional) Update Garbage collection choice and Scheduler
-1. Press detect button
-1. Press "Update gopath" button.
-1. Enable "Index Entire GOPATH" in GOPATH settings
+1. Select TinyGo SDK.
+1. Add target platform or select from defined in the SDK.
+1. (Optional) Update Garbage collection choice and Scheduler.

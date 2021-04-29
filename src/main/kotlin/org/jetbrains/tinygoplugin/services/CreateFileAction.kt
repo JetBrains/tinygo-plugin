@@ -10,12 +10,10 @@ import com.intellij.openapi.vfs.VirtualFileVisitor
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
-import com.jetbrains.rd.util.ConcurrentHashMap
 import org.jetbrains.tinygoplugin.TinyGoBundle.message
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.sdk.nullSdk
-import java.util.concurrent.ConcurrentMap
 
 private const val TINYGO_FILE_TEMPLATE = "ui.template.name"
 private const val TINYGO_TEMPLATE_ACTION_NAME = "ui.template.action.name"
@@ -44,17 +42,20 @@ class CreateFileAction :
         val examples = sdkPath.findChild("src")?.findChild("examples") ?: return emptyList()
         val psiManager = PsiManager.getInstance(project)
         val result = HashSet<String>()
-        VfsUtil.visitChildrenRecursively(examples, object : VirtualFileVisitor<Unit>() {
-            override fun visitFile(file: VirtualFile): Boolean {
-                if (!file.isDirectory && file.extension == "go") {
-                    val psiFile = psiManager.findFile(file)
-                    if (GoRunUtil.isMainGoFile(psiFile)) {
-                        result.add(VfsUtil.getRelativePath(file, examples) ?: "")
+        VfsUtil.visitChildrenRecursively(
+            examples,
+            object : VirtualFileVisitor<Unit>() {
+                override fun visitFile(file: VirtualFile): Boolean {
+                    if (!file.isDirectory && file.extension == "go") {
+                        val psiFile = psiManager.findFile(file)
+                        if (GoRunUtil.isMainGoFile(psiFile)) {
+                            result.add(VfsUtil.getRelativePath(file, examples) ?: "")
+                        }
                     }
+                    return true
                 }
-                return true
             }
-        })
+        )
         return result.filter(String::isNotEmpty)
     }
     @Suppress("ReturnCount")

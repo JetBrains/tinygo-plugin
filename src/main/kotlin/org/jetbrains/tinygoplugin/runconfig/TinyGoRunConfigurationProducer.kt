@@ -7,7 +7,6 @@ import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.sdk.nullSdk
 
 class TinyGoRunConfigurationProducer : GoRunConfigurationProducerBase<TinyGoRunConfiguration>() {
     override fun getConfigurationFactory(): ConfigurationFactory =
@@ -20,7 +19,7 @@ class TinyGoRunConfigurationProducer : GoRunConfigurationProducerBase<TinyGoRunC
         elementRef: Ref<PsiElement>,
     ): Boolean {
         val settings = TinyGoConfiguration.getInstance(context.project)
-        if (settings.sdk == nullSdk) return false
+        if (!settings.enabled) return false
         val element = getContextElement(context)
         val contextFile = element?.containingFile
 
