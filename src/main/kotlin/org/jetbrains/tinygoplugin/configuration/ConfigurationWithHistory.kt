@@ -3,15 +3,32 @@ package org.jetbrains.tinygoplugin.configuration
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.services.tinyGoTargets
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
+
+class LazyVar<T : Any>(private val initializer: () -> T) : ReadWriteProperty<Any?, T> {
+    private lateinit var value: T
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+        if (!this::value.isInitialized) {
+            value = initializer()
+        }
+        return value
+    }
+
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        this.value = value
+    }
+}
+
+fun <T : Any> lazyVar(initializer: () -> T): LazyVar<T> = LazyVar(initializer)
 
 class ConfigurationWithHistory(
     val settings: TinyGoConfiguration = TinyGoConfiguration.getInstance(),
-    private val pathConverter: PathConverter = object : PathConverter {},
 ) :
     TinyGoConfiguration by settings {
     constructor(project: Project) : this(
-        TinyGoConfiguration.getInstance(project).deepCopy(),
-        ProjectPathConverter(project)
+        TinyGoConfiguration.getInstance(project),
     )
 
     override var sdk: TinyGoSdk
@@ -22,29 +39,30 @@ class ConfigurationWithHistory(
                 predefinedTargets = tinyGoTargets(value)
             }
         }
+
     override var targetPlatform: String
-        get() {
-            if (predefinedTargets.contains(settings.targetPlatform)) {
-                return settings.targetPlatform
-            }
-            val absolutePath = pathConverter.toAbsolute(settings.targetPlatform)
-            return absolutePath.ifEmpty { settings.targetPlatform }
-        }
+        get() = settings.targetPlatform
         set(value) {
-            var newTarget = value
-            if (!predefinedTargets.contains(newTarget)) {
-                newTarget = pathConverter.toRelative(value).ifEmpty { value }
-                if (!settings.userTargets.contains(newTarget)) {
-                    settings.userTargets += newTarget
-                }
+            if (!predefinedTargets.contains(value) && !settings.userTargets.contains(value)) {
+                settings.userTargets += value
             }
-            settings.targetPlatform = newTarget
+            settings.targetPlatform = value
         }
+
     override var userTargets: List<String>
-        get() = settings.userTargets.map { pathConverter.toAbsolute(it) }
-            .filter(String::isNotEmpty) + predefinedTargets
+        get() = settings.userTargets + predefinedTargets
         set(value) {
             settings.userTargets = value
         }
-    var predefinedTargets: Set<String> = tinyGoTargets(settings.sdk)
+
+    override fun deepCopy(): TinyGoConfiguration {
+        val settingsCopy = settings.deepCopy()
+        val result = ConfigurationWithHistory(settingsCopy)
+        result.predefinedTargets = predefinedTargets
+        return result
+    }
+
+    var predefinedTargets: Set<String> by lazyVar {
+        tinyGoTargets(settings.sdk)
+    }
 }

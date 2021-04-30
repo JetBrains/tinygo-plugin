@@ -3,6 +3,7 @@ package org.jetbrains.tinygoplugin.runconfig
 import com.goide.GoFileType
 import com.goide.execution.GoModuleBasedConfiguration
 import com.goide.execution.GoRunConfigurationBase
+import com.intellij.conversion.impl.ConversionContextImpl
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
@@ -17,15 +18,16 @@ import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.configuration.absoluteOrRelativePath
-import org.jetbrains.tinygoplugin.configuration.toRelativePath
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
+import java.nio.file.Path
 
 private const val ERROR_SDK_NOT_SET = "run.configuration.errors.sdk"
 private const val ERROR_MAIN_FILE_NOT_FOUND = "run.configuration.errors.main"
 private const val ERROR_NOT_GO_FILE = "run.configuration.errors.type"
 private const val CONFIGURATION_EDITOR_NAME = "run.configuration.editor.name"
+private const val MAIN_FILE = "tinygo_main_file"
+private const val CMD_OPTIONS = "tinygo_cmd_options"
 
 class TinyGoRunConfiguration(
     project: Project,
@@ -35,13 +37,10 @@ class TinyGoRunConfiguration(
 ) :
     GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory),
     ConfigurationProvider<RunSettings> {
-    companion object {
-        const val MAIN_FILE = "tinygo_main_file"
-        const val CMD_OPTIONS = "tinygo_cmd_options"
-    }
-
     val command = runType.command
     var runConfig: RunSettings
+    private val context = ConversionContextImpl(Path.of(project.basePath ?: project.projectFile?.path ?: ""))
+
     val cmdlineOptions: List<String>
         get() = runConfig.cmdlineOptions
 
@@ -99,15 +98,14 @@ class TinyGoRunConfiguration(
 
     override fun writeExternal(element: Element) {
         super.writeExternal(element)
-        JDOMExternalizerUtil.writeCustomField(element, MAIN_FILE, toRelativePath(runConfig.mainFile, project))
+        JDOMExternalizerUtil.writeCustomField(element, MAIN_FILE, context.collapsePath(runConfig.mainFile))
         JDOMExternalizerUtil.writeCustomField(element, CMD_OPTIONS, runConfig.userArguments)
     }
 
     override fun readExternal(element: Element) {
         super.readExternal(element)
         val filePath = JDOMExternalizerUtil.readCustomField(element, MAIN_FILE) ?: ""
-        runConfig.mainFile =
-            absoluteOrRelativePath(filePath, project)?.path ?: project.basePath ?: ""
+        runConfig.mainFile = context.expandPath(filePath)
         val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
         runConfig.userArguments = arguments ?: ""
     }

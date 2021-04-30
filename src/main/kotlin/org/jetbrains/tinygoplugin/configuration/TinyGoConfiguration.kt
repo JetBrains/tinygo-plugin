@@ -11,7 +11,7 @@ interface TinyGoConfiguration : UserConfiguration, ProjectConfiguration {
     val enabled: Boolean
 
     companion object {
-        fun getInstance(p: Project): TinyGoConfiguration = TinyGoConfigurationImpl.getInstance(p)
+        fun getInstance(p: Project): TinyGoConfiguration = TinyGoConfigurationImpl(p).deepCopy()
 
         fun getInstance(): TinyGoConfiguration = TinyGoConfigurationImpl()
     }
@@ -22,13 +22,18 @@ internal data class TinyGoConfigurationImpl(
     private val projectConfig: ProjectConfigurationState = ProjectConfigurationState(),
 ) : TinyGoConfiguration, UserConfiguration by userConfig, ProjectConfiguration by projectConfig {
 
+    constructor(project: Project) : this(
+        projectConfig = project.service<ProjectConfigurationImpl>().myState,
+        userConfig = project.service<UserConfigurationImpl>().myState,
+    )
+
     override fun saveState(project: Project) {
         project.service<ProjectConfigurationImpl>().myState = projectConfig.copy()
         project.service<UserConfigurationImpl>().myState = userConfig.copy()
     }
 
     override fun modified(project: Project): Boolean {
-        val currentSettings = getInstance(project)
+        val currentSettings = TinyGoConfigurationImpl(project)
         return currentSettings.projectConfig != projectConfig || currentSettings.userConfig != userConfig
     }
 
@@ -43,11 +48,4 @@ internal data class TinyGoConfigurationImpl(
 
     override val enabled: Boolean
         get() = sdk != nullSdk
-
-    companion object {
-        fun getInstance(p: Project): TinyGoConfigurationImpl = TinyGoConfigurationImpl(
-            projectConfig = p.service<ProjectConfigurationImpl>().myState,
-            userConfig = p.service<UserConfigurationImpl>().myState,
-        )
-    }
 }
