@@ -24,17 +24,17 @@
                          bundle="messages.TinyGo" key="inspection.import.name"
                          groupBundle="messages.TinyGo" enabledByDefault="true"
                          level="ERROR"
-                         implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.ImportInspection"/>
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.TinyGoImportInspection"/>
         <localInspection language="go" groupKey="inspection.bundle.key"
                          bundle="messages.TinyGo" key="inspection.interface.name"
                          groupBundle="messages.TinyGo" enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="org.jetbrains.tinygoplugin.inspections.InterfaceInspection"/>
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.TinyGoInterfaceInspection"/>
         <localInspection language="go" groupKey="inspection.bundle.key"
-                         bundle="messages.TinyGo" key="inspection.go.name"
+                         bundle="messages.TinyGo" key="inspection.go.statement.name"
                          groupBundle="messages.TinyGo" enabledByDefault="true"
                          level="ERROR"
-                         implementationClass="org.jetbrains.tinygoplugin.inspections.GoInspection"/>
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.TinyGoStatementInspection"/>
 
         <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoLibraryProvider"/>
         <runConfigurationProducer id="TinyGoFlashConfigurationProducer"

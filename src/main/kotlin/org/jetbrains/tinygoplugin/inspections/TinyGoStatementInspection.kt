@@ -17,10 +17,10 @@ import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.services.propagateGoFlags
 
-class GoInspection : GoInspectionBase() {
+class TinyGoStatementInspection : GoInspectionBase() {
     companion object {
-        const val GO_INSPECTION_NAME = "inspection.go.name"
-        const val GO_INSPECTION_MESSAGE = "inspection.go.message"
+        const val GO_INSPECTION_NAME = "inspection.go.statement.name"
+        const val GO_INSPECTION_MESSAGE = "inspection.go.statement.message"
         val QUICK_FIX = object : LocalQuickFix {
             override fun getFamilyName(): String = TinyGoBundle.message(GO_INSPECTION_NAME)
 

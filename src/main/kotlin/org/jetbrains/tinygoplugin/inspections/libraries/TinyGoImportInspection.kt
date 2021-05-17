@@ -20,7 +20,7 @@ import org.jetbrains.tinygoplugin.services.UnsupportedPackageProvider
 private fun tinyGoLink(packageName: String): String =
     "https://tinygo.org/lang-support/stdlib/#${packageName.replace('/', '-')}"
 
-class ImportInspection : GoInspectionBase() {
+class TinyGoImportInspection : GoInspectionBase() {
 
     companion object {
         const val IMPORT_INSPECTION_MESSAGE = "inspection.import.message"

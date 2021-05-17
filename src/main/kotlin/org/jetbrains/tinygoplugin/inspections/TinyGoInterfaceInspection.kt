@@ -11,7 +11,7 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.psi.PsiElement
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 
-class InterfaceInspection : GoInspectionBase() {
+class TinyGoInterfaceInspection : GoInspectionBase() {
     companion object {
         const val INTERFACE_INSPECTION_MESSAGE_KEY = "inspection.interface.message"
     }
