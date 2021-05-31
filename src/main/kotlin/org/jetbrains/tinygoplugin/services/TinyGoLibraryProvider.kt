@@ -34,8 +34,13 @@ class TinyGoRootLibrary(private val moduleName: String, private val sourceRoots:
 
 class TinyGoLibraryProvider : AdditionalLibraryRootsProvider() {
     override fun getAdditionalProjectLibraries(project: Project): Collection<SyntheticLibrary> {
-        val tinygoRoots = getRootsToWatch(project)
-        return if (tinygoRoots.isEmpty()) emptyList() else listOf(TinyGoRootLibrary("TinyGo", tinygoRoots))
+        val tinyGoRoots = getRootsToWatch(project)
+        return if (tinyGoRoots.isEmpty()) emptyList() else listOf(
+            TinyGoRootLibrary(
+                "TinyGo " + TinyGoConfiguration.getInstance(project).sdk.sdkVersion,
+                tinyGoRoots
+            )
+        )
     }
 
     override fun getRootsToWatch(project: Project): Collection<VirtualFile> {
