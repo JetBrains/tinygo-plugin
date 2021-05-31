@@ -44,7 +44,7 @@ internal class ProjectConfigurationImpl(val project: Project) :
     override fun loadState(state: ProjectConfigurationState) {
         XmlSerializerUtil.copyBean(state, myState)
         myState.targetPlatform = context.expandPath(myState.targetPlatform)
-        myState.userTargets = myState.userTargets.map(context::collapsePath)
+        myState.userTargets = myState.userTargets.filter { it.isNotBlank() }.map(context::collapsePath)
     }
 
     override fun getState(): ProjectConfigurationState {
