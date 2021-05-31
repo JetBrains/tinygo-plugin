@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.configuration
 
+import com.goide.util.GoUtil
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.sdk.nullSdk
@@ -28,6 +29,7 @@ internal data class TinyGoConfigurationImpl(
     )
 
     override fun saveState(project: Project) {
+        GoUtil.cleanResolveCache(project)
         project.service<ProjectConfigurationImpl>().myState = projectConfig.copy()
         project.service<UserConfigurationImpl>().myState = userConfig.copy()
     }
