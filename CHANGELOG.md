@@ -2,6 +2,13 @@
 
 # tinygo-plugin Changelog
 
-## [Unreleased]
+## [0.1.0]
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+- Ability to specify or download TinyGo SDK.
+- Settings that help to infer build tags from a target platform.
+- Code inspections:
+  - Usage of the `go` with a disabled scheduler.
+  - Usage of unsupported package.
+  - Usage of interface comparison.
+- Ability to flash and run a TinyGo application.
+- Support for code completion and autoimport.
