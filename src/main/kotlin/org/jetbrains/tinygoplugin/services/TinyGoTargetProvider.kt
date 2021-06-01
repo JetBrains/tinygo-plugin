@@ -25,8 +25,10 @@ fun tinyGoTargets(sdk: TinyGoSdk): Set<String> {
             it.endsWith(".json")
         }.map {
             it.substringBeforeLast(".json")
-        }.collect(Collectors.toCollection {
-            TreeSet()
-        }) as TreeSet<String>
+        }.collect(
+            Collectors.toCollection {
+                TreeSet()
+            }
+        ) as TreeSet<String>
     }
 }
