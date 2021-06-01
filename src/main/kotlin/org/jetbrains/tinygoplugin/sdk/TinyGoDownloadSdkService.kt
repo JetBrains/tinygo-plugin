@@ -109,14 +109,14 @@ class TinyGoDownloadSdkService private constructor() {
                     } else {
                         Decompressor.Tar(archive).extract(tempDirectory)
                     }
-                    val tinygo = tempDirectory.resolve("tinygo")
-                    if (!Files.exists(tinygo) || !Files.isDirectory(tinygo)) {
+                    val tinyGo = tempDirectory.resolve("tinygo")
+                    if (!Files.exists(tinyGo) || !Files.isDirectory(tinyGo)) {
                         error("Could not find tinygo directory in downloaded directory")
                     }
                     val targetDir = Files.createDirectory(Paths.get(targetPath))
-                    copyDir(tinygo, targetDir, indicator)
+                    copyDir(tinyGo, targetDir, indicator)
                     LocalFileSystem.getInstance().refreshNioFiles(Collections.singleton(targetDir))
-                    FileUtil.asyncDelete(tinygo.toFile())
+                    FileUtil.asyncDelete(tinyGo.toFile())
                 } catch (e: IOException) {
                     error("Error unpacking TinyGoSDK", e, null)
                 }

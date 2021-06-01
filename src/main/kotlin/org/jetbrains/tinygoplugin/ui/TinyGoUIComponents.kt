@@ -88,7 +88,7 @@ private fun LayoutBuilder.tinyGoSettings(
 ) {
     lateinit var tinyGoSdkComboChooser: CellBuilder<TinyGoSdkChooserCombo>
     row(TinyGoBundle.message(SDK_LABEL)) {
-        tinyGoSdkComboChooser = tinyGoSdkComboChooser(property = wrapper.tinygoSDKPath, parentDisposable)
+        tinyGoSdkComboChooser = tinyGoSdkComboChooser(property = wrapper.tinyGoSdkPath, parentDisposable)
     }
     titledRow(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
         row(TinyGoBundle.message(TARGET_LABEL)) {
@@ -142,7 +142,7 @@ fun generateSettingsPanel(
         tinyGoSettings(wrapper, parentDisposable)
     }
     row("GOOS") {
-        textField(property = wrapper.goOS).growPolicy(GrowPolicy.MEDIUM_TEXT)
+        textField(property = wrapper.goOs).growPolicy(GrowPolicy.MEDIUM_TEXT)
     }
     row("GOARCH") {
         textField(property = wrapper.goArch).growPolicy(GrowPolicy.MEDIUM_TEXT)
