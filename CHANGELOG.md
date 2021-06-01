@@ -2,6 +2,9 @@
 
 # tinygo-plugin Changelog
 
+## [Unreleased]
+### Added
+
 ## [0.1.0]
 ### Added
 - Ability to specify or download TinyGo SDK.
