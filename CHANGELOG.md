@@ -5,6 +5,18 @@
 ## [Unreleased]
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+## [unspecified]
+### Added
+
 ## [0.1.1]
 ### Added
 - Fix compatibility with 2021.2 EAP.
