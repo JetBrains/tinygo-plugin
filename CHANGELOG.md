@@ -14,11 +14,9 @@
 ### Fixed
 
 ### Security
-## [unspecified]
-### Added
 
 ## [0.1.1]
-### Added
+### Fixed
 - Fix compatibility with 2021.2 EAP.
 
 ## [0.1.0]

@@ -107,7 +107,7 @@ tasks {
         // Get the latest available change notes from the changelog file
         changeNotes.set(
             provider {
-                changelog.getLatest().toHTML()
+                changelog.get(version.get()).toHTML()
             }
         )
     }
