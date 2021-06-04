@@ -5,6 +5,10 @@
 ## [Unreleased]
 ### Added
 
+## [0.1.1]
+### Added
+- Fix compatibility with 2021.2 EAP.
+
 ## [0.1.0]
 ### Added
 - Ability to specify or download TinyGo SDK.
