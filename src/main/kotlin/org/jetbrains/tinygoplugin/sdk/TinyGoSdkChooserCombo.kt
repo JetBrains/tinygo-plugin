@@ -12,6 +12,7 @@ import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
@@ -93,11 +94,9 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
         ) { selectedFile ->
             val sdk = TinyGoSdk(selectedFile.url, null)
             if (sdk.isValid) {
-                if (e.project != null) {
-                    sdk.computeVersion(e.project!!) {
-                        combo.addSdk(sdk, true)
-                        TinyGoSdkList.getInstance().addSdk(sdk)
-                    }
+                sdk.computeVersion(e.project ?: ProjectManager.getInstance().defaultProject) {
+                    combo.addSdk(sdk, true)
+                    TinyGoSdkList.getInstance().addSdk(sdk)
                 }
             } else {
                 Messages.showErrorDialog(
