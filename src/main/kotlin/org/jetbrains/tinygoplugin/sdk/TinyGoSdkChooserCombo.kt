@@ -11,8 +11,8 @@ import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.project.DefaultProjectFactory
 import com.intellij.openapi.project.DumbAwareAction
-import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
@@ -27,13 +27,13 @@ private const val TINYGO_SDK_TITLE = "tinygoSDK.download.title"
 private const val TINYGO_SDK_PROGRESS_ICON_NAME = "tinygoSDK.download.progress"
 private const val TINYGO_GITHUB = "tinygo-org/tinygo"
 
-class TinyGoDownloaderDialog : GoSdkDownloaderDialog<TinyGoSdk> {
+class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkDownloaderDialog<TinyGoSdk> {
     override fun createDownloadingSdk(version: String, path: String): TinyGoSdk {
         if (path.isEmpty()) {
             return TinyGoDownloadingSdk(version, null)
         }
         val result = TinyGoDownloadingSdk(version, path)
-        TinyGoDownloadSdkService.getInstance().downloadTinyGoSdk(result)
+        TinyGoDownloadSdkService.getInstance().downloadTinyGoSdk(result, onFinish)
         return result
     }
 
@@ -45,7 +45,7 @@ class TinyGoDownloaderDialog : GoSdkDownloaderDialog<TinyGoSdk> {
         progressIndicator: ProgressIndicator,
         versionConsumer: Consumer<MutableCollection<String>>,
     ): Boolean {
-        val tinyGoReleasesUrl = "http://api.github.com/repos/$TINYGO_GITHUB/releases"
+        val tinyGoReleasesUrl = "https://api.github.com/repos/$TINYGO_GITHUB/releases"
         val request = HttpRequests.request(tinyGoReleasesUrl)
         try {
             val response = request.readString(progressIndicator)
@@ -94,7 +94,8 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
         ) { selectedFile ->
             val sdk = TinyGoSdk(selectedFile.url, null)
             if (sdk.isValid) {
-                sdk.computeVersion(e.project ?: ProjectManager.getInstance().defaultProject) {
+                val project = e.project ?: DefaultProjectFactory.getInstance().defaultProject
+                sdk.computeVersion(project) {
                     combo.addSdk(sdk, true)
                     TinyGoSdkList.getInstance().addSdk(sdk)
                 }
@@ -125,7 +126,7 @@ class TinyGoSdkChooserCombo :
                 TinyGoLocalSdkAction(it),
                 GoDownloadSdkAction(
                     it,
-                    TinyGoDownloaderDialog(),
+                    TinyGoDownloaderDialog { sdk -> it.addSdk(sdk, true) },
                     VersionComparatorUtil.COMPARATOR.reversed()
                 )
             )

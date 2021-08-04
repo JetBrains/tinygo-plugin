@@ -21,6 +21,7 @@ import java.time.Duration
 import java.util.function.BiConsumer
 
 private const val GO_NOT_CONFIGURED_MESSAGE = "notifications.tinygoSDK.goSDKNotConfigured"
+private const val TINYGO_TARGET_PLATFORM_NOT_SET = "notifications.tinygoSDK.tinyGoTargetNotSet"
 private const val DETECTION_TITLE = "notifications.tinygoSDK.detection.title"
 private const val DETECTION_INDICATOR_TEXT = "notifications.tinygoSDK.detection.indicatorText"
 private const val DETECTION_FAIL_MESSAGE = "notifications.tinygoSDK.detection.failMessage"
@@ -104,6 +105,13 @@ class TinyGoInfoExtractor(private val project: Project) {
             notifyTinyGoNotConfigured(
                 project,
                 TinyGoBundle.message(GO_NOT_CONFIGURED_MESSAGE)
+            )
+            return
+        }
+        if (settings.targetPlatform.isEmpty()) {
+            notifyTinyGoNotConfigured(
+                project,
+                TinyGoBundle.message(TINYGO_TARGET_PLATFORM_NOT_SET)
             )
             return
         }
