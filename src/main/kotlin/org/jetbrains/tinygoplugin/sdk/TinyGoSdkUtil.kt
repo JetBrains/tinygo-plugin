@@ -22,7 +22,7 @@ fun notifyTinyGoNotConfigured(
         .createNotification(
             TinyGoBundle.message(CONFIGURATION_INCOMPLETE_NOTIFICATION),
             content,
-            NotificationType.INFORMATION
+            NotificationType.WARNING
         )
     notification.addAction(object : NotificationAction("TinyGo settings") {
         override fun actionPerformed(e: AnActionEvent, notification: Notification) {

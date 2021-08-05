@@ -67,7 +67,6 @@ class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkD
 
 const val TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE = "tinygoSDK.local.fileDescriptor"
 const val TINYGO_LOCAL_ERROR_INVALID_DIR = "tinygoSDK.local.error"
-const val TINYGO_LOCAL_ERROR_INVALID_DIR_MESSAGE = "tinygoSDK.local.error.message"
 
 class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>) : DumbAwareAction({ "Local..." }) {
 
@@ -102,7 +101,7 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
             } else {
                 Messages.showErrorDialog(
                     combo,
-                    TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR_MESSAGE),
+                    TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR),
                     TinyGoBundle.message(TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE)
                 )
             }

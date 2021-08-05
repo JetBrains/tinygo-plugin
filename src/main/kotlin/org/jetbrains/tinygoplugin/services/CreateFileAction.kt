@@ -4,6 +4,7 @@ import com.goide.execution.GoRunUtil
 import com.intellij.ide.actions.CreateFileFromTemplateAction
 import com.intellij.ide.actions.CreateFileFromTemplateDialog
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileVisitor
@@ -13,11 +14,15 @@ import com.intellij.psi.PsiManager
 import org.jetbrains.tinygoplugin.TinyGoBundle.message
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
+import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.nullSdk
 
 private const val TINYGO_FILE_TEMPLATE = "ui.template.name"
 private const val TINYGO_TEMPLATE_ACTION_NAME = "ui.template.action.name"
 private const val TINYGO_TEMPLATE_DIALOG_NAME = "ui.template.dialog.name"
+private const val TINYGO_INVALID_SDK = "notifications.tinyGoSdk.tinyGoSDKInvalid"
+private const val TINYGO_TEMPLATES_NOT_FOUND_TITLE = "file.create.errors.templatesCannotLoad.title"
+private const val TINYGO_TEMPLATES_NOT_FOUND_MESSAGE = "file.create.errors.templatesCannotLoad.message"
 
 class CreateFileAction :
     CreateFileFromTemplateAction(
@@ -29,7 +34,15 @@ class CreateFileAction :
     override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {
         val tinyGoSettings = TinyGoConfiguration.getInstance(project)
         if (tinyGoSettings.sdk != nullSdk) {
-
+            if (!tinyGoSettings.sdk.isValid) {
+                Messages.showErrorDialog(
+                    project,
+                    message(TINYGO_TEMPLATES_NOT_FOUND_MESSAGE),
+                    message(TINYGO_TEMPLATES_NOT_FOUND_TITLE)
+                )
+                notifyTinyGoNotConfigured(project, message(TINYGO_INVALID_SDK))
+                return
+            }
             builder.setTitle(message(TINYGO_TEMPLATE_DIALOG_NAME))
             val examples = availableExamples(project, tinyGoSettings.sdk.sdkRoot!!)
             examples.forEach {

@@ -11,6 +11,7 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -20,6 +21,8 @@ import org.jetbrains.tinygoplugin.sdk.osManager
 import java.time.Duration
 import java.util.function.BiConsumer
 
+private const val TINYGO_INCOMPATIBLE_GO_VERSION_TITLE = "tinygoSDK.incompatibleGoVersion.title"
+private const val TINYGO_INCOMPATIBLE_GO_VERSION_MESSAGE = "tinygoSDK.incompatibleGoVersion.message"
 private const val GO_NOT_CONFIGURED_MESSAGE = "notifications.tinygoSDK.goSDKNotConfigured"
 private const val TINYGO_TARGET_PLATFORM_NOT_SET = "notifications.tinygoSDK.tinyGoTargetNotSet"
 private const val DETECTION_TITLE = "notifications.tinygoSDK.detection.title"
@@ -46,7 +49,26 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     this.gc = GarbageCollector.valueOf(gc.groupValues[1].toUpperCase())
     this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].toUpperCase())
 
-    TinyGoInfoExtractor.logger.warn("extraction finished")
+    TinyGoInfoExtractor.logger.info("extraction finished")
+}
+
+@Suppress("MagicNumber")
+private fun extractIncompatibleVersionsError(msg: String): Triple<String, String, String>? {
+    val minor2DigitsRule = "([0-9]\\.[0-9][0-9])"
+    val minor1DigitRule = "([0-9]\\.[0-9])" // rule produces 3 groups: (2d), (1d), (2d or 1d)
+    val goVersionRule = "($minor1DigitRule|$minor2DigitsRule)"
+    val incompatibleGoVersionPattern =
+        Regex("""requires go version $goVersionRule through $goVersionRule, got go$goVersionRule\n""")
+
+    if (!incompatibleGoVersionPattern.containsMatchIn(msg)) {
+        return null
+    }
+    val incompatibleGoVersionError = incompatibleGoVersionPattern.findAll(msg).first()
+    val oldestCompatibleGoVersion = incompatibleGoVersionError.groupValues[3] // 1st or 2nd = 3rd
+    val latestCompatibleGoVersion = incompatibleGoVersionError.groupValues[6] // 4th or 5th = 6th
+    val currentGoVersion = incompatibleGoVersionError.groupValues[9] // 7th or 8th = 9th
+
+    return Triple(currentGoVersion, oldestCompatibleGoVersion, latestCompatibleGoVersion)
 }
 
 class TinyGoExecutable(private val project: Project) {
@@ -62,17 +84,32 @@ class TinyGoExecutable(private val project: Project) {
             .withParameters(arguments)
             .showNotifications(true, false)
         executor.executeWithProgress(true, true, processHistory, null) {
+            val processOutput = processHistory.output.toString()
             if (it.status.ordinal == 0) {
-                onFinish.accept(it, processHistory.output.joinToString(""))
+                onFinish.accept(it, processOutput)
             } else {
-                notifyTinyGoNotConfigured(
-                    project,
-                    TinyGoBundle.message(DETECTION_FAIL_MESSAGE)
-                )
-                TinyGoInfoExtractor.logger.error(
-                    TinyGoBundle.message(DETECTION_ERROR_MESSAGE),
-                    processHistory.output.toString()
-                )
+                val incompatibleGoVersionsTuple = extractIncompatibleVersionsError(processOutput)
+                val errorMessage: String =
+                    if (incompatibleGoVersionsTuple != null) {
+                        val (currentVer, oldestVer, latestVer) = incompatibleGoVersionsTuple
+                        val incompatibleVersionsMessage = TinyGoBundle.message(
+                            TINYGO_INCOMPATIBLE_GO_VERSION_MESSAGE,
+                            currentVer,
+                            oldestVer,
+                            latestVer
+                        )
+                        Messages.showErrorDialog(
+                            project,
+                            incompatibleVersionsMessage,
+                            TinyGoBundle.message(TINYGO_INCOMPATIBLE_GO_VERSION_TITLE)
+                        )
+                        incompatibleVersionsMessage
+                    } else {
+                        val detectionErrorMessage = TinyGoBundle.message(DETECTION_ERROR_MESSAGE)
+                        TinyGoInfoExtractor.logger.error(detectionErrorMessage, processOutput)
+                        detectionErrorMessage
+                    }
+                notifyTinyGoNotConfigured(project, errorMessage)
             }
         }
     }
