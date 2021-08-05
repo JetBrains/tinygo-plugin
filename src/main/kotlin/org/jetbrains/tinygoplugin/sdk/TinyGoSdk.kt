@@ -4,8 +4,8 @@ import com.goide.sdk.GoBasedSdk
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.vfs.VirtualFileManager
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.warn
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
@@ -74,7 +74,7 @@ open class TinyGoSdk(
     )
 
     val sdkRoot: VirtualFile? by lazy {
-        tinyGoHomeUrl?.let { VfsUtil.findFileByURL(URL(it)) }
+        tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) }
     }
 
     override fun getIcon(): Icon = TinyGoPluginIcons.TinyGoIcon

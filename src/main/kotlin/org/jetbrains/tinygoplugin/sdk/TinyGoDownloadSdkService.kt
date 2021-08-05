@@ -32,7 +32,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import java.util.*
+import java.util.Collections
 import java.util.function.Consumer
 
 private const val TINYGO_GITHUB = "tinygo-org/tinygo"
