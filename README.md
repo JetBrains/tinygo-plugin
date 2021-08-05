@@ -9,6 +9,8 @@ TinyGo plugin
 This plugin adds support for <a href="https://tinygo.org/">TinyGo</a> – a Go compiler for small places. 
 <!-- Plugin description end -->
 
+Please report issues to [GoLand YouTrack](https://youtrack.jetbrains.com/issues/GO).
+
 ---
 Plugin based on the [IntelliJ Platform Plugin Template][template].
 
