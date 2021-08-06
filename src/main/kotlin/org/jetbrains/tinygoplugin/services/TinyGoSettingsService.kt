@@ -14,7 +14,10 @@ import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.util.EmptyRunnable
 import com.intellij.util.messages.MessageBus
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
+import org.jetbrains.tinygoplugin.configuration.GarbageCollector
+import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import org.jetbrains.tinygoplugin.ui.generateSettingsPanel
@@ -40,14 +43,43 @@ class TinyGoConfigurationWithTagUpdate(
         }
     }
 
+    override var sdk: TinyGoSdk
+        get() = settings.sdk
+        set(value) {
+            if (settings.sdk != value) {
+                settings.sdk = value
+                callback()
+            }
+        }
+
     override var targetPlatform: String
         get() = settings.targetPlatform
         set(value) {
             if (settings.targetPlatform != value) {
                 settings.targetPlatform = value
                 if (value.isNotEmpty()) {
+                    settings.gc = GarbageCollector.AUTO_DETECT
+                    settings.scheduler = Scheduler.AUTO_DETECT
                     callback()
                 }
+            }
+        }
+
+    override var gc: GarbageCollector
+        get() = settings.gc
+        set(value) {
+            if (settings.gc != value) {
+                settings.gc = value
+                callback()
+            }
+        }
+
+    override var scheduler: Scheduler
+        get() = settings.scheduler
+        set(value) {
+            if (settings.scheduler != value) {
+                settings.scheduler = value
+                callback()
             }
         }
 
