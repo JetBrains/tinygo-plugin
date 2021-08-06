@@ -123,6 +123,7 @@ class TinyGoSettingsService(private val project: Project) :
         val oldSdk = TinyGoConfiguration.getInstance(project).sdk
         tinyGoSettings.saveState(project)
         propagateGoFlags()
+        updateTinyGoRunConfigurations()
         if (oldSdk != tinyGoSettings.sdk) {
             if (!project.isDisposed) {
                 ApplicationManager.getApplication().assertIsDispatchThread()
@@ -158,19 +159,8 @@ class TinyGoSettingsService(private val project: Project) :
     private fun propagateGoFlags() {
         propagateGoFlags(project, tinyGoSettings)
     }
-}
 
-fun propagateGoFlags(project: Project, settings: TinyGoConfiguration) {
-    val goSettings = ModuleManager.getInstance(project).modules.mapNotNull {
-        it?.getService(GoModuleSettings::class.java)
-    }.firstOrNull()
-    if (goSettings == null) {
-        TinyGoSettingsService.logger.warn("Could not find go module settings")
-        return
+    private fun updateTinyGoRunConfigurations() {
+        updateTinyGoRunConfigurations(project, tinyGoSettings)
     }
-    val buildSettings = goSettings.buildTargetSettings
-    buildSettings.arch = settings.goArch
-    buildSettings.os = settings.goOS
-    buildSettings.customFlags = settings.goTags.split(' ').toTypedArray()
-    goSettings.buildTargetSettings = buildSettings
 }
