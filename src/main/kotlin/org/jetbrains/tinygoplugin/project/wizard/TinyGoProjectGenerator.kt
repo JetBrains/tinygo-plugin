@@ -1,6 +1,5 @@
 package org.jetbrains.tinygoplugin.project.wizard
 
-import com.goide.GoIcons
 import com.goide.vgo.wizard.VgoModuleBuilder
 import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
@@ -10,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
@@ -24,7 +24,7 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
 
     override fun getName(): String = "TinyGo"
 
-    override fun getLogo(): Icon = GoIcons.ICON
+    override fun getLogo(): Icon = TinyGoPluginIcons.TinyGoIcon
 
     override fun validate(baseDirPath: String): ValidationResult = ValidationResult.OK
 

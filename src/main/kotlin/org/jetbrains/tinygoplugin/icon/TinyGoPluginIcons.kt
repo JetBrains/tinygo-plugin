@@ -1,12 +1,12 @@
 package org.jetbrains.tinygoplugin.icon
 
-import com.goide.GoIcons
+import com.intellij.openapi.util.IconLoader
 
 object TinyGoPluginIcons {
 
     @JvmField
-    val TinyGoIcon = GoIcons.ICON
+    val TinyGoIcon = IconLoader.getIcon("/icons/tinyGo.svg", javaClass)
 
     @JvmField
-    val TinyGoLibraryIcon = GoIcons.ICON
+    val TinyGoLibraryIcon = TinyGoIcon
 }
