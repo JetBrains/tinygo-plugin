@@ -25,7 +25,7 @@ import java.util.function.Consumer
 
 private const val TINYGO_SDK_TITLE = "tinygoSDK.download.title"
 private const val TINYGO_SDK_PROGRESS_ICON_NAME = "tinygoSDK.download.progress"
-private const val TINYGO_GITHUB = "tinygo-org/tinygo"
+const val TINYGO_GITHUB = "tinygo-org/tinygo"
 
 class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkDownloaderDialog<TinyGoSdk> {
     override fun createDownloadingSdk(version: String, path: String): TinyGoSdk {

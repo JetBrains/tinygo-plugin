@@ -53,9 +53,9 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
 }
 
 @Suppress("MagicNumber")
-private fun extractIncompatibleVersionsError(msg: String): Triple<String, String, String>? {
+fun extractIncompatibleVersionsError(msg: String): Triple<String, String, String>? {
     val minor2DigitsRule = "([0-9]\\.[0-9][0-9])"
-    val minor1DigitRule = "([0-9]\\.[0-9])" // rule produces 3 groups: (2d), (1d), (2d or 1d)
+    val minor1DigitRule = "([0-9]\\.[0-9])" // rule produces 3 groups: (1d or 2d), (1d), (2d)
     val goVersionRule = "($minor1DigitRule|$minor2DigitsRule)"
     val incompatibleGoVersionPattern =
         Regex("""requires go version $goVersionRule through $goVersionRule, got go$goVersionRule\n""")
@@ -64,9 +64,9 @@ private fun extractIncompatibleVersionsError(msg: String): Triple<String, String
         return null
     }
     val incompatibleGoVersionError = incompatibleGoVersionPattern.findAll(msg).first()
-    val oldestCompatibleGoVersion = incompatibleGoVersionError.groupValues[3] // 1st or 2nd = 3rd
-    val latestCompatibleGoVersion = incompatibleGoVersionError.groupValues[6] // 4th or 5th = 6th
-    val currentGoVersion = incompatibleGoVersionError.groupValues[9] // 7th or 8th = 9th
+    val oldestCompatibleGoVersion = incompatibleGoVersionError.groupValues[1] // 1st = 2nd or 3rd
+    val latestCompatibleGoVersion = incompatibleGoVersionError.groupValues[4] // 4th = 5th or 6th
+    val currentGoVersion = incompatibleGoVersionError.groupValues[7] // 7th = 8th or 9th
 
     return Triple(currentGoVersion, oldestCompatibleGoVersion, latestCompatibleGoVersion)
 }

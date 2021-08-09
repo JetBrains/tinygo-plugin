@@ -35,8 +35,6 @@ import java.nio.file.StandardCopyOption
 import java.util.Collections
 import java.util.function.Consumer
 
-private const val TINYGO_GITHUB = "tinygo-org/tinygo"
-
 @Service
 @Suppress("NestedBlockDepth")
 class TinyGoDownloadSdkService private constructor() {
@@ -77,11 +75,13 @@ class TinyGoDownloadSdkService private constructor() {
                 }
                 TinyGoSdkList.getInstance().addSdk(localSdk)
                 sdk.isDownloaded = true
-                if (success) {
-                    sdk.isDownloaded = true
-                    GoNotifications.getGeneralGroup()
-                        .createNotification("Downloaded SDK", NotificationType.INFORMATION)
-                        .notify(null)
+                synchronized(success) {
+                    if (success) {
+                        sdk.isDownloaded = true
+                        GoNotifications.getGeneralGroup()
+                            .createNotification("Downloaded SDK", NotificationType.INFORMATION)
+                            .notify(null)
+                    }
                 }
                 onFinish.accept(localSdk)
             }
@@ -100,7 +100,9 @@ class TinyGoDownloadSdkService private constructor() {
                     indicator.text2 = ""
                     // checksum verifying??
                     unpackSdk(indicator, downloadedArchive, VfsUtilCore.urlToPath(sdk.homeUrl))
-                    success = true
+                    synchronized(success) {
+                        success = true
+                    }
                 } catch (e: IOException) {
                     error("Unable to download TinyGo SDK from GitHub", e, null, onFinish)
                     logger.error(e.message)
