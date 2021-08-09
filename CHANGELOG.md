@@ -15,6 +15,16 @@
 
 ### Security
 
+## [0.1.2]
+### Fixed
+- Fix NPE on applying recently downloaded TinyGo SDK to a project
+- Fix NPE on selecting local TinyGo SDK
+- Fix project creation and TinyGo SDK verification on Windows
+
+### Added
+- Error handling on `tinygo` command call
+- Dynamic settings UI updates when editing compiler flags
+
 ## [0.1.1]
 ### Fixed
 - Fix compatibility with 2021.2 EAP.
