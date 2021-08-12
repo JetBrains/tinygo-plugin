@@ -50,9 +50,9 @@ class TinyGoImportResolver : GoImportResolver {
         if (importPath.isEmpty()) {
             return emptyList()
         }
-        val tinyGoSdk = TinyGoConfiguration.getInstance(project).sdk
-        val tinyGoSdkSrc = tinyGoSdk.srcDir
-        val importFile = tinyGoSdkSrc?.findFileByRelativePath(importPath)
+        val tinyGoCachedGoRoot = TinyGoConfiguration.getInstance(project).cachedGoRoot
+        val tinyGoCachedGoRootSrc = tinyGoCachedGoRoot.srcDir
+        val importFile = tinyGoCachedGoRootSrc?.findFileByRelativePath(importPath)
         return if (importFile != null) {
             GoPackage.`in`(PsiManager.getInstance(project).findDirectory(importFile), module)
         } else {

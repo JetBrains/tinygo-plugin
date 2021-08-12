@@ -1,11 +1,13 @@
 package org.jetbrains.tinygoplugin.configuration
 
+import com.goide.project.GoModuleSettings
 import com.intellij.conversion.impl.ConversionContextImpl
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.project.Project
+import com.intellij.util.messages.MessageBusConnection
 import com.intellij.util.xmlb.XmlSerializerUtil
 import java.nio.file.Path
 
@@ -39,6 +41,9 @@ internal class ProjectConfigurationImpl(val project: Project) :
     init {
         val baseDir = project.basePath ?: project.projectFilePath ?: ""
         context = ConversionContextImpl(Path.of(baseDir))
+
+        val connection: MessageBusConnection = project.messageBus.connect()
+        connection.subscribe(GoModuleSettings.BUILD_TARGET_TOPIC, CachedGoRootUpdater())
     }
 
     override fun loadState(state: ProjectConfigurationState) {

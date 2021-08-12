@@ -12,6 +12,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vfs.VfsUtil
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -36,18 +37,21 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
     val gcPattern = Regex("""garbage collector:\s+(.+)\n""")
     val schedulerPattern = Regex("""scheduler:\s+(.+)\n""")
+    val cachedGoRootPattern = Regex("""cached GOROOT:\s+(.+)\n""")
 
     val tags = tagPattern.findAll(msg).first()
     val goArch = goArchPattern.findAll(msg).first()
     val goOS = goOSPattern.findAll(msg).first()
     val gc = gcPattern.findAll(msg).first()
     val scheduler = schedulerPattern.findAll(msg).first()
+    val cachedGoRoot = cachedGoRootPattern.findAll(msg).first()
 
     this.goArch = goArch.groupValues[1]
     this.goTags = tags.groupValues[1]
     this.goOS = goOS.groupValues[1]
     this.gc = GarbageCollector.valueOf(gc.groupValues[1].toUpperCase())
     this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].toUpperCase())
+    this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
 
     TinyGoInfoExtractor.logger.info("extraction finished")
 }

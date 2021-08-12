@@ -28,9 +28,9 @@ class TinyGoRootsProvider : GoRootsProvider {
         if (file == null || module == null || !projectSettings.enabled) {
             return null
         }
-        val sdk = projectSettings.sdk
-        val sdkRoot = sdk.sdkRoot ?: return null
-        if (VfsUtil.isAncestor(sdkRoot, file, false)) {
+        val cachedGoRoot = projectSettings.cachedGoRoot
+        val cachedGoRootDir = cachedGoRoot.sdkRoot ?: return null
+        if (VfsUtil.isAncestor(cachedGoRootDir, file, false)) {
             return mutableListOf(file.parent)
         }
         return null
