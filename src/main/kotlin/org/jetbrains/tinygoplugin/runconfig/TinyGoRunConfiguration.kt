@@ -18,6 +18,7 @@ import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationEditor.PathKind
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 import java.nio.file.Path
@@ -34,6 +35,7 @@ open class TinyGoRunConfiguration(
     factory: ConfigurationFactory,
     name: String,
     runType: TinyGoCommandType,
+    private val pathKind: PathKind = PathKind.MAIN
 ) :
     GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory),
     ConfigurationProvider<RunSettings> {
@@ -87,7 +89,7 @@ open class TinyGoRunConfiguration(
 
     override fun createSettingsEditorGroup(): SettingsEditorGroup<TinyGoRunConfiguration> {
         val result = SettingsEditorGroup<TinyGoRunConfiguration>()
-        val editor: SettingsEditor<TinyGoRunConfiguration> = TinyGoRunConfigurationEditor(this)
+        val editor: SettingsEditor<TinyGoRunConfiguration> = TinyGoRunConfigurationEditor(this, pathKind)
         result.addEditor(TinyGoBundle.message(CONFIGURATION_EDITOR_NAME, command), editor)
         return result
     }
@@ -112,7 +114,7 @@ open class TinyGoRunConfiguration(
 }
 
 class TinyGoTestRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
-    TinyGoRunConfiguration(project, factory, name, TinyGoTestCommand()) {
+    TinyGoRunConfiguration(project, factory, name, TinyGoTestCommand(), PathKind.TEST) {
     override fun newRunningState(environment: ExecutionEnvironment, module: Module): TinyGoRunningState {
         return TinyGoTestRunningState(environment, module, this)
     }
