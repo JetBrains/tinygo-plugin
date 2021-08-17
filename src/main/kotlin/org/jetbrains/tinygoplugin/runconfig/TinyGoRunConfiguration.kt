@@ -29,7 +29,7 @@ private const val CONFIGURATION_EDITOR_NAME = "run.configuration.editor.name"
 private const val MAIN_FILE = "tinygo_main_file"
 private const val CMD_OPTIONS = "tinygo_cmd_options"
 
-class TinyGoRunConfiguration(
+open class TinyGoRunConfiguration(
     project: Project,
     factory: ConfigurationFactory,
     name: String,
@@ -108,5 +108,12 @@ class TinyGoRunConfiguration(
         runConfig.mainFile = context.expandPath(filePath)
         val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
         runConfig.userArguments = arguments ?: ""
+    }
+}
+
+class TinyGoTestRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
+    TinyGoRunConfiguration(project, factory, name, TinyGoTestCommand()) {
+    override fun newRunningState(environment: ExecutionEnvironment, module: Module): TinyGoRunningState {
+        return TinyGoTestRunningState(environment, module, this)
     }
 }
