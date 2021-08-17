@@ -11,14 +11,13 @@ import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 
-class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
+open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     GoRunningState<TinyGoRunConfiguration>(env, module, configuration) {
     // override the function to supply GoExecutor with tinygo
+    protected open val hardwareArguments: List<String> = configuration.cmdlineOptions + listOf("-size", "full")
+
     override fun createRunExecutor(): GoExecutor {
-        val arguments = listOf(configuration.command) +
-                configuration.cmdlineOptions +
-                listOf("-size", "full") +
-                listOf(configuration.runConfig.mainFile)
+        val arguments = listOf(configuration.command) + hardwareArguments + listOf(configuration.runConfig.mainFile)
         val tinyGoExecutablePath = configuration.executable
         if (tinyGoExecutablePath == null) {
             notifyTinyGoNotConfigured(configuration.project, "TinyGo SDK is not set. Please configure TinyGo SDK")
@@ -29,6 +28,11 @@ class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuratio
             .withExePath(tinyGoExecutablePath.path)
             .withParameters(arguments)
     }
+}
+
+class TinyGoTestRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
+    TinyGoRunningState(env, module, configuration) {
+    override val hardwareArguments: List<String> = emptyList()
 }
 
 data class RunSettings(

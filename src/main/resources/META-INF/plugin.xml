@@ -18,10 +18,15 @@
         <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
         <directoryProjectGenerator implementation="org.jetbrains.tinygoplugin.project.wizard.TinyGoProjectGenerator"/>
         <localInspection language="go" groupKey="inspection.bundle.key"
-                         bundle="messages.TinyGo" key="inspection.import.name"
+                         bundle="messages.TinyGo" key="inspection.import.unsupported.name"
                          groupBundle="messages.TinyGo" enabledByDefault="true"
                          level="ERROR"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.TinyGoImportInspection"/>
+        <localInspection language="go" groupKey="inspection.bundle.key"
+                         bundle="messages.TinyGo" key="inspection.import.unsupported.name"
+                         groupBundle="messages.TinyGo" enabledByDefault="true"
+                         level="ERROR"
+                         implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.TinyGoMachineDependentTestInspection"/>
         <localInspection language="go" groupKey="inspection.bundle.key"
                          bundle="messages.TinyGo" key="inspection.interface.name"
                          groupBundle="messages.TinyGo" enabledByDefault="true"
@@ -35,9 +40,15 @@
 
         <additionalLibraryRootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoLibraryProvider"/>
         <runConfigurationProducer id="TinyGoFlashConfigurationProducer"
-                                  implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationProducer"/>
+                                  implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoFlashRunConfigurationProducer"/>
+        <runConfigurationProducer id="TinyGoRunConfigurationProducer"
+                                  implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoEmulateRunConfigurationProducer"/>
+        <runConfigurationProducer id="TinyGoTestConfigurationProducer"
+                                  implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoTestRunConfigurationProducer"/>
         <runLineMarkerContributor language="go"
                                   implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoRunLineMarkerContributor"/>
+        <runLineMarkerContributor language="go"
+                                  implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoTestRunLineMarkerContributor"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>

@@ -12,6 +12,7 @@ import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
+import com.intellij.psi.PsiElement
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.inspections.inspectionMessage
@@ -20,11 +21,11 @@ import org.jetbrains.tinygoplugin.services.UnsupportedPackageProvider
 private fun tinyGoLink(packageName: String): String =
     "https://tinygo.org/lang-support/stdlib/#${packageName.replace('/', '-')}"
 
-class TinyGoImportInspection : GoInspectionBase() {
+open class TinyGoImportInspection : GoInspectionBase() {
 
     companion object {
-        const val IMPORT_INSPECTION_MESSAGE = "inspection.import.message"
-        const val IMPORT_QUICK_FIX_FAMILY = "inspection.import.name"
+        private const val IMPORT_INSPECTION_MESSAGE = "inspection.import.unsupported.message"
+        private const val IMPORT_QUICK_FIX_FAMILY = "inspection.import.unsupported.name"
 
         val UNSUPPORTED_LIBRARY_QUICK_FIX = object : LocalQuickFix {
             override fun getFamilyName(): String = TinyGoBundle.message(IMPORT_QUICK_FIX_FAMILY)
@@ -41,6 +42,18 @@ class TinyGoImportInspection : GoInspectionBase() {
                 }
             }
         }
+    }
+
+    protected fun GoProblemsHolder.registerImportProblem(o: PsiElement, message: String, importPath: String = "") {
+        val concatenatedMessage = if (importPath.isEmpty()) inspectionMessage(message)
+        else inspectionMessage(message, importPath, tinyGoLink(importPath))
+
+        registerProblem(
+            o,
+            concatenatedMessage,
+            ProblemHighlightType.GENERIC_ERROR,
+            UNSUPPORTED_LIBRARY_QUICK_FIX
+        )
     }
 
     override fun buildGoVisitor(
@@ -60,12 +73,7 @@ class TinyGoImportInspection : GoInspectionBase() {
                 if (file is GoFile) {
                     val importPath = file.getImportPath(false) ?: return
                     if (unsupportedImports.contains(importPath)) {
-                        holder.registerProblem(
-                            o,
-                            inspectionMessage(IMPORT_INSPECTION_MESSAGE, importPath, tinyGoLink(importPath)),
-                            ProblemHighlightType.GENERIC_ERROR,
-                            UNSUPPORTED_LIBRARY_QUICK_FIX
-                        )
+                        holder.registerImportProblem(o, IMPORT_INSPECTION_MESSAGE, importPath)
                     }
                 }
             }
@@ -77,12 +85,7 @@ class TinyGoImportInspection : GoInspectionBase() {
                 }
                 val importPath = o.path
                 if (unsupportedImports.contains(importPath)) {
-                    holder.registerProblem(
-                        o,
-                        inspectionMessage(IMPORT_INSPECTION_MESSAGE, importPath, tinyGoLink(importPath)),
-                        ProblemHighlightType.GENERIC_ERROR,
-                        UNSUPPORTED_LIBRARY_QUICK_FIX
-                    )
+                    holder.registerImportProblem(o, IMPORT_INSPECTION_MESSAGE, importPath)
                 }
             }
         }

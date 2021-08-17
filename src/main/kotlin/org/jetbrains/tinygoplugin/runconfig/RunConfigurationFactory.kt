@@ -13,7 +13,7 @@ internal const val DESCRIPTION = "TinyGo Flash Application"
 internal const val TINYGO_CONFIGURATION_ID = "tinyGoConfigurationId"
 internal const val FACTORY_ID = "tinyGoFactoryId"
 
-class TinyGoConfigurationFactory(
+open class TinyGoConfigurationFactory(
     type: ConfigurationType,
     private val runType: TinyGoCommandType,
 ) : GoConfigurationFactoryBase(type) {
@@ -29,14 +29,22 @@ class TinyGoConfigurationFactory(
     }
 }
 
+class TinyGoTestConfigurationFactory(type: ConfigurationType) : TinyGoConfigurationFactory(type, TinyGoTestCommand()) {
+    override fun createTemplateConfiguration(project: Project): RunConfiguration {
+        return TinyGoTestRunConfiguration(project, this, project.name)
+    }
+}
+
 class TinyGoRunConfigurationType :
     ConfigurationTypeBase(TINYGO_CONFIGURATION_ID, CONFIGURATION_NAME, DESCRIPTION, TinyGoPluginIcons.TinyGoIcon) {
     val runFactory = TinyGoConfigurationFactory(this, TinyGoRunCommand())
     val flashFactory = TinyGoConfigurationFactory(this, TinyGoFlashCommand())
+    val testFactory = TinyGoTestConfigurationFactory(this)
 
     init {
         addFactory(runFactory)
         addFactory(flashFactory)
+        addFactory(testFactory)
     }
 
     companion object {

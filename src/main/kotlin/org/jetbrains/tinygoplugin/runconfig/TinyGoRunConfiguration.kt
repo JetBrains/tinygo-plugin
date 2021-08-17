@@ -18,6 +18,7 @@ import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationEditor.PathKind
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 import java.nio.file.Path
@@ -29,11 +30,12 @@ private const val CONFIGURATION_EDITOR_NAME = "run.configuration.editor.name"
 private const val MAIN_FILE = "tinygo_main_file"
 private const val CMD_OPTIONS = "tinygo_cmd_options"
 
-class TinyGoRunConfiguration(
+open class TinyGoRunConfiguration(
     project: Project,
     factory: ConfigurationFactory,
     name: String,
     runType: TinyGoCommandType,
+    private val pathKind: PathKind = PathKind.MAIN
 ) :
     GoRunConfigurationBase<TinyGoRunningState>(name, GoModuleBasedConfiguration(project), factory),
     ConfigurationProvider<RunSettings> {
@@ -87,7 +89,7 @@ class TinyGoRunConfiguration(
 
     override fun createSettingsEditorGroup(): SettingsEditorGroup<TinyGoRunConfiguration> {
         val result = SettingsEditorGroup<TinyGoRunConfiguration>()
-        val editor: SettingsEditor<TinyGoRunConfiguration> = TinyGoRunConfigurationEditor(this)
+        val editor: SettingsEditor<TinyGoRunConfiguration> = TinyGoRunConfigurationEditor(this, pathKind)
         result.addEditor(TinyGoBundle.message(CONFIGURATION_EDITOR_NAME, command), editor)
         return result
     }
@@ -108,5 +110,12 @@ class TinyGoRunConfiguration(
         runConfig.mainFile = context.expandPath(filePath)
         val arguments = JDOMExternalizerUtil.readCustomField(element, CMD_OPTIONS)
         runConfig.userArguments = arguments ?: ""
+    }
+}
+
+class TinyGoTestRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
+    TinyGoRunConfiguration(project, factory, name, TinyGoTestCommand(), PathKind.TEST) {
+    override fun newRunningState(environment: ExecutionEnvironment, module: Module): TinyGoRunningState {
+        return TinyGoTestRunningState(environment, module, this)
     }
 }

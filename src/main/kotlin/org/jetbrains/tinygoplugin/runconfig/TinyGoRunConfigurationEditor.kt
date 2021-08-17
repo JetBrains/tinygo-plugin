@@ -32,8 +32,14 @@ class RunConfigurationWrapper(private val configurationProvider: ConfigurationPr
     )
 }
 
-class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoRunConfiguration) :
-    SettingsEditor<TinyGoRunConfiguration>() {
+class TinyGoRunConfigurationEditor(
+    private val runConfiguration: TinyGoRunConfiguration,
+    private val pathKind: PathKind
+) : SettingsEditor<TinyGoRunConfiguration>() {
+    enum class PathKind(private val string: String) {
+        MAIN("main.go"), TEST("test file");
+        override fun toString(): String = string
+    }
 
     private val properties = RunConfigurationWrapper(runConfiguration)
 
@@ -58,7 +64,7 @@ class TinyGoRunConfigurationEditor(private val runConfiguration: TinyGoRunConfig
             row("Command line arguments") {
                 textField(properties.cmdLineArguments).growPolicy(GrowPolicy.MEDIUM_TEXT)
             }
-            row("Path to main") {
+            row("Path to $pathKind") {
                 val fileChooserDescriptor = FileChooserDescriptor(true, true, false, false, false, false)
                 textFieldWithBrowseButton(
                     property = properties.mainFile,
