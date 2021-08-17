@@ -17,6 +17,7 @@ import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.TinyGoExtractionFailureListener
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.osManager
 import java.time.Duration
@@ -79,6 +80,7 @@ class TinyGoExecutable(private val project: Project) {
     fun execute(
         sdkRoot: String,
         arguments: List<String>,
+        failureListener: TinyGoExtractionFailureListener? = null,
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
         val processHistory = GoHistoryProcessListener()
@@ -113,6 +115,7 @@ class TinyGoExecutable(private val project: Project) {
                         TinyGoInfoExtractor.logger.error(detectionErrorMessage, processOutput)
                         detectionErrorMessage
                     }
+                failureListener?.onExtractionFailure()
                 notifyTinyGoNotConfigured(project, errorMessage)
             }
         }
@@ -139,6 +142,7 @@ class TinyGoInfoExtractor(private val project: Project) {
 
     fun extractTinyGoInfo(
         settings: TinyGoConfiguration,
+        failureListener: TinyGoExtractionFailureListener? = null,
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
         val currentGoSdk = GoSdkService.getInstance(project).getSdk(null)
@@ -165,7 +169,7 @@ class TinyGoInfoExtractor(private val project: Project) {
                         Thread.sleep(Duration.ofSeconds(1).toMillis())
                     }
                 }
-                executor.execute(settings.sdk.sdkRoot!!.path, tinyGoArguments(settings), onFinish)
+                executor.execute(settings.sdk.sdkRoot!!.path, tinyGoArguments(settings), failureListener, onFinish)
             }
         }
         ProgressManager.getInstance()
