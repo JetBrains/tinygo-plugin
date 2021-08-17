@@ -19,6 +19,7 @@ import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
+import org.jetbrains.tinygoplugin.sdk.nullSdk
 import java.awt.event.ItemEvent
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JPanel
@@ -63,7 +64,13 @@ fun Cell.tinyGoSdkComboChooser(
 ): CellBuilder<TinyGoSdkChooserCombo> {
     return component(TinyGoSdkChooserCombo())
         .applyToComponent {
-            selectSdkByUrl(property.get().homeUrl)
+            var sdk: TinyGoSdk = property.get()
+            if (sdk == nullSdk) {
+                selectFirstNotNullSdk()
+                @Suppress("UnstableApiUsage")
+                sdk = comboBox.model.selectedItem as TinyGoSdk
+                property.set(sdk)
+            } else selectSdkByUrl(sdk.homeUrl)
             Disposer.register(parentDisposable, this)
         }
         .withBinding(
