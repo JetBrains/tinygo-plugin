@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.configuration
 
+import com.goide.sdk.GoSdk
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
@@ -12,10 +13,14 @@ import org.jetbrains.tinygoplugin.sdk.unknownVersion
 
 interface UserConfiguration {
     var sdk: TinyGoSdk
+    var cachedGoRoot: GoSdk
 }
+
+data class CachedGoRootStorage(var sdkUrl: String = "")
 
 internal interface UserConfigurationStorage {
     var sdkStorage: TinyGoSdkStorage
+    var cachedGoRootStorage: CachedGoRootStorage
 }
 
 internal data class UserConfigurationStorageImpl(
@@ -23,6 +28,7 @@ internal data class UserConfigurationStorageImpl(
         "",
         unknownVersion
     ),
+    override var cachedGoRootStorage: CachedGoRootStorage = CachedGoRootStorage()
 ) :
     UserConfigurationStorage
 
@@ -35,12 +41,23 @@ internal fun TinyGoSdkStorage.toImpl(): TinyGoSdk {
     return TinyGoSdk(homeUrl, this.version)
 }
 
+internal fun GoSdk.toStorage(): CachedGoRootStorage {
+    return CachedGoRootStorage(this.homeUrl)
+}
+
+internal fun CachedGoRootStorage.toImpl(): GoSdk {
+    val homeUrl = if (sdkUrl.isEmpty()) null else sdkUrl
+    return GoSdk.fromUrl(homeUrl)
+}
+
 internal class UserConfigurationStorageWrapper : UserConfigurationStorage, UserConfiguration {
     internal fun updateState() {
         tinyGoSdk = state.sdkStorage.toImpl()
+        cachedGoRoot = state.cachedGoRootStorage.toImpl()
     }
 
     private var tinyGoSdk: TinyGoSdk = nullSdk
+    private var tinyGoCachedGoRoot: GoSdk = GoSdk.NULL
     var state: UserConfigurationStorageImpl = UserConfigurationStorageImpl()
 
     override var sdk: TinyGoSdk
@@ -56,6 +73,19 @@ internal class UserConfigurationStorageWrapper : UserConfigurationStorage, UserC
             tinyGoSdk = state.sdkStorage.toImpl()
         }
 
+    override var cachedGoRoot: GoSdk
+        get() = tinyGoCachedGoRoot
+        set(value) {
+            tinyGoCachedGoRoot = value
+            state.cachedGoRootStorage = value.toStorage()
+        }
+    override var cachedGoRootStorage: CachedGoRootStorage
+        get() = state.cachedGoRootStorage
+        set(value) {
+            state.cachedGoRootStorage = value
+            tinyGoCachedGoRoot = state.cachedGoRootStorage.toImpl()
+        }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is UserConfigurationStorageWrapper) return false
@@ -65,6 +95,7 @@ internal class UserConfigurationStorageWrapper : UserConfigurationStorage, UserC
     fun copy(): UserConfigurationStorageWrapper {
         val result = UserConfigurationStorageWrapper()
         result.sdkStorage = sdkStorage.copy()
+        result.cachedGoRootStorage = cachedGoRootStorage.copy()
         return result
     }
 

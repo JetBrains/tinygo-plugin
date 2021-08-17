@@ -13,6 +13,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.openapi.util.EmptyRunnable
 import com.intellij.util.messages.MessageBus
+import org.jetbrains.tinygoplugin.configuration.CachedGoRootInvalidator
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -142,7 +143,7 @@ class TinyGoSettingsService(private val project: Project) :
     override fun createPanel(): DialogPanel = generateSettingsPanel(propertiesWrapper, disposable!!)
 
     private fun callExtractor() {
-        infoExtractor.extractTinyGoInfo(tinyGoSettings) { _, output ->
+        infoExtractor.extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
             logger.trace(output)
             tinyGoSettings.extractTinyGoInfo(output)
             // update all ui fields

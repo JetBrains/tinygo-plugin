@@ -12,10 +12,12 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vfs.VfsUtil
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.TinyGoExtractionFailureListener
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.osManager
 import java.time.Duration
@@ -36,18 +38,21 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
     val gcPattern = Regex("""garbage collector:\s+(.+)\n""")
     val schedulerPattern = Regex("""scheduler:\s+(.+)\n""")
+    val cachedGoRootPattern = Regex("""cached GOROOT:\s+(.+)\n""")
 
     val tags = tagPattern.findAll(msg).first()
     val goArch = goArchPattern.findAll(msg).first()
     val goOS = goOSPattern.findAll(msg).first()
     val gc = gcPattern.findAll(msg).first()
     val scheduler = schedulerPattern.findAll(msg).first()
+    val cachedGoRoot = cachedGoRootPattern.findAll(msg).first()
 
     this.goArch = goArch.groupValues[1]
     this.goTags = tags.groupValues[1]
     this.goOS = goOS.groupValues[1]
     this.gc = GarbageCollector.valueOf(gc.groupValues[1].toUpperCase())
     this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].toUpperCase())
+    this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
 
     TinyGoInfoExtractor.logger.info("extraction finished")
 }
@@ -75,6 +80,7 @@ class TinyGoExecutable(private val project: Project) {
     fun execute(
         sdkRoot: String,
         arguments: List<String>,
+        failureListener: TinyGoExtractionFailureListener? = null,
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
         val processHistory = GoHistoryProcessListener()
@@ -109,6 +115,7 @@ class TinyGoExecutable(private val project: Project) {
                         TinyGoInfoExtractor.logger.error(detectionErrorMessage, processOutput)
                         detectionErrorMessage
                     }
+                failureListener?.onExtractionFailure()
                 notifyTinyGoNotConfigured(project, errorMessage)
             }
         }
@@ -135,6 +142,7 @@ class TinyGoInfoExtractor(private val project: Project) {
 
     fun extractTinyGoInfo(
         settings: TinyGoConfiguration,
+        failureListener: TinyGoExtractionFailureListener? = null,
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
         val currentGoSdk = GoSdkService.getInstance(project).getSdk(null)
@@ -161,7 +169,7 @@ class TinyGoInfoExtractor(private val project: Project) {
                         Thread.sleep(Duration.ofSeconds(1).toMillis())
                     }
                 }
-                executor.execute(settings.sdk.sdkRoot!!.path, tinyGoArguments(settings), onFinish)
+                executor.execute(settings.sdk.sdkRoot!!.path, tinyGoArguments(settings), failureListener, onFinish)
             }
         }
         ProgressManager.getInstance()
