@@ -15,6 +15,15 @@
 
 ### Security
 
+## [0.2.0]
+### Added
+- Partial support of TinyGo unit testing (tests that use `machine` package are yet not supported by TinyGo)
+  - "TinyGo Test ..." run configuration from test file/function context
+  - Inspection for usage of `machine` package in tests
+- "TinyGo Emulate ..." run configuration (`tinygo run`) from `main` function context
+### Changed
+- Use cached GOROOT as TinyGo library instead of TinyGo sources
+
 ## [0.1.2]
 ### Fixed
 - Fix NPE on applying recently downloaded TinyGo SDK to a project
