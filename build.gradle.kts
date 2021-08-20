@@ -37,10 +37,20 @@ version = pluginVersion
 
 // Configure project's dependencies
 repositories {
-    mavenCentral()
-    jcenter()
+    maven("https://cache-redirector.jetbrains.com/maven-central")
+    maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
+    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
+    maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 dependencies {
+    testImplementation("com.jetbrains.intellij.go:go-test-framework:212.4746.93") {
+        exclude("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
+        exclude("org.jetbrains.kotlin", "kotlin-reflect")
+        exclude("com.jetbrains.rd", "rd-core")
+        exclude("com.jetbrains.rd", "rd-swing")
+        exclude("com.jetbrains.rd", "rd-framework")
+    }
+
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
 }
 
