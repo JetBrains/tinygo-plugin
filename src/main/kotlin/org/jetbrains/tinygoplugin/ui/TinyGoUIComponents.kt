@@ -3,8 +3,11 @@ package org.jetbrains.tinygoplugin.ui
 import com.intellij.json.JsonFileType
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
+import com.intellij.openapi.fileChooser.FileChooserFactory
+import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.util.Disposer
+import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.layout.Cell
 import com.intellij.ui.layout.CellBuilder
@@ -17,11 +20,14 @@ import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
+import org.jetbrains.tinygoplugin.configuration.createTargetWrapper
+import org.jetbrains.tinygoplugin.configuration.serialize
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
 import org.jetbrains.tinygoplugin.sdk.nullSdk
 import java.awt.event.ItemEvent
 import java.util.concurrent.atomic.AtomicBoolean
+import javax.swing.JButton
 import javax.swing.JPanel
 
 fun generateTinyGoParametersPanel(
@@ -85,6 +91,7 @@ fun Cell.tinyGoSdkComboChooser(
 private const val SDK_LABEL = "ui.sdk"
 private const val TARGET_LABEL = "ui.target"
 private const val COMPILER_PARAMETERS_LABEL = "ui.compiler"
+private const val HELP_AUTO = "ui.help.auto"
 private const val GC_LABEL = "ui.gc"
 private const val SCHEDULER_LABEL = "ui.scheduler"
 private const val TARGET_BROWSE_DIALOG_TITLE = "ui.target.dialogTitle"
@@ -103,9 +110,14 @@ private fun LayoutBuilder.tinyGoSettings(
         }
         row(TinyGoBundle.message(GC_LABEL)) {
             comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
+            autoHelpLabel()
         }
         row(TinyGoBundle.message(SCHEDULER_LABEL)) {
             comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
+            autoHelpLabel()
+        }
+        row {
+            exportButton(wrapper)
         }
     }
 }
@@ -139,6 +151,26 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder
             childComponent.history = wrapper.userTargets
         }
     }
+}
+
+fun Cell.exportButton(wrapper: TinyGoPropertiesWrapper) {
+    component(JButton("Export TinyGo Target...")).applyToComponent {
+        this.addActionListener {
+            val target = createTargetWrapper(wrapper) ?: return@addActionListener
+            val jsonChooser = FileSaverDescriptor(
+                "Save TinyGo Target As...",
+                "Select a JSON file to export your custom TinyGo target",
+                JsonFileType.DEFAULT_EXTENSION
+            )
+            val chooserDialog =
+                FileChooserFactory.getInstance().createSaveFileDialog(jsonChooser, null).save(null)
+            chooserDialog?.file?.writeText(target.serialize())
+        }
+    }.growPolicy(GrowPolicy.MEDIUM_TEXT)
+}
+
+fun Row.autoHelpLabel() {
+    right { component(ContextHelpLabel.create(TinyGoBundle.message(HELP_AUTO))) }
 }
 
 fun generateSettingsPanel(
