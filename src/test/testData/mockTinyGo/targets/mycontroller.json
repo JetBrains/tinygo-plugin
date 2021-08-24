@@ -1,0 +1,7 @@
+{
+  "inherits": ["myarch"],
+  "cpu": "mycpu",
+  "build-tags": ["mycontroller", "mycpu", "myarchspec"],
+  "serial": "uart",
+  "emulator": ["mycpusim", "-m", "mycontroller", "-f", "987654321"]
+}

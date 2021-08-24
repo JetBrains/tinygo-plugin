@@ -1,0 +1,8 @@
+{
+  "build-tags": ["myarch", "baremetal", "linux", "arm"],
+  "goos": "linux",
+  "goarch": "arm64",
+  "gc": "conservative",
+  "scheduler": "none",
+  "default-stack-size": 123
+}

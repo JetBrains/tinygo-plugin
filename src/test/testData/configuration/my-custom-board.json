@@ -1,0 +1,7 @@
+{
+  "inherits": ["mycontroller"],
+  "build-tags": ["myboard"],
+  "flash-command": "flashutil -c myboard -p mycontroller -P {port}",
+  "serial-port": ["acm:2341:0043", "acm:2341:0001", "acm:2a03:0043", "acm:2341:0243"],
+  "emulator": ["myboardsim", "-m", "myboard", "-f", "123456789"]
+}
