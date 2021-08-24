@@ -23,6 +23,8 @@ private const val TINYGO_TEMPLATE_DIALOG_NAME = "ui.template.dialog.name"
 private const val TINYGO_INVALID_SDK = "notifications.tinyGoSdk.tinyGoSDKInvalid"
 private const val TINYGO_TEMPLATES_NOT_FOUND_TITLE = "file.create.errors.templatesCannotLoad.title"
 private const val TINYGO_TEMPLATES_NOT_FOUND_MESSAGE = "file.create.errors.templatesCannotLoad.message"
+private const val TINYGO_FILE_EXISTS_TITLE = "file.create.errors.fileExists.title"
+private const val TINYGO_FILE_EXISTS_MESSAGE = "file.create.errors.fileExists.message"
 
 class CreateFileAction :
     CreateFileFromTemplateAction(
@@ -86,6 +88,14 @@ class CreateFileAction :
         var filename = name
         if (!name.endsWith(".go")) {
             filename = "$name.go"
+        }
+        if (dir.findFile(filename) != null) {
+            Messages.showErrorDialog(
+                project,
+                message(TINYGO_FILE_EXISTS_MESSAGE, "${dir.virtualFile.path}/$filename"),
+                message(TINYGO_FILE_EXISTS_TITLE)
+            )
+            return null
         }
         val result = VfsUtil.copyFile(project, exampleFile, dir.virtualFile, filename)
         val psiManager = PsiManager.getInstance(project)
