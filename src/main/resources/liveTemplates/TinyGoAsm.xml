@@ -1,0 +1,69 @@
+<templateSet group="TinyGo Assembly">
+    <template name="asmavr"
+              value="avr.Asm(&quot;$ASM$&quot;)"
+              description="TinyGo: Insert inline AVR assembly"
+              toReformat="false"
+              toShortenFQNames="false">
+        <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
+        <context>
+            <option name="TINYGOAVR" value="true"/>
+        </context>
+    </template>
+    <template name="asmarm"
+              value="arm.Asm(&quot;$ASM$&quot;)"
+              description="TinyGo: Insert inline ARM assembly"
+              toReformat="false"
+              toShortenFQNames="false">
+        <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
+        <context>
+            <option name="TINYGOARM" value="true"/>
+        </context>
+    </template>
+    <template name="asmarm64"
+              value="arm64.Asm(&quot;$ASM$&quot;)"
+              description="TinyGo: Insert inline ARM64 assembly"
+              toReformat="false"
+              toShortenFQNames="false">
+        <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
+        <context>
+            <option name="TINYGOARM64" value="true"/>
+        </context>
+    </template>
+
+    <template name="asmextavr"
+              value="avr.AsmFull(`&#10;$ASM$&#10;`, map[string]interface{}{&#10;&quot;$PARAM$&quot;: $VAL$,&#10;})"
+              description="TinyGo: Insert inline AVR assembly with parameters"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="PARAM" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="VAL" expression="" defaultValue="complete()" alwaysStopAt="true" />
+        <context>
+            <option name="TINYGOAVR" value="true"/>
+        </context>
+    </template>
+    <template name="asmextarm"
+              value="arm.AsmFull(`&#10;$ASM$&#10;`, map[string]interface{}{&#10;&quot;$PARAM$&quot;: $VAL$,&#10;})"
+              description="TinyGo: Insert inline ARM assembly with parameters"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="PARAM" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="VAL" expression="" defaultValue="complete()" alwaysStopAt="true" />
+        <context>
+            <option name="TINYGOARM" value="true"/>
+        </context>
+    </template>
+    <template name="asmextarm64"
+              value="arm64.AsmFull(`&#10;$ASM$&#10;`, map[string]interface{}{&#10;&quot;$PARAM$&quot;: $VAL$,&#10;})"
+              description="TinyGo: Insert inline ARM64 assembly with parameters"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="PARAM" expression="" defaultValue="" alwaysStopAt="true" />
+        <variable name="VAL" expression="" defaultValue="complete()" alwaysStopAt="true" />
+        <context>
+            <option name="TINYGOARM64" value="true"/>
+        </context>
+    </template>
+</templateSet>

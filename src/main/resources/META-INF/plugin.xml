@@ -49,6 +49,10 @@
                                   implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoRunLineMarkerContributor"/>
         <runLineMarkerContributor language="go"
                                   implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoTestRunLineMarkerContributor"/>
+        <defaultLiveTemplates file="/liveTemplates/TinyGoAsm.xml"/>
+        <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmAvr"/>
+        <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm"/>
+        <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm64"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
