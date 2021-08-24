@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.actionSystem.ActionGroup
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.ActionToolbar
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
@@ -40,7 +41,7 @@ class TinyGoHeapAllocsWindow(val project: Project) : Disposable, HeapAllocsWatch
         private const val TOOLBAR_ACTION_GROUP_ID = "HeapAllocs.ToolWindow.Toolbar"
     }
 
-    val treeModel = TinyGoHeapAllocsTreeModel(this)
+    var treeModel = TinyGoHeapAllocsTreeModel(this)
     val tree: Tree = Tree(treeModel)
     val panel = JPanel(BorderLayout())
 
@@ -67,10 +68,18 @@ class TinyGoHeapAllocsWindow(val project: Project) : Disposable, HeapAllocsWatch
         return ActionManager.getInstance().createActionToolbar(javaClass.name, group, false)
     }
 
+    private fun expandAllNodes() {
+        for (i in 0..treeModel.root?.getChildren()?.size!!) {
+            tree.expandRow(i)
+        }
+    }
+
     override fun refreshHeapAllocsList() {
-        TinyGoHeapAllocsSupplier.getInstance().supplyHeapAllocs(project) {
+        FileDocumentManager.getInstance().saveAllDocuments()
+        TinyGoHeapAllocsSupplier.getInstance().supplyHeapAllocs(project) { it ->
             val newTree = RootNode(project, it)
             treeModel.root = newTree
+            expandAllNodes()
         }
     }
 
