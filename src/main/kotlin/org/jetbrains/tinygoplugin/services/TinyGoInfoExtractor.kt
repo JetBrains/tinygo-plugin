@@ -129,15 +129,8 @@ class TinyGoInfoExtractor(private val project: Project) {
 
     private val executor = TinyGoExecutable(project)
 
-    private fun tinyGoArguments(settings: TinyGoConfiguration): List<String> {
-        val parameters = mutableListOf("info", "-target", settings.targetPlatform)
-        if (settings.scheduler != Scheduler.AUTO_DETECT) {
-            parameters.addAll(listOf("-scheduler", settings.scheduler.cmd))
-        }
-        if (settings.gc != GarbageCollector.AUTO_DETECT) {
-            parameters.addAll(listOf("-gc", settings.gc.cmd))
-        }
-        return parameters
+    private fun tinyGoExtractionArguments(settings: TinyGoConfiguration): List<String> {
+        return listOf("info") + tinyGoArguments(settings)
     }
 
     fun extractTinyGoInfo(
@@ -169,7 +162,12 @@ class TinyGoInfoExtractor(private val project: Project) {
                         Thread.sleep(Duration.ofSeconds(1).toMillis())
                     }
                 }
-                executor.execute(settings.sdk.sdkRoot!!.path, tinyGoArguments(settings), failureListener, onFinish)
+                executor.execute(
+                    settings.sdk.sdkRoot!!.path,
+                    tinyGoExtractionArguments(settings),
+                    failureListener,
+                    onFinish
+                )
             }
         }
         ProgressManager.getInstance()

@@ -10,6 +10,12 @@
         <action class="org.jetbrains.tinygoplugin.services.CreateFileAction">
             <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFile"/>
         </action>
+        <group id="HeapAllocs.ToolWindow.Toolbar">
+            <action id="ProblemsView.Refresh"
+                    description="Refresh"
+                    icon="AllIcons.Actions.Refresh"
+                    class="org.jetbrains.tinygoplugin.heapAllocations.toolWindow.RefreshHeapAllocsAction"/>
+        </group>
     </actions>
     <extensions defaultExtensionNs="com.intellij">
         <projectConfigurable parentId="go" instance="org.jetbrains.tinygoplugin.services.TinyGoSettingsService"
@@ -53,6 +59,8 @@
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmAvr"/>
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm"/>
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm64"/>
+        <toolWindow factoryClass="org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocationsWindowFactory"
+                    id="TinyGo: Heap Allocations" anchor="right"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>

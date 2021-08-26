@@ -4,6 +4,8 @@ import com.goide.project.GoModuleSettings
 import com.intellij.execution.RunManager
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import org.jetbrains.tinygoplugin.configuration.GarbageCollector
+import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfiguration
 
@@ -31,4 +33,15 @@ fun updateTinyGoRunConfigurations(project: Project, settings: TinyGoConfiguratio
         it.runConfig.scheduler = settings.scheduler
         it.runConfig.gc = settings.gc
     }
+}
+
+fun tinyGoArguments(settings: TinyGoConfiguration): List<String> {
+    val parameters = mutableListOf("-target", settings.targetPlatform)
+    if (settings.scheduler != Scheduler.AUTO_DETECT) {
+        parameters.addAll(listOf("-scheduler", settings.scheduler.cmd))
+    }
+    if (settings.gc != GarbageCollector.AUTO_DETECT) {
+        parameters.addAll(listOf("-gc", settings.gc.cmd))
+    }
+    return parameters
 }
