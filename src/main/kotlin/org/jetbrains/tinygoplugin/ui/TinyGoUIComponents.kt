@@ -26,6 +26,7 @@ import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
 import org.jetbrains.tinygoplugin.sdk.nullSdk
 import java.awt.event.ItemEvent
+import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JButton
 import javax.swing.JPanel
@@ -164,7 +165,11 @@ fun Cell.exportButton(wrapper: TinyGoPropertiesWrapper) {
             )
             val chooserDialog =
                 FileChooserFactory.getInstance().createSaveFileDialog(jsonChooser, null).save(null)
-            chooserDialog?.file?.writeText(target.serialize())
+            var file = chooserDialog?.file ?: return@addActionListener
+            if (!file.name.endsWith(".json")) {
+                file = File(file.path + ".json")
+            }
+            file.writeText(target.serialize())
         }
     }.growPolicy(GrowPolicy.MEDIUM_TEXT)
 }
