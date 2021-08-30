@@ -29,7 +29,7 @@ class TinyGoAsmArm : TinyGoAsmContext("TINYGOARM", "TinyGo ARM") {
         val notArmDevices = setOf("avr", "arm64", "kendryte")
 
         return super.isInContext(templateActionContext) &&
-                goTags.contains("arm") && !goTags.contains("avr") && !goTags.any { tag -> notArmDevices.contains(tag) }
+            goTags.contains("arm") && !goTags.contains("avr") && !goTags.any { tag -> notArmDevices.contains(tag) }
     }
 }
 
