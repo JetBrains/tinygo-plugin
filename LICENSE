@@ -175,6 +175,13 @@
 
    END OF TERMS AND CONDITIONS
 
+    This product uses portions of TinyGo, which is available under a
+    "3-clause BSD" license. For details, see src/test/testData/mockTinyGo/ and
+    src/test/testData/mockCachedGoRoot/.
+
+    This product uses portions of the Go standard library, which is available under a
+    "3-clause BSD" license. For details, see mockSdk/ and src/test/testData/mockCachedGoRoot/.
+
    APPENDIX: How to apply the Apache License to your work.
 
       To apply the Apache License to your work, attach the following
