@@ -154,13 +154,17 @@ private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder
     }
 }
 
+private const val EXPORT_TARGET_BUTTON = "ui.target.export"
+private const val EXPORT_TARGET_DIALOG_TITLE = "ui.target.export.dialog.title"
+private const val EXPORT_TARGET_DIALOG_DESCRIPTION = "ui.target.export.dialog.description"
+
 fun Cell.exportButton(wrapper: TinyGoPropertiesWrapper) {
-    component(JButton("Export TinyGo Target...")).applyToComponent {
+    component(JButton(TinyGoBundle.message(EXPORT_TARGET_BUTTON))).applyToComponent {
         this.addActionListener {
             val target = createTargetWrapper(wrapper) ?: return@addActionListener
             val jsonChooser = FileSaverDescriptor(
-                "Save TinyGo Target As...",
-                "Select a JSON file to export your custom TinyGo target",
+                TinyGoBundle.message(EXPORT_TARGET_DIALOG_TITLE),
+                TinyGoBundle.message(EXPORT_TARGET_DIALOG_DESCRIPTION),
                 JsonFileType.DEFAULT_EXTENSION
             )
             val chooserDialog =

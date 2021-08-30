@@ -16,7 +16,7 @@ abstract class TinyGoAsmContext(id: String, presentableName: String) : TemplateC
 class TinyGoAsmAvr : TinyGoAsmContext("TINYGOAVR", "TinyGo AVR") {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val project = templateActionContext.file.project
-        val goTags = TinyGoConfiguration.getInstance(project).goTags
+        val goTags = TinyGoConfiguration.getInstance(project).goTags.split(" ")
         return super.isInContext(templateActionContext) && goTags.contains("avr")
     }
 }
@@ -26,17 +26,17 @@ class TinyGoAsmArm : TinyGoAsmContext("TINYGOARM", "TinyGo ARM") {
         val project = templateActionContext.file.project
         val goTags = TinyGoConfiguration.getInstance(project).goTags.split(" ")
 
-        val notArmDevices = setOf("avr", "arm64", "kendryte")
+        val notArm32BitDevices = setOf("avr", "arm64", "kendryte")
 
         return super.isInContext(templateActionContext) &&
-            goTags.contains("arm") && !goTags.contains("avr") && !goTags.any { tag -> notArmDevices.contains(tag) }
+            goTags.contains("arm") && goTags.none { tag -> notArm32BitDevices.contains(tag) }
     }
 }
 
 class TinyGoAsmArm64 : TinyGoAsmContext("TINYGOARM64", "TinyGo ARM64") {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val project = templateActionContext.file.project
-        val goTags = TinyGoConfiguration.getInstance(project).goTags
+        val goTags = TinyGoConfiguration.getInstance(project).goTags.split(" ")
         return super.isInContext(templateActionContext) && goTags.contains("arm64")
     }
 }

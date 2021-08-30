@@ -33,7 +33,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
 
     companion object {
         private const val IMPORT_INSPECTION_MESSAGE = "inspection.import.unsupported.message"
-        private const val IMPORT_QUICK_FIX_FAMILY = "inspection.import.unsupported.name"
+        private const val IMPORT_QUICK_FIX_FAMILY = "inspection.import.unsupported.fix"
         protected const val IMPORT_DEPENDENCY_INSPECTION_MESSAGE = "inspection.import.reference.message"
         protected const val IMPORT_DEPENDENCY_TYPE_INSPECTION_MESSAGE = "inspection.import.type.message"
 

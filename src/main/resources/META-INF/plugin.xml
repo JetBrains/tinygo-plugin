@@ -24,12 +24,12 @@
         <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
         <directoryProjectGenerator implementation="org.jetbrains.tinygoplugin.project.wizard.TinyGoProjectGenerator"/>
         <localInspection language="go" groupKey="inspection.bundle.key"
-                         bundle="messages.TinyGo" key="inspection.import.unsupported.name"
+                         bundle="messages.TinyGo" key="inspection.import.unsupported.fix"
                          groupBundle="messages.TinyGo" enabledByDefault="true"
                          level="ERROR"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.TinyGoImportInspection"/>
         <localInspection language="go" groupKey="inspection.bundle.key"
-                         bundle="messages.TinyGo" key="inspection.import.unsupported.name"
+                         bundle="messages.TinyGo" key="inspection.import.unsupported.fix"
                          groupBundle="messages.TinyGo" enabledByDefault="true"
                          level="ERROR"
                          implementationClass="org.jetbrains.tinygoplugin.inspections.libraries.TinyGoMachineDependentTestInspection"/>
