@@ -41,7 +41,7 @@ class TinyGoHeapAllocsWindow(val project: Project) : Disposable, HeapAllocsWatch
         private const val TOOLBAR_ACTION_GROUP_ID = "HeapAllocs.ToolWindow.Toolbar"
     }
 
-    var treeModel = TinyGoHeapAllocsTreeModel(this)
+    private val treeModel = TinyGoHeapAllocsTreeModel(this)
     val tree: Tree = Tree(treeModel)
     val panel = JPanel(BorderLayout())
 
@@ -56,7 +56,7 @@ class TinyGoHeapAllocsWindow(val project: Project) : Disposable, HeapAllocsWatch
         myToolbar.component.isVisible = true
 
         TinyGoHeapAllocsSupplier.getInstance().listeners.add(this)
-        refreshHeapAllocsList()
+        refreshHeapAllocsList(false)
 
         UIUtil.addBorder(myToolbar.component, CustomLineBorder(JBUI.insetsBottom(1)))
         panel.add(BorderLayout.CENTER, ScrollPaneFactory.createScrollPane(tree, true))
@@ -74,11 +74,10 @@ class TinyGoHeapAllocsWindow(val project: Project) : Disposable, HeapAllocsWatch
         }
     }
 
-    override fun refreshHeapAllocsList() {
+    override fun refreshHeapAllocsList(blameOutdatedVersion: Boolean) {
         FileDocumentManager.getInstance().saveAllDocuments()
-        TinyGoHeapAllocsSupplier.getInstance().supplyHeapAllocs(project) { it ->
-            val newTree = RootNode(project, it)
-            treeModel.root = newTree
+        TinyGoHeapAllocsSupplier.getInstance().supplyHeapAllocs(project, blameOutdatedVersion) {
+            treeModel.root = RootNode(project, it)
             expandAllNodes()
         }
     }
