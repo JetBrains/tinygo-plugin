@@ -15,6 +15,17 @@
 
 ### Security
 
+## [0.3.0]
+### Added
+- View window for heap allocations
+- Export custom targets as `.json` file
+- Live templates for inline assembly on AVR, ARM and 64-bit ARM boards
+- Error on attempt to rewrite an existing file
+- Help boxes about `auto` flag for garbage collector and scheduler
+### Changed
+- Highlight all usages of unsupported packages, not only its imports
+- Cosmetic changes on project wizard UI layout
+
 ## [0.2.0]
 ### Added
 - Partial support of TinyGo unit testing (tests that use `machine` package are yet not supported by TinyGo)
