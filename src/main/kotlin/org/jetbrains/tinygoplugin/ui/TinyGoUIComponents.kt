@@ -105,20 +105,22 @@ private fun LayoutBuilder.tinyGoSettings(
     row(TinyGoBundle.message(SDK_LABEL)) {
         tinyGoSdkComboChooser = tinyGoSdkComboChooser(property = wrapper.tinyGoSdkPath, parentDisposable)
     }
-    titledRow(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
-        row(TinyGoBundle.message(TARGET_LABEL)) {
-            targetChooser(wrapper, tinyGoSdkComboChooser)
-        }
-        row(TinyGoBundle.message(GC_LABEL)) {
-            comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
-            autoHelpLabel()
-        }
-        row(TinyGoBundle.message(SCHEDULER_LABEL)) {
-            comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
-            autoHelpLabel()
-        }
-        row {
-            exportButton(wrapper)
+    nestedPanel {
+        titledRow(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
+            row(TinyGoBundle.message(TARGET_LABEL)) {
+                targetChooser(wrapper, tinyGoSdkComboChooser)
+            }
+            row(TinyGoBundle.message(GC_LABEL)) {
+                comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
+                autoHelpLabel()
+            }
+            row(TinyGoBundle.message(SCHEDULER_LABEL)) {
+                comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
+                autoHelpLabel()
+            }
+            row {
+                exportButton(wrapper)
+            }
         }
     }
 }
