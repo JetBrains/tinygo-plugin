@@ -4,6 +4,7 @@
 
 ## [Unreleased]
 ### Added
+- Allow creating a new TinyGo project in IntelliJ IDEA.
 
 ### Changed
 

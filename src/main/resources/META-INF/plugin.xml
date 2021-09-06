@@ -23,6 +23,7 @@
                              displayName="TinyGo"/>
         <configurationType implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationType"/>
         <directoryProjectGenerator implementation="org.jetbrains.tinygoplugin.project.wizard.TinyGoProjectGenerator"/>
+        <moduleBuilder builderClass="org.jetbrains.tinygoplugin.project.wizard.TinyGoModuleBuilder"/> <!-- for IDEA -->
         <localInspection language="go" groupKey="inspection.bundle.key"
                          bundle="messages.TinyGo" key="inspection.import.unsupported.fix"
                          groupBundle="messages.TinyGo" enabledByDefault="true"
