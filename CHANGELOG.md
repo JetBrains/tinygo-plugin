@@ -2,11 +2,12 @@
 
 # tinygo-plugin Changelog
 
-## [Unreleased]
+## [0.3.1]
 ### Added
 - Allow creating a new TinyGo project in IntelliJ IDEA.
 
 ### Changed
+- Update small TinyGo icon.
 
 ### Deprecated
 
