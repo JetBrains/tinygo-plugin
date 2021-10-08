@@ -3,6 +3,9 @@
 # tinygo-plugin Changelog
 
 ## [Unreleased]
+### Changed
+- Make plugin compatible with 2021.3.
+
 ### Fixed
 - Hide Go SDK from Libraries as it's now a part of TinyGo SDK.
 
