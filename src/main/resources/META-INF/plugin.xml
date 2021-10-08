@@ -67,5 +67,6 @@
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
         <importsFilter implementation="org.jetbrains.tinygoplugin.services.TinyGoImportsFilter"/>
         <rootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootsProvider" order="before vgo"/>
+        <sdk.sdkVetoer implementation="org.jetbrains.tinygoplugin.sdk.TinyGoBasedSdkVetoer"/>
     </extensions>
 </idea-plugin>

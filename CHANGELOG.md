@@ -3,17 +3,8 @@
 # tinygo-plugin Changelog
 
 ## [Unreleased]
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
 ### Fixed
-
-### Security
+- Hide Go SDK from Libraries as it's now a part of TinyGo SDK.
 
 ## [0.3.1]
 ### Added
@@ -21,14 +12,6 @@
 
 ### Changed
 - Update small TinyGo icon.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## [0.3.0]
 ### Added
