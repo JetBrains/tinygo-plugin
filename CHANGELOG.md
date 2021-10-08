@@ -2,7 +2,7 @@
 
 # tinygo-plugin Changelog
 
-## [Unreleased]
+## [0.3.2]
 ### Changed
 - Make plugin compatible with 2021.3.
 
