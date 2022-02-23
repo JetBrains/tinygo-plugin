@@ -19,6 +19,7 @@ import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationEditor.PathKind
+import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 import java.nio.file.Path
@@ -26,6 +27,7 @@ import java.nio.file.Path
 private const val ERROR_SDK_NOT_SET = "run.configuration.errors.sdk"
 private const val ERROR_MAIN_FILE_NOT_FOUND = "run.configuration.errors.main"
 private const val ERROR_NOT_GO_FILE = "run.configuration.errors.type"
+private const val ERROR_HEAP_ALLOCS_OUTDATED_COMPILER = "run.configuration.errors.heapAllocs.outdatedCompiler"
 private const val CONFIGURATION_EDITOR_NAME = "run.configuration.editor.name"
 private const val MAIN_FILE = "tinygo_main_file"
 private const val CMD_OPTIONS = "tinygo_cmd_options"
@@ -117,5 +119,27 @@ class TinyGoTestRunConfiguration(project: Project, factory: ConfigurationFactory
     TinyGoRunConfiguration(project, factory, name, TinyGoTestCommand(), PathKind.TEST) {
     override fun newRunningState(environment: ExecutionEnvironment, module: Module): TinyGoRunningState {
         return TinyGoTestRunningState(environment, module, this)
+    }
+}
+
+class TinyGoHeapAllocRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
+    TinyGoRunConfiguration(project, factory, name, TinyGoBuildCommand(), PathKind.MAIN) {
+    @Suppress("MagicNumber")
+    companion object {
+        private val TINYGO_PRINT_HEAP_ALLOCS_MIN_VER = TinyGoSdkVersion(0, 18, 0)
+    }
+
+    override fun newRunningState(environment: ExecutionEnvironment, module: Module): TinyGoRunningState {
+        return TinyGoHeapAllocRunningState(environment, module, this)
+    }
+
+    @Throws(RuntimeConfigurationException::class)
+    override fun checkConfiguration() {
+        super.checkConfiguration()
+
+        val sdk = TinyGoConfiguration.getInstance(project).sdk
+        if (sdk.sdkVersion.isLessThan(TINYGO_PRINT_HEAP_ALLOCS_MIN_VER)) {
+            throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_HEAP_ALLOCS_OUTDATED_COMPILER))
+        }
     }
 }

@@ -35,16 +35,25 @@ class TinyGoTestConfigurationFactory(type: ConfigurationType) : TinyGoConfigurat
     }
 }
 
+class TinyGoHeapAllocConfigurationFactory(type: ConfigurationType) :
+    TinyGoConfigurationFactory(type, TinyGoBuildCommand()) {
+    override fun createTemplateConfiguration(project: Project): RunConfiguration {
+        return TinyGoHeapAllocRunConfiguration(project, this, project.name)
+    }
+}
+
 class TinyGoRunConfigurationType :
     ConfigurationTypeBase(TINYGO_CONFIGURATION_ID, CONFIGURATION_NAME, DESCRIPTION, TinyGoPluginIcons.TinyGoIcon) {
     val runFactory = TinyGoConfigurationFactory(this, TinyGoRunCommand())
     val flashFactory = TinyGoConfigurationFactory(this, TinyGoFlashCommand())
     val testFactory = TinyGoTestConfigurationFactory(this)
+    val heapAllocFactory = TinyGoHeapAllocConfigurationFactory(this)
 
     init {
         addFactory(runFactory)
         addFactory(flashFactory)
         addFactory(testFactory)
+        addFactory(heapAllocFactory)
     }
 
     companion object {
