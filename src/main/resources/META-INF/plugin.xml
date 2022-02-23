@@ -52,6 +52,8 @@
                                   implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoEmulateRunConfigurationProducer"/>
         <runConfigurationProducer id="TinyGoTestConfigurationProducer"
                                   implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoTestRunConfigurationProducer"/>
+        <runConfigurationProducer id="TinyGoHeapAllocConfigurationProducer"
+                                  implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoHeapAllocRunConfigurationProducer"/>
         <runLineMarkerContributor language="go"
                                   implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoRunLineMarkerContributor"/>
         <runLineMarkerContributor language="go"
@@ -60,8 +62,9 @@
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmAvr"/>
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm"/>
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm64"/>
-        <toolWindow factoryClass="org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocationsWindowFactory"
-                    id="TinyGo: Heap Allocations" anchor="right"/>
+        <toolWindow
+                factoryClass="org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocationsWindowFactory"
+                id="TinyGo: Heap Allocations" anchor="right"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>

@@ -79,3 +79,8 @@ class TinyGoTestRunConfigurationProducer : TinyGoRunConfigurationProducer("Test"
         return file.name
     }
 }
+
+class TinyGoHeapAllocRunConfigurationProducer : TinyGoRunConfigurationProducer("Heap Allocations") {
+    override fun getConfigurationFactory(): ConfigurationFactory =
+        TinyGoRunConfigurationType.getInstance().heapAllocFactory
+}

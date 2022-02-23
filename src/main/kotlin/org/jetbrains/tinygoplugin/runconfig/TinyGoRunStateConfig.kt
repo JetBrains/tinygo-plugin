@@ -15,9 +15,13 @@ open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configu
     GoRunningState<TinyGoRunConfiguration>(env, module, configuration) {
     // override the function to supply GoExecutor with tinygo
     protected open val hardwareArguments: List<String> = configuration.cmdlineOptions + listOf("-size", "full")
+    protected open val additionalParameters: List<String> = emptyList()
 
     override fun createRunExecutor(): GoExecutor {
-        val arguments = listOf(configuration.command) + hardwareArguments + listOf(configuration.runConfig.mainFile)
+        val arguments = listOf(configuration.command) +
+                hardwareArguments +
+                additionalParameters +
+                listOf(configuration.runConfig.mainFile)
         val tinyGoExecutablePath = configuration.executable
         if (tinyGoExecutablePath == null) {
             notifyTinyGoNotConfigured(configuration.project, "TinyGo SDK is not set. Please configure TinyGo SDK")
@@ -33,6 +37,11 @@ open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configu
 class TinyGoTestRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     TinyGoRunningState(env, module, configuration) {
     override val hardwareArguments: List<String> = emptyList()
+}
+
+class TinyGoHeapAllocRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
+    TinyGoRunningState(env, module, configuration) {
+    override val additionalParameters: List<String> = listOf("-o", "temp.out", "-print-allocs=.")
 }
 
 data class RunSettings(
