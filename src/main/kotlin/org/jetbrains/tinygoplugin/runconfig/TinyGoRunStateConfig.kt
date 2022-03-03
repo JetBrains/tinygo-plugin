@@ -3,12 +3,22 @@ package org.jetbrains.tinygoplugin.runconfig
 import com.goide.execution.GoRunningState
 import com.goide.util.GoExecutor
 import com.intellij.execution.ExecutionException
+import com.intellij.execution.ExecutionResult
+import com.intellij.execution.Executor
+import com.intellij.execution.process.ProcessAdapter
+import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.execution.runners.ProgramRunner
+import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.util.Key
 import org.codehaus.plexus.util.cli.CommandLineUtils.translateCommandline
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.heapAllocations.supplyHeapAllocsFromOutput
+import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocsViewManager
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 
 open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
@@ -42,6 +52,27 @@ class TinyGoTestRunningState(env: ExecutionEnvironment, module: Module, configur
 class TinyGoHeapAllocRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     TinyGoRunningState(env, module, configuration) {
     override val additionalParameters: List<String> = listOf("-o", "temp.out", "-print-allocs=.")
+
+    override fun execute(
+        executor: Executor,
+        runner: ProgramRunner<*>,
+        processHandler: ProcessHandler
+    ): ExecutionResult {
+        processHandler.addProcessListener(object : ProcessAdapter() {
+            private var processOutput: String = ""
+
+            override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                processOutput += event.text
+            }
+
+            override fun processTerminated(event: ProcessEvent) {
+                val heapAllocs = supplyHeapAllocsFromOutput(processOutput)
+                module?.project?.service<TinyGoHeapAllocsViewManager>()?.updateHeapAllocsList(heapAllocs)
+            }
+        })
+
+        return super.execute(executor, runner, processHandler)
+    }
 }
 
 data class RunSettings(

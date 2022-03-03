@@ -1,88 +1,84 @@
 package org.jetbrains.tinygoplugin.heapAllocations.toolWindow
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.actionSystem.ActionGroup
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.ActionToolbar
-import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.ScrollPaneFactory
-import com.intellij.ui.border.CustomLineBorder
 import com.intellij.ui.content.Content
-import com.intellij.ui.content.ContentFactory
+import com.intellij.ui.content.ContentManagerEvent
+import com.intellij.ui.content.ContentManagerListener
 import com.intellij.ui.treeStructure.Tree
-import com.intellij.util.ui.JBUI
-import com.intellij.util.ui.UIUtil
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.heapAllocations.HeapAllocsWatcher
-import org.jetbrains.tinygoplugin.heapAllocations.TinyGoHeapAllocsSupplier
+import org.jetbrains.tinygoplugin.heapAllocations.TinyGoHeapAlloc
 import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.model.RootNode
 import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.model.TinyGoHeapAllocsTreeModel
 import java.awt.BorderLayout
 import javax.swing.JPanel
-import javax.swing.SwingConstants
 import javax.swing.tree.TreeSelectionModel
 
-class TinyGoHeapAllocationsWindowFactory : ToolWindowFactory {
+private const val TINYGO_HEAP_ALLOC_TOOLWINDOW_ID = "TinyGo: Heap Allocations"
+
+class TinyGoHeapAllocsToolWindowFactory : ToolWindowFactory {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val myToolWindow = TinyGoHeapAllocsWindow(project)
-        val contentFactory = ContentFactory.SERVICE.getInstance()
-        val content: Content = contentFactory.createContent(myToolWindow.panel, "", false)
-        toolWindow.contentManager.addContent(content)
+        toolWindow.contentManager.addContentManagerListener(object : ContentManagerListener {
+            override fun contentRemoved(event: ContentManagerEvent) {
+                if (toolWindow.contentManager.contentCount == 0) {
+                    toolWindow.isAvailable = false
+                }
+            }
+        })
     }
 
-    override fun isApplicable(project: Project): Boolean = TinyGoConfiguration.getInstance(project).enabled
+    override fun shouldBeAvailable(project: Project): Boolean = false
 }
 
-class TinyGoHeapAllocsWindow(val project: Project) : Disposable, HeapAllocsWatcher {
-    companion object {
-        private const val TOOLBAR_ACTION_GROUP_ID = "HeapAllocs.ToolWindow.Toolbar"
+@Service
+class TinyGoHeapAllocsViewManager(val project: Project) {
+    fun updateHeapAllocsList(update: Map<String, Set<TinyGoHeapAlloc>>) {
+        val heapAllocsView = TinyGoHeapAllocsWindow(project)
+        heapAllocsView.refreshHeapAllocsList(update)
+        activateToolWindow(heapAllocsView)
     }
 
+    private fun activateToolWindow(heapAllocsView: TinyGoHeapAllocsWindow) {
+        ApplicationManager.getApplication().invokeLater {
+            val toolWindow: ToolWindow = project.service<ToolWindowManager>()
+                .getToolWindow(TINYGO_HEAP_ALLOC_TOOLWINDOW_ID)
+                ?: return@invokeLater
+            val contentManager = toolWindow.contentManager
+
+            contentManager.removeAllContents(true)
+            val contentTab: Content = contentManager.factory.createContent(heapAllocsView, project.name, false)
+            contentManager.addContent(contentTab)
+
+            toolWindow.isAvailable = true
+            toolWindow.activate(null, true)
+        }
+    }
+}
+
+class TinyGoHeapAllocsWindow(val project: Project) : JPanel(BorderLayout()), Disposable {
     private val treeModel = TinyGoHeapAllocsTreeModel(this)
-    val tree: Tree = Tree(treeModel)
-    val panel = JPanel(BorderLayout())
+    private val tree: Tree = Tree(treeModel)
 
     init {
         tree.selectionModel.selectionMode = TreeSelectionModel.SINGLE_TREE_SELECTION
         tree.isRootVisible = false
         tree.setupGoToSourceOnDoubleClick()
 
-        val myToolbar = getToolbar()
-        myToolbar.setOrientation(SwingConstants.HORIZONTAL)
-        myToolbar.setTargetComponent(tree)
-        myToolbar.component.isVisible = true
-
-        TinyGoHeapAllocsSupplier.getInstance().listeners.add(this)
-        refreshHeapAllocsList(false)
-
-        UIUtil.addBorder(myToolbar.component, CustomLineBorder(JBUI.insetsBottom(1)))
-        panel.add(BorderLayout.CENTER, ScrollPaneFactory.createScrollPane(tree, true))
-        panel.add(BorderLayout.NORTH, myToolbar.component)
+        add(BorderLayout.CENTER, ScrollPaneFactory.createScrollPane(tree, true))
     }
 
-    private fun getToolbar(): ActionToolbar {
-        val group = ActionManager.getInstance().getAction(TOOLBAR_ACTION_GROUP_ID) as ActionGroup
-        return ActionManager.getInstance().createActionToolbar(javaClass.name, group, false)
+    fun refreshHeapAllocsList(update: Map<String, Set<TinyGoHeapAlloc>>) {
+        treeModel.root = RootNode(project, update)
+        tree.expandAllNodes()
     }
 
-    private fun expandAllNodes() {
-        for (i in 0..treeModel.root?.getChildren()?.size!!) {
-            tree.expandRow(i)
-        }
-    }
-
-    override fun refreshHeapAllocsList(blameOutdatedVersion: Boolean) {
-        FileDocumentManager.getInstance().saveAllDocuments()
-        TinyGoHeapAllocsSupplier.getInstance().supplyHeapAllocs(project, blameOutdatedVersion) {
-            treeModel.root = RootNode(project, it)
-            expandAllNodes()
-        }
-    }
-
+    @Suppress("EmptyFunctionBlock")
     override fun dispose() {
-        TinyGoHeapAllocsSupplier.getInstance().listeners.remove(this)
     }
 }
