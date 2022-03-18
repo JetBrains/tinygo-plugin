@@ -20,6 +20,8 @@ import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.heapAllocations.supplyHeapAllocsFromOutput
 import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocsViewManager
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
+import java.nio.file.Files
+import java.nio.file.Paths
 
 open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     GoRunningState<TinyGoRunConfiguration>(env, module, configuration) {
@@ -51,7 +53,17 @@ class TinyGoTestRunningState(env: ExecutionEnvironment, module: Module, configur
 
 class TinyGoHeapAllocRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     TinyGoRunningState(env, module, configuration) {
-    override val additionalParameters: List<String> = listOf("-o", "temp.out", "-print-allocs=.")
+    private val outputFile: String
+        get() {
+            val outputFilePrefix = "tinygo-temp-output-${module?.project?.locationHash}"
+            val tempDir = System.getProperty("java.io.tmpdir")
+            val candidate = Paths.get(tempDir, "$outputFilePrefix.out")
+
+            return if (Files.exists(candidate)) candidate.toString()
+            else Files.createTempFile(outputFilePrefix, ".out").toString()
+        }
+
+    override val additionalParameters: List<String> = listOf("-o", outputFile, "-print-allocs=.")
 
     override fun execute(
         executor: Executor,
