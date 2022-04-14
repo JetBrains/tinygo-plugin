@@ -2,30 +2,9 @@
 
 # tinygo-plugin Changelog
 
-## [Unreleased]
-### Added
-
+## [0.3.3]
 ### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
-## [unspecified]
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+- Make the plugin compatible with 2022.1.
 
 ## [0.3.2]
 ### Changed
