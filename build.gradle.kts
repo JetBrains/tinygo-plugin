@@ -43,12 +43,20 @@ repositories {
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 dependencies {
-    testImplementation("com.jetbrains.intellij.go:go-test-framework:212.4746.93") {
+    testImplementation("com.jetbrains.intellij.go:go-test-framework:221.5080.224") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
         exclude("org.jetbrains.kotlin", "kotlin-reflect")
         exclude("com.jetbrains.rd", "rd-core")
         exclude("com.jetbrains.rd", "rd-swing")
         exclude("com.jetbrains.rd", "rd-framework")
+        exclude("org.jetbrains.teamcity", "serviceMessages")
+        exclude("io.ktor", "ktor-network-jvm")
+        exclude("com.jetbrains.infra", "download-pgp-verifier")
+        exclude("ai.grazie.utils", "utils-common")
+        exclude("ai.grazie.nlp", "nlp-common")
+        exclude("ai.grazie.nlp", "nlp-tokenizer")
+        exclude("ai.grazie.spell", "hunspell-en")
+        exclude("ai.grazie.spell", "gec-spell-local-engine")
     }
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")

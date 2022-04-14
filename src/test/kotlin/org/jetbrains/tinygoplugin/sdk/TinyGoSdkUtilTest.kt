@@ -1,7 +1,7 @@
 package org.jetbrains.tinygoplugin.sdk
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
-import kotlin.test.assertEquals
 
 class TinyGoSdkUtilTest {
     @Test fun testParseTinyGoVersion() {

@@ -1,9 +1,9 @@
 package org.jetbrains.tinygoplugin.services
 
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 private const val NO_ERROR_TINYGO_OUTPUT = """
         [GOROOT=/path/to/go/go1.16.7 #gosetup
