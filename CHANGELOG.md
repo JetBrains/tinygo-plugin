@@ -16,6 +16,19 @@
 ### Security
 
 ## [0.3.3]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.3.3]
 ### Changed
 - Make the plugin compatible with 2022.1.
 
@@ -40,6 +53,7 @@
 - Live templates for inline assembly on AVR, ARM and 64-bit ARM boards
 - Error on attempt to rewrite an existing file
 - Help boxes about `auto` flag for garbage collector and scheduler
+
 ### Changed
 - Highlight all usages of unsupported packages, not only its imports
 - Cosmetic changes on project wizard UI layout
@@ -50,6 +64,7 @@
   - "TinyGo Test ..." run configuration from test file/function context
   - Inspection for usage of `machine` package in tests
 - "TinyGo Emulate ..." run configuration (`tinygo run`) from `main` function context
+
 ### Changed
 - Use cached GOROOT as TinyGo library instead of TinyGo sources
 
