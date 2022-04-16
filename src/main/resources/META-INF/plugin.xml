@@ -56,6 +56,13 @@
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmAvr"/>
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm"/>
         <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm64"/>
+        <toolWindow id="TinyGo: Heap Allocations"
+                    factoryClass="org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocsToolWindowFactory"
+                    icon="/icons/tinyGo.svg"
+                    anchor="right"
+                    canCloseContents="true"
+                    secondary="true"
+        />
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
