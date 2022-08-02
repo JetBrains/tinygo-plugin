@@ -43,7 +43,7 @@ repositories {
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 dependencies {
-    testImplementation("com.jetbrains.intellij.go:go-test-framework:221.5080.224") {
+    testImplementation("com.jetbrains.intellij.go:go-test-framework:222.3345.118") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
         exclude("org.jetbrains.kotlin", "kotlin-reflect")
         exclude("com.jetbrains.rd", "rd-core")
@@ -89,20 +89,20 @@ detekt {
 }
 
 tasks {
-    // Set the compatibility versions to 11
+    // Set the compatibility versions to 17
     withType<JavaCompile> {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
     withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "11"
+            jvmTarget = "17"
             freeCompilerArgs = listOf("-Xjvm-default=enable")
         }
     }
 
     withType<Detekt> {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 
     patchPluginXml {
