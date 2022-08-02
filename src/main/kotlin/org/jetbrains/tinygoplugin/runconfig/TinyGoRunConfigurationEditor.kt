@@ -4,8 +4,6 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.options.SettingsEditor
-import com.intellij.ui.layout.CellBuilder
-import com.intellij.ui.layout.ComponentPredicate
 import com.intellij.ui.layout.GrowPolicy
 import com.intellij.ui.layout.panel
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
@@ -71,17 +69,6 @@ class TinyGoRunConfigurationEditor(
                     fileChooserDescriptor = fileChooserDescriptor
                 )
             }
-        }
-    }
-}
-
-private fun <T> CellBuilder<com.intellij.openapi.ui.ComboBox<T>>.predicate(folder: T): ComponentPredicate {
-    return object : ComponentPredicate() {
-        override fun invoke(): Boolean =
-            component.item == folder
-
-        override fun addListener(listener: (Boolean) -> Unit) {
-            component.addActionListener { listener(invoke()) }
         }
     }
 }

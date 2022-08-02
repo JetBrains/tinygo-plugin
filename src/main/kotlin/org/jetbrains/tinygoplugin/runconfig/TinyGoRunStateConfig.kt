@@ -50,9 +50,9 @@ data class RunSettings(
         get() {
             val userDefined = translateCommandline(userArguments)
             return listOf("-target", targetPlatform) +
-                    scheduler(userDefined, scheduler) +
-                    garbageCollector(userDefined, gc) +
-                    filteredUserArguments(userDefined)
+                scheduler(userDefined, scheduler) +
+                garbageCollector(userDefined, gc) +
+                filteredUserArguments(userDefined)
         }
 }
 
