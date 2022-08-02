@@ -6,15 +6,15 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.6.20"
+    id("org.jetbrains.kotlin.jvm") version "1.7.10"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij") version "1.5.2"
+    id("org.jetbrains.intellij") version "1.6.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "1.3.1"
     // detekt linter - read more: https://detekt.github.io/detekt/gradle.html
-    id("io.gitlab.arturbosch.detekt") version "1.15.0"
+    id("io.gitlab.arturbosch.detekt") version "1.21.0"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
-    id("org.jlleitschuh.gradle.ktlint") version "10.0.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
 // Import variables from gradle.properties file
@@ -59,7 +59,7 @@ dependencies {
         exclude("ai.grazie.spell", "gec-spell-local-engine")
     }
 
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -80,12 +80,6 @@ intellij {
 detekt {
     config = files("./detekt-config.yml")
     buildUponDefaultConfig = true
-
-    reports {
-        html.enabled = false
-        xml.enabled = false
-        txt.enabled = false
-    }
 }
 
 tasks {
@@ -103,6 +97,11 @@ tasks {
 
     withType<Detekt> {
         jvmTarget = "17"
+        reports {
+            html.required.set(false)
+            xml.required.set(false)
+            txt.required.set(false)
+        }
     }
 
     patchPluginXml {
