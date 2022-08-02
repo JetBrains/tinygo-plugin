@@ -68,7 +68,7 @@ private fun configureModule(
     if (newProjectSettings.tinyGoSettings.sdk.sdkVersion.isAtLeast(tinyGoVersionWithModules)) {
         VgoModuleBuilder.vgoModuleCreated(
             module,
-            VgoNewProjectSettings(newProjectSettings.goSdk, emptyMap(), true),
+            VgoNewProjectSettings(newProjectSettings.goSdk, emptyMap(), true, false),
             true,
             contentRoot
         )

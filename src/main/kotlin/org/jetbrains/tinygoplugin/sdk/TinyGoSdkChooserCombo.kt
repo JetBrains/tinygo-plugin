@@ -42,11 +42,14 @@ class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkD
     override fun getProgressIconName(): String = TinyGoBundle.getMessage(TINYGO_SDK_PROGRESS_ICON_NAME)
 
     override fun discoverVersions(
+        os: String,
+        arch: String,
         progressIndicator: ProgressIndicator,
         versionConsumer: Consumer<MutableCollection<String>>,
     ): Boolean {
         val tinyGoReleasesUrl = "https://api.github.com/repos/$TINYGO_GITHUB/releases"
         val request = HttpRequests.request(tinyGoReleasesUrl)
+        @Suppress("SwallowedException")
         try {
             val response = request.readString(progressIndicator)
             val objectMapper = ObjectMapper()
@@ -54,7 +57,11 @@ class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkD
             if (!releases.isArray) {
                 return false
             }
-            val versions = releases.asSequence().map { node ->
+            val versions = releases.asSequence().filter { node ->
+                node["assets"].asSequence().filter { asset ->
+                    asset["name"].textValue().matches(Regex(".*[.]($os-$arch)[.](tar.gz|zip|deb)"))
+                }.any()
+            }.map { node ->
                 node["tag_name"].textValue()
             }.distinct().map { it.substring(1) }.sorted().toMutableList()
             versionConsumer.accept(versions)
@@ -124,6 +131,7 @@ class TinyGoSdkChooserCombo :
             listOf(
                 TinyGoLocalSdkAction(it),
                 GoDownloadSdkAction(
+                    { null },
                     it,
                     TinyGoDownloaderDialog { sdk -> it.addSdk(sdk, true) },
                     VersionComparatorUtil.COMPARATOR.reversed()
