@@ -1,23 +1,18 @@
 package org.jetbrains.tinygoplugin.services
 
-import com.goide.GoLibrariesUtil
-import com.goide.project.GoBuildTargetSettings
 import com.goide.project.GoModuleSettings
-import com.goide.sdk.GoSdkService
-import com.goide.util.GoUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
-import com.intellij.openapi.util.EmptyRunnable
-import com.intellij.util.messages.MessageBus
 import org.jetbrains.tinygoplugin.configuration.CachedGoRootInvalidator
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -121,22 +116,14 @@ class TinyGoSettingsService(private val project: Project) :
 
     override fun apply() {
         logger.warn("Apply called")
-        val oldSdk = TinyGoConfiguration.getInstance(project).sdk
+        val oldConfiguration = TinyGoConfiguration.getInstance(project)
+        val oldSdk = oldConfiguration.sdk
+        val oldTarget = oldConfiguration.targetPlatform
         tinyGoSettings.saveState(project)
         propagateGoFlags()
         updateTinyGoRunConfigurations()
-        if (oldSdk != tinyGoSettings.sdk) {
-            if (!project.isDisposed) {
-                ApplicationManager.getApplication().assertIsDispatchThread()
-                GoSdkService.getInstance(project).incModificationCount()
-                GoUtil.cleanResolveCache(project)
-                GoLibrariesUtil.updateLibraries(project, EmptyRunnable.getInstance(), null)
-                val messageBus: MessageBus = project.messageBus
-                val modules = ModuleManager.getInstance(project).modules
-                modules.filter {
-                    GoBuildTargetSettings.DEFAULT == GoModuleSettings.getInstance(it).buildTargetSettings.goVersion
-                }.forEach { messageBus.syncPublisher(GoModuleSettings.BUILD_TARGET_TOPIC).changed(it, true) }
-            }
+        if (oldSdk != tinyGoSettings.sdk || oldTarget != tinyGoSettings.targetPlatform) {
+            sendReloadLibrariesSignal(project)
         }
     }
 

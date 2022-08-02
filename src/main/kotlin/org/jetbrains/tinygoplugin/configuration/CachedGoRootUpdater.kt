@@ -1,14 +1,17 @@
 package org.jetbrains.tinygoplugin.configuration
 
 import com.goide.GoLibrariesUtil
+import com.goide.project.GoBuildTargetSettings
 import com.goide.project.GoModuleSettings
 import com.goide.sdk.GoSdk
 import com.goide.sdk.GoSdkService
 import com.goide.util.GoUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.EmptyRunnable
+import com.intellij.util.messages.MessageBus
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.services.propagateGoFlags
@@ -51,5 +54,15 @@ private fun updateExtLibrariesAndCleanCache(project: Project) {
         GoSdkService.getInstance(project).incModificationCount()
         GoUtil.cleanResolveCache(project)
         GoLibrariesUtil.updateLibraries(project, EmptyRunnable.getInstance(), null)
+    }
+}
+
+fun sendReloadLibrariesSignal(project: Project) {
+    if (!project.isDisposed) {
+        val messageBus: MessageBus = project.messageBus
+        val modules = ModuleManager.getInstance(project).modules
+        modules.filter {
+            GoBuildTargetSettings.DEFAULT == GoModuleSettings.getInstance(it).buildTargetSettings.goVersion
+        }.forEach { messageBus.syncPublisher(GoModuleSettings.BUILD_TARGET_TOPIC).changed(it, true) }
     }
 }
