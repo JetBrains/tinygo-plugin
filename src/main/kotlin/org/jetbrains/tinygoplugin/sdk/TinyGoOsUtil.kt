@@ -15,6 +15,8 @@ interface OSUtils {
         val file = VfsUtil.findFileByIoFile(File(tinyGoSDKPath), false) ?: return ""
         return executableVFile(file)?.canonicalPath ?: ""
     }
+
+    fun emulatedArch(arch: String): String = arch
 }
 
 internal abstract class OSUtilsImpl : OSUtils {
@@ -58,6 +60,9 @@ internal class MacOSUtils : UnixUtils() {
         }
         return if (tinyGoSdkDirectories.isNullOrEmpty()) emptyList() else tinyGoSdkDirectories.map { f -> f.path }
     }
+
+    override fun emulatedArch(arch: String): String =
+        if (arch == "arm64") "amd64" else arch
 }
 
 internal class LinuxUtils : UnixUtils() {
@@ -70,12 +75,15 @@ val osManager: OSUtils
             GoOsManager.isLinux() -> {
                 LinuxUtils()
             }
+
             GoOsManager.isMac() -> {
                 MacOSUtils()
             }
+
             GoOsManager.isWindows() -> {
                 WindowsUtils()
             }
+
             else -> {
                 UnknownOSUtils()
             }

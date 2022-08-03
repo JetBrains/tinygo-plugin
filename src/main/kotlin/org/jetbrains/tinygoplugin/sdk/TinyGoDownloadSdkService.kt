@@ -90,7 +90,8 @@ class TinyGoDownloadSdkService private constructor() {
                 try {
                     indicator.isIndeterminate = false
                     val extension = if (GoOsManager.isWindows()) ".zip" else ".tar.gz"
-                    val fileName = "tinygo${sdk.version}.${GoUtil.systemOS()}-${GoUtil.systemArch()}$extension"
+                    val emulatedArch = osManager.emulatedArch(GoUtil.systemArch())
+                    val fileName = "tinygo${sdk.version}.${GoUtil.systemOS()}-$emulatedArch$extension"
                     val downloadedArchive = Files.createTempFile("for-actual-downloading-", extension)
                     DownloadUtil.downloadContentToFile(
                         indicator,
