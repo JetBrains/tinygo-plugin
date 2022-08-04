@@ -7,6 +7,7 @@ import com.goide.sdk.GoSdk
 import com.goide.sdk.GoSdkService
 import com.goide.util.GoUtil
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
@@ -23,15 +24,15 @@ internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
         val settings = TinyGoConfiguration.getInstance(project)
         if (!settings.enabled) return
 
-        val infoExtractor = TinyGoInfoExtractor(project)
         val tinyGoSettings: TinyGoConfiguration = ConfigurationWithHistory(project)
-        infoExtractor.extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
-            tinyGoSettings.extractTinyGoInfo(output)
-            tinyGoSettings.saveState(project)
+        project.service<TinyGoInfoExtractor>()
+            .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
+                tinyGoSettings.extractTinyGoInfo(output)
+                tinyGoSettings.saveState(project)
 
-            propagateGoFlags(project, tinyGoSettings)
-            updateExtLibrariesAndCleanCache(project)
-        }
+                propagateGoFlags(project, tinyGoSettings)
+                updateExtLibrariesAndCleanCache(project)
+            }
     }
 }
 

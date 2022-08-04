@@ -63,6 +63,7 @@ class TinyGoDownloadSdkService private constructor() {
 
         val downloadTask: Task.Backgroundable = object : Task.Backgroundable(null, "Downloading TinyGo SDK", true) {
             private var success = false
+            private val lock = object {}
 
             override fun onFinished() {
                 synchronized(downloadingTinyGoSdks) {
@@ -75,7 +76,7 @@ class TinyGoDownloadSdkService private constructor() {
                 }
                 TinyGoSdkList.getInstance().addSdk(localSdk)
                 sdk.isDownloaded = true
-                synchronized(success) {
+                synchronized(lock) {
                     if (success) {
                         sdk.isDownloaded = true
                         GoNotifications.getGeneralGroup()
@@ -101,7 +102,7 @@ class TinyGoDownloadSdkService private constructor() {
                     indicator.text2 = ""
                     // checksum verifying??
                     unpackSdk(indicator, downloadedArchive, VfsUtilCore.urlToPath(sdk.homeUrl))
-                    synchronized(success) {
+                    synchronized(lock) {
                         success = true
                     }
                 } catch (e: IOException) {

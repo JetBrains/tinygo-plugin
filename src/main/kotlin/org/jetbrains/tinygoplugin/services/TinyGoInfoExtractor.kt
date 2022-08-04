@@ -5,6 +5,8 @@ import com.goide.sdk.GoSdkService
 import com.goide.sdk.download.GoDownloadingSdk
 import com.goide.util.GoExecutor
 import com.goide.util.GoHistoryProcessListener
+import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -18,6 +20,8 @@ import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.TinyGoExtractionFailureListener
+import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
+import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.osManager
 import java.time.Duration
@@ -121,6 +125,7 @@ class TinyGoExecutable(private val project: Project) {
     }
 }
 
+@Service
 class TinyGoInfoExtractor(private val project: Project) {
     companion object {
         val logger: Logger = Logger.getInstance(TinyGoInfoExtractor::class.java)
@@ -154,19 +159,38 @@ class TinyGoInfoExtractor(private val project: Project) {
         }
         val detectingTask = object : Task.Backgroundable(project, TinyGoBundle.message(DETECTION_TITLE)) {
             override fun run(indicator: ProgressIndicator) {
-                if (currentGoSdk is GoDownloadingSdk) {
-                    indicator.isIndeterminate = true
-                    indicator.text2 = TinyGoBundle.message(DETECTION_INDICATOR_TEXT)
-                    while (GoSdkService.getInstance(project).getSdk(null) is GoDownloadingSdk) {
-                        Thread.sleep(Duration.ofSeconds(1).toMillis())
+                synchronized(project) {
+                    if (currentGoSdk is GoDownloadingSdk) {
+                        logger.debug("Waiting until Go SDK will be downloaded")
+                        indicator.isIndeterminate = true
+                        indicator.text2 = TinyGoBundle.message(DETECTION_INDICATOR_TEXT)
+                        while (project.service<GoSdkService>().getSdk(null) is GoDownloadingSdk) {
+                            Thread.sleep(Duration.ofSeconds(1).toMillis())
+                        }
+                    }
+                    logger.debug("Go SDK present")
+                    var reloadNeeded = false
+                    if (settings.sdk is TinyGoDownloadingSdk) {
+                        logger.debug("Waiting until TinyGo SDK will be downloaded. Explicit library reload needed")
+                        indicator.isIndeterminate = true
+                        indicator.text2 = TinyGoBundle.message(DETECTION_INDICATOR_TEXT)
+                        while (settings.sdk is TinyGoDownloadingSdk) {
+                            Thread.sleep(Duration.ofSeconds(1).toMillis())
+                        }
+                        reloadNeeded = true
+                    }
+                    logger.debug("TinyGo SDK present")
+                    executor.execute(
+                        settings.sdk.sdkRoot!!.path,
+                        tinyGoExtractionArguments(settings),
+                        failureListener,
+                        onFinish
+                    )
+                    if (reloadNeeded) {
+                        logger.debug("Explicit library reload needed. Sending reload signal")
+                        sendReloadLibrariesSignal(project)
                     }
                 }
-                executor.execute(
-                    settings.sdk.sdkRoot!!.path,
-                    tinyGoExtractionArguments(settings),
-                    failureListener,
-                    onFinish
-                )
             }
         }
         ProgressManager.getInstance()

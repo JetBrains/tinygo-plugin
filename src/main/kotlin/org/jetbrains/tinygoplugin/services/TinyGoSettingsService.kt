@@ -1,7 +1,7 @@
 package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoModuleSettings
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.BoundConfigurable
@@ -109,7 +109,6 @@ class TinyGoSettingsService(private val project: Project) :
     override var tinyGoSettings: TinyGoConfiguration =
         TinyGoConfigurationWithTagUpdate(project, this::callExtractor)
 
-    private val infoExtractor = TinyGoInfoExtractor(project)
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 
     override fun isModified(): Boolean = tinyGoSettings.modified(project)
@@ -130,12 +129,13 @@ class TinyGoSettingsService(private val project: Project) :
     override fun createPanel(): DialogPanel = generateSettingsPanel(propertiesWrapper, disposable!!)
 
     private fun callExtractor() {
-        infoExtractor.extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
-            logger.trace(output)
-            tinyGoSettings.extractTinyGoInfo(output)
-            // update all ui fields
-            propertiesWrapper.reset()
-        }
+        project.service<TinyGoInfoExtractor>()
+            .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
+                logger.trace(output)
+                tinyGoSettings.extractTinyGoInfo(output)
+                // update all ui fields
+                propertiesWrapper.reset()
+            }
     }
 
     override fun reset() {
