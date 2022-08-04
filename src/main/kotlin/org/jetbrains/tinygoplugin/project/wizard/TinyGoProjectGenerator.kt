@@ -5,6 +5,7 @@ import com.goide.vgo.wizard.VgoModuleBuilder
 import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -26,6 +27,9 @@ private fun getProjectDescription(): String = TinyGoBundle.message("new.project.
 private fun getProjectIcon(): Icon = TinyGoPluginIcons.TinyGoIcon
 
 class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
+    companion object {
+        val logger = logger<TinyGoProjectGenerator>()
+    }
 
     override fun getName(): String = getProjectPresentableName()
 
@@ -40,12 +44,19 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
         baseDir: VirtualFile,
         newProjectSettings: TinyGoNewProjectSettings,
         module: Module,
-    ) = configureModule(newProjectSettings, project, module, baseDir.path)
+    ) {
+        logger.debug("Begin configuring module for a new project")
+        configureModule(newProjectSettings, project, module, baseDir.path)
+        logger.debug("Finish configuring module for a new project")
+    }
 
     override fun createPeer(): ProjectGeneratorPeer<TinyGoNewProjectSettings> = TinyGoProjectGeneratorPeer()
 }
 
 class TinyGoModuleBuilder : GoModuleBuilderBase<TinyGoNewProjectSettings>(TinyGoProjectGeneratorPeer()) {
+    companion object {
+        val logger = logger<TinyGoModuleBuilder>()
+    }
 
     override fun getPresentableName(): String = getProjectPresentableName()
 
@@ -53,8 +64,11 @@ class TinyGoModuleBuilder : GoModuleBuilderBase<TinyGoNewProjectSettings>(TinyGo
 
     override fun getNodeIcon(): Icon = getProjectIcon()
 
-    override fun moduleCreated(module: Module, isCreatingNewProject: Boolean) =
+    override fun moduleCreated(module: Module, isCreatingNewProject: Boolean) {
+        logger.debug("Begin configuring module for module creation")
         configureModule(settings, module.project, module, contentEntryPath)
+        TinyGoProjectGenerator.logger.debug("Finish configuring module for module creation")
+    }
 }
 
 private fun configureModule(

@@ -8,6 +8,7 @@ import com.goide.sdk.GoSdkService
 import com.goide.util.GoUtil
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
@@ -19,7 +20,13 @@ import org.jetbrains.tinygoplugin.services.propagateGoFlags
 import java.util.EventListener
 
 internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
+    companion object {
+        val logger = logger<CachedGoRootUpdater>()
+    }
+
     override fun changed(module: Module, batchUpdate: Boolean) {
+        logger.debug("cached GOROOT update signal caught")
+
         val project = module.project
         val settings = TinyGoConfiguration.getInstance(project)
         if (!settings.enabled) return
@@ -33,6 +40,8 @@ internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
                 propagateGoFlags(project, tinyGoSettings)
                 updateExtLibrariesAndCleanCache(project)
             }
+
+        logger.debug("cached GOROOT update signal processed")
     }
 }
 

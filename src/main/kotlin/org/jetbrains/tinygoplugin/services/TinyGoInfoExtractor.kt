@@ -148,6 +148,7 @@ class TinyGoInfoExtractor(private val project: Project) {
                 project,
                 TinyGoBundle.message(GO_NOT_CONFIGURED_MESSAGE)
             )
+            logger.debug(GO_NOT_CONFIGURED_MESSAGE)
             return
         }
         if (settings.targetPlatform.isEmpty()) {
@@ -155,6 +156,7 @@ class TinyGoInfoExtractor(private val project: Project) {
                 project,
                 TinyGoBundle.message(TINYGO_TARGET_PLATFORM_NOT_SET)
             )
+            logger.debug(TINYGO_TARGET_PLATFORM_NOT_SET)
             return
         }
         val detectingTask = object : Task.Backgroundable(project, TinyGoBundle.message(DETECTION_TITLE)) {
@@ -193,7 +195,9 @@ class TinyGoInfoExtractor(private val project: Project) {
                 }
             }
         }
+        logger.debug("Waiting for TinyGo parameters extraction task")
         ProgressManager.getInstance()
             .runProcessWithProgressAsynchronously(detectingTask, BackgroundableProcessIndicator(detectingTask))
+        logger.debug("TinyGo parameters extraction task finished")
     }
 }

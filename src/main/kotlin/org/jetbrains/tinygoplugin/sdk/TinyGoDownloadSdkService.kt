@@ -48,13 +48,17 @@ class TinyGoDownloadSdkService private constructor() {
     val downloadingTinyGoSdks: MutableSet<TinyGoDownloadingSdk> = mutableSetOf()
 
     fun downloadTinyGoSdk(sdk: TinyGoDownloadingSdk, onFinish: Consumer<TinyGoSdk>) {
+        logger.debug("Download of TinyGo SDK started")
         if (sdk.isDownloaded) {
+            logger.debug("TinyGo SDK has been already downloaded, exit")
             return
         }
+        logger.debug("Waiting for TinyGo SDK to be registered")
         val registered = synchronized(downloadingTinyGoSdks) {
             downloadingTinyGoSdks.add(sdk)
         }
         if (registered) {
+            logger.debug("TinyGo SDK registered")
             startDownloading(sdk, onFinish)
         }
     }
@@ -66,15 +70,19 @@ class TinyGoDownloadSdkService private constructor() {
             private val lock = object {}
 
             override fun onFinished() {
+                logger.debug("Start processing downloaded temporary TinyGo SDK object")
                 synchronized(downloadingTinyGoSdks) {
                     downloadingTinyGoSdks.remove(sdk)
+                    logger.debug("Removed TinyGo SDK from the list of downloading SDKs")
                 }
 
                 val localSdk = sdk.toLocalTinyGoSdk()
                 if (localSdk == GoSdk::NULL) {
+                    logger.debug("Converting of downloading SDK to local failed")
                     return
                 }
                 TinyGoSdkList.getInstance().addSdk(localSdk)
+                logger.debug("Added downloaded TinyGo SDK to the list of local SDKs")
                 sdk.isDownloaded = true
                 synchronized(lock) {
                     if (success) {
@@ -89,6 +97,7 @@ class TinyGoDownloadSdkService private constructor() {
 
             override fun run(indicator: ProgressIndicator) {
                 try {
+                    logger.debug("Started downloading TinyGo SDK")
                     indicator.isIndeterminate = false
                     val extension = if (GoOsManager.isWindows()) ".zip" else ".tar.gz"
                     val emulatedArch = osManager.emulatedArch(GoUtil.systemArch())
@@ -99,11 +108,13 @@ class TinyGoDownloadSdkService private constructor() {
                         "https://github.com/$TINYGO_GITHUB/releases/download/v${sdk.version}/$fileName",
                         downloadedArchive.toFile()
                     )
+                    logger.debug("Downloaded TinyGo SDK into temp")
                     indicator.text2 = ""
                     // checksum verifying??
                     unpackSdk(indicator, downloadedArchive, VfsUtilCore.urlToPath(sdk.homeUrl))
                     synchronized(lock) {
                         success = true
+                        logger.debug("TinyGo SDK download and unpacking succeeded")
                     }
                 } catch (e: IOException) {
                     error("Unable to download TinyGo SDK from GitHub", e, null, onFinish)
@@ -112,6 +123,7 @@ class TinyGoDownloadSdkService private constructor() {
             }
 
             private fun unpackSdk(indicator: ProgressIndicator, archive: Path, targetPath: String) {
+                logger.debug("Start unpacking TinyGo SDK into $targetPath")
                 indicator.isIndeterminate = false
                 indicator.text = "Unpacking"
                 try {
@@ -133,6 +145,7 @@ class TinyGoDownloadSdkService private constructor() {
                     copyDir(tinyGo, targetDir, indicator)
                     LocalFileSystem.getInstance().refreshNioFiles(Collections.singleton(targetDir))
                     FileUtil.asyncDelete(tinyGo.toFile())
+                    logger.debug("Unpacked TinyGo SDK into $targetPath")
                 } catch (e: IOException) {
                     error("Error unpacking TinyGoSDK", e, null, onFinish)
                 }
@@ -178,8 +191,10 @@ class TinyGoDownloadSdkService private constructor() {
             }
         }
 
+        logger.debug("Waiting for TinyGo SDK downloading and unpacking task")
         ProgressManager.getInstance().runProcessWithProgressAsynchronously(
             downloadTask, BackgroundableProcessIndicator(downloadTask)
         )
+        logger.debug("TinyGo SDK downloading and unpacking task finished")
     }
 }
