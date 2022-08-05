@@ -16,6 +16,19 @@
 ### Security
 
 ## [0.3.4]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.3.4]
 ### Changed
 - Make the plugin compatible with 2022.2.
 - Detect heap allocations with a context run configuration.
