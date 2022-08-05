@@ -18,6 +18,13 @@
 ## [0.3.4]
 ### Changed
 - Make the plugin compatible with 2022.2.
+- Detect heap allocations with a context run configuration.
+
+### Fixed
+- Download TinyGo SDK from plugin on Apple Silicon architecture.
+- Handle another kind of Go and TinyGo incompatibility error.
+- Reload TinyGo library dynamically after target platform change.
+- Detect heap allocations in IDE that is installed to a read-only directory.
 
 ## [0.3.3]
 ### Changed
