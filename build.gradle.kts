@@ -83,20 +83,20 @@ detekt {
 }
 
 tasks {
-    // Set the compatibility versions to 17
+    // Set the compatibility versions to 11
     withType<JavaCompile> {
-        sourceCompatibility = "17"
-        targetCompatibility = "17"
+        sourceCompatibility = "11"
+        targetCompatibility = "11"
     }
     withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = "11"
             freeCompilerArgs = listOf("-Xjvm-default=enable")
         }
     }
 
     withType<Detekt> {
-        jvmTarget = "17"
+        jvmTarget = "11"
         reports {
             html.required.set(false)
             xml.required.set(false)
