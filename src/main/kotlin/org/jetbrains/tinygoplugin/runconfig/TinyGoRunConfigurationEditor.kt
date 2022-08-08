@@ -4,8 +4,11 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.options.SettingsEditor
-import com.intellij.ui.layout.GrowPolicy
-import com.intellij.ui.layout.panel
+import com.intellij.ui.dsl.builder.COLUMNS_MEDIUM
+import com.intellij.ui.dsl.builder.bindText
+import com.intellij.ui.dsl.builder.columns
+import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.MappedGraphProperty
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -57,17 +60,22 @@ class TinyGoRunConfigurationEditor(
     override fun createEditor(): JComponent {
         return panel {
             row("Target") {
-                textField(properties.target).enabled(false)
+                textField()
+                    .horizontalAlign(HorizontalAlign.FILL)
+                    .bindText(properties.target)
+                    .enabled(false)
             }
             row("Command line arguments") {
-                textField(properties.cmdLineArguments).growPolicy(GrowPolicy.MEDIUM_TEXT)
+                textField()
+                    .horizontalAlign(HorizontalAlign.FILL)
+                    .bindText(properties.cmdLineArguments)
+                    .columns(COLUMNS_MEDIUM)
             }
             row("Path to $pathKind") {
                 val fileChooserDescriptor = FileChooserDescriptor(true, true, false, false, false, false)
-                textFieldWithBrowseButton(
-                    property = properties.mainFile,
-                    fileChooserDescriptor = fileChooserDescriptor
-                )
+                textFieldWithBrowseButton(fileChooserDescriptor = fileChooserDescriptor)
+                    .horizontalAlign(HorizontalAlign.FILL)
+                    .bindText(properties.mainFile)
             }
         }
     }

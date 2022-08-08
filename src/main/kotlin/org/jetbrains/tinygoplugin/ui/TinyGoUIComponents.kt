@@ -2,21 +2,27 @@ package org.jetbrains.tinygoplugin.ui
 
 import com.intellij.json.JsonFileType
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.ContextHelpLabel
-import com.intellij.ui.EnumComboBoxModel
-import com.intellij.ui.layout.Cell
-import com.intellij.ui.layout.CellBuilder
-import com.intellij.ui.layout.GrowPolicy
-import com.intellij.ui.layout.LayoutBuilder
-import com.intellij.ui.layout.PropertyBinding
-import com.intellij.ui.layout.Row
-import com.intellij.ui.layout.applyToComponent
-import com.intellij.ui.layout.panel
+import com.intellij.ui.TextFieldWithHistoryWithBrowseButton
+import com.intellij.ui.components.textFieldWithHistoryWithBrowseButton
+import com.intellij.ui.dsl.builder.COLUMNS_LARGE
+import com.intellij.ui.dsl.builder.COLUMNS_MEDIUM
+import com.intellij.ui.dsl.builder.COLUMNS_SHORT
+import com.intellij.ui.dsl.builder.Cell
+import com.intellij.ui.dsl.builder.MutableProperty
+import com.intellij.ui.dsl.builder.Panel
+import com.intellij.ui.dsl.builder.Row
+import com.intellij.ui.dsl.builder.bindItem
+import com.intellij.ui.dsl.builder.bindText
+import com.intellij.ui.dsl.builder.columns
+import com.intellij.ui.dsl.builder.panel
+import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -28,14 +34,13 @@ import org.jetbrains.tinygoplugin.sdk.nullSdk
 import java.awt.event.ItemEvent
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.swing.JButton
 import javax.swing.JPanel
 
 fun generateTinyGoParametersPanel(
     wrapper: TinyGoPropertiesWrapper,
     parent: Disposable,
 ): JPanel = panel {
-    tinyGoSettings(wrapper, parent)
+    tinyGoSettings(this, wrapper, parent)
 }
 
 private fun AtomicBoolean.lockOrSkip(action: () -> Unit) {
@@ -58,34 +63,33 @@ fun TinyGoSdkChooserCombo.bind(property: GraphProperty<TinyGoSdk>) {
     childComponent.addItemListener {
         if (it.stateChange == ItemEvent.SELECTED) {
             mutex.lockOrSkip {
-                @Suppress("UNCHECKED_CAST")
                 property.set(it.item as TinyGoSdk)
             }
         }
     }
 }
 
-fun Cell.tinyGoSdkComboChooser(
+fun tinyGoSdkComboChooser(
+    row: Row,
     property: GraphProperty<TinyGoSdk>,
     parentDisposable: Disposable,
-): CellBuilder<TinyGoSdkChooserCombo> {
-    return component(TinyGoSdkChooserCombo())
+): Cell<TinyGoSdkChooserCombo> = with(row) {
+    cell(TinyGoSdkChooserCombo())
+        .horizontalAlign(HorizontalAlign.FILL)
         .applyToComponent {
             var sdk: TinyGoSdk = property.get()
             if (sdk == nullSdk) {
                 selectFirstNotNullSdk()
-                @Suppress("UnstableApiUsage")
                 sdk = comboBox.model.selectedItem as TinyGoSdk
                 property.set(sdk)
             } else selectSdkByUrl(sdk.homeUrl)
             Disposer.register(parentDisposable, this)
         }
-        .withBinding(
-            { component -> component.sdk },
-            { component, value -> component.selectSdkByUrl(value.homeUrl) },
-            PropertyBinding(property::get, property::set)
+        .bind(
+            { component: TinyGoSdkChooserCombo -> component.sdk },
+            { component: TinyGoSdkChooserCombo, value: TinyGoSdk -> component.selectSdkByUrl(value.homeUrl) },
+            UIPropertyAdapter(property)
         )
-        .withGraphProperty(property)
         .applyToComponent { bind(property) }
 }
 
@@ -97,62 +101,87 @@ private const val GC_LABEL = "ui.gc"
 private const val SCHEDULER_LABEL = "ui.scheduler"
 private const val TARGET_BROWSE_DIALOG_TITLE = "ui.target.dialogTitle"
 
-private fun LayoutBuilder.tinyGoSettings(
+private fun tinyGoSettings(
+    panel: Panel,
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
 ) {
-    lateinit var tinyGoSdkComboChooser: CellBuilder<TinyGoSdkChooserCombo>
-    row(TinyGoBundle.message(SDK_LABEL)) {
-        tinyGoSdkComboChooser = tinyGoSdkComboChooser(property = wrapper.tinyGoSdkPath, parentDisposable)
-    }
-    nestedPanel {
-        titledRow(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
-            row(TinyGoBundle.message(TARGET_LABEL)) {
-                targetChooser(wrapper, tinyGoSdkComboChooser)
-            }
-            row(TinyGoBundle.message(GC_LABEL)) {
-                comboBox(EnumComboBoxModel(GarbageCollector::class.java), wrapper.gc)
-                autoHelpLabel()
-            }
-            row(TinyGoBundle.message(SCHEDULER_LABEL)) {
-                comboBox(EnumComboBoxModel(Scheduler::class.java), wrapper.scheduler)
-                autoHelpLabel()
-            }
-            row {
-                exportButton(wrapper)
+    with(panel) {
+        lateinit var tinyGoSdkComboChooser: Cell<TinyGoSdkChooserCombo>
+        row(TinyGoBundle.message(SDK_LABEL)) {
+            tinyGoSdkComboChooser = tinyGoSdkComboChooser(this, wrapper.tinyGoSdkPath, parentDisposable)
+        }
+        panel {
+            group(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
+                row(TinyGoBundle.message(TARGET_LABEL)) {
+                    targetChooser(this, wrapper, tinyGoSdkComboChooser)
+                }
+                row(TinyGoBundle.message(GC_LABEL)) {
+                    comboBox(GarbageCollector.values().toSet())
+                        .bindItem(wrapper.gc)
+                        .columns(COLUMNS_SHORT)
+                    autoHelpLabel(this)
+                }
+                row(TinyGoBundle.message(SCHEDULER_LABEL)) {
+                    comboBox(Scheduler.values().toSet())
+                        .bindItem(wrapper.scheduler)
+                        .columns(COLUMNS_SHORT)
+                    autoHelpLabel(this)
+                }
+                row {
+                    exportButton(this, wrapper)
+                }
             }
         }
     }
 }
 
-private fun Row.targetChooser(wrapper: TinyGoPropertiesWrapper, sdk: CellBuilder<TinyGoSdkChooserCombo>) {
-    val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false).withFileFilter {
-        it.fileType == JsonFileType.INSTANCE
-    }
-    textFieldWithHistoryWithBrowseButton(
-        { wrapper.target.get() },
-        { wrapper.target.set(it) },
-        TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE),
-        null,
-        jsonChooser,
-    ).applyToComponent {
-        text = wrapper.target.get()
-        wrapper.target.afterChange {
-            text = it
-            val historyIndex = childComponent.history.indexOf(it)
-            if (historyIndex >= 0) {
-                childComponent.selectedIndex = historyIndex
-            }
+private fun targetChooser(
+    row: Row,
+    wrapper: TinyGoPropertiesWrapper,
+    sdk: Cell<TinyGoSdkChooserCombo>
+) {
+    with(row) {
+        val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false).withFileFilter {
+            it.fileType == JsonFileType.INSTANCE
         }
-        childComponent.addActionListener {
-            if (childComponent.isShowing) {
-                wrapper.target.set(text)
+        cell(
+            textFieldWithHistoryWithBrowseButton(
+                null,
+                TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE),
+                jsonChooser,
+            )
+        ).horizontalAlign(HorizontalAlign.FILL).bind(
+            { component: TextFieldWithHistoryWithBrowseButton -> component.text },
+            { component: TextFieldWithHistoryWithBrowseButton, value: String -> component.text = value },
+            UIPropertyAdapter(wrapper.target)
+        ).applyToComponent {
+            text = wrapper.target.get()
+            wrapper.target.afterChange {
+                text = it
+                val historyIndex = childComponent.history.indexOf(it)
+                if (historyIndex >= 0) {
+                    childComponent.selectedIndex = historyIndex
+                }
             }
-        }
-        childComponent.history = wrapper.userTargets
-        sdk.component.addChangedListener {
+            childComponent.addActionListener {
+                if (childComponent.isShowing) {
+                    wrapper.target.set(text)
+                }
+            }
             childComponent.history = wrapper.userTargets
+            sdk.component.addChangedListener {
+                childComponent.history = wrapper.userTargets
+            }
         }
+    }
+}
+
+private class UIPropertyAdapter<T>(private val property: GraphProperty<T>) : MutableProperty<T> {
+    override fun get(): T = property.get()
+
+    override fun set(value: T) {
+        property.set(value)
     }
 }
 
@@ -160,44 +189,51 @@ private const val EXPORT_TARGET_BUTTON = "ui.target.export"
 private const val EXPORT_TARGET_DIALOG_TITLE = "ui.target.export.dialog.title"
 private const val EXPORT_TARGET_DIALOG_DESCRIPTION = "ui.target.export.dialog.description"
 
-fun Cell.exportButton(wrapper: TinyGoPropertiesWrapper) {
-    component(JButton(TinyGoBundle.message(EXPORT_TARGET_BUTTON))).applyToComponent {
-        this.addActionListener {
-            val target = createTargetWrapper(wrapper) ?: return@addActionListener
+fun exportButton(row: Row, wrapper: TinyGoPropertiesWrapper) {
+    with(row) {
+        button(TinyGoBundle.message(EXPORT_TARGET_BUTTON)) {
+            val target = createTargetWrapper(wrapper) ?: return@button
             val jsonChooser = FileSaverDescriptor(
                 TinyGoBundle.message(EXPORT_TARGET_DIALOG_TITLE),
                 TinyGoBundle.message(EXPORT_TARGET_DIALOG_DESCRIPTION),
                 JsonFileType.DEFAULT_EXTENSION
             )
-            val chooserDialog =
-                FileChooserFactory.getInstance().createSaveFileDialog(jsonChooser, null).save(null)
-            var file = chooserDialog?.file ?: return@addActionListener
+            val chooserDialog = service<FileChooserFactory>()
+                .createSaveFileDialog(jsonChooser, null)
+                .save(null)
+            var file = chooserDialog?.file ?: return@button
             if (!file.name.endsWith(".json")) {
                 file = File(file.path + ".json")
             }
             file.writeText(target.serialize())
         }
-    }.growPolicy(GrowPolicy.MEDIUM_TEXT)
+    }
 }
 
-fun Row.autoHelpLabel() {
-    right { component(ContextHelpLabel.create(TinyGoBundle.message(HELP_AUTO))) }
+fun autoHelpLabel(row: Row) {
+    with(row) {
+        cell(ContextHelpLabel.create(TinyGoBundle.message(HELP_AUTO)))
+    }
 }
 
 fun generateSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
 ) = panel {
-    row {
-        tinyGoSettings(wrapper, parentDisposable)
-    }
+    tinyGoSettings(this, wrapper, parentDisposable)
     row("GOOS") {
-        textField(property = wrapper.goOs).growPolicy(GrowPolicy.MEDIUM_TEXT)
+        textField()
+            .bindText(wrapper.goOs)
+            .columns(COLUMNS_MEDIUM)
     }
     row("GOARCH") {
-        textField(property = wrapper.goArch).growPolicy(GrowPolicy.MEDIUM_TEXT)
+        textField()
+            .bindText(wrapper.goArch)
+            .columns(COLUMNS_MEDIUM)
     }
     row("Go tags") {
-        expandableTextField(wrapper.goTags).growPolicy(GrowPolicy.MEDIUM_TEXT)
+        expandableTextField()
+            .bindText(wrapper.goTags)
+            .columns(COLUMNS_LARGE)
     }
 }
