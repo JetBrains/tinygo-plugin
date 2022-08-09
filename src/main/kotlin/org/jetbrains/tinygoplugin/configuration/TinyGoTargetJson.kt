@@ -3,8 +3,10 @@ package org.jetbrains.tinygoplugin.configuration
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import com.intellij.json.JsonFileType
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import java.io.File
@@ -86,7 +88,12 @@ fun readTargetJson(pathToTarget: String, sdkRoot: VirtualFile): TinyGoTarget? {
     if (!jsonFile.exists()) return null
 
     val gsonBuilder = Gson()
-    return gsonBuilder.fromJson(jsonFile.readText(), TinyGoTarget::class.java)
+    return try {
+        gsonBuilder.fromJson(jsonFile.readText(), TinyGoTarget::class.java)
+    } catch (e: JsonSyntaxException) {
+        logger<TinyGoTarget>().error(e)
+        null
+    }
 }
 
 fun TinyGoTarget.performInheritance(sdkRoot: VirtualFile) {
