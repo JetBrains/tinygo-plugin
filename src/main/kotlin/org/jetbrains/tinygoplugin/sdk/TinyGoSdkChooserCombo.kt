@@ -66,7 +66,7 @@ class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkD
             val versions = releases.asSequence().filter { node ->
                 node["assets"].asSequence().filter { asset ->
                     val emulatedArch = osManager.emulatedArch(arch)
-                    asset["name"].textValue().matches(Regex(".*[.]($os-$emulatedArch)[.](tar.gz|zip|deb)"))
+                    asset["name"].textValue().matches(Regex(".*[.]($os-($arch|$emulatedArch))[.](tar.gz|zip|deb)"))
                 }.any()
             }.map { node ->
                 node["tag_name"].textValue()

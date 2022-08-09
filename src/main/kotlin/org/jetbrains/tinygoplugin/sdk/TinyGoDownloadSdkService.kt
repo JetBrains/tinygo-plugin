@@ -25,6 +25,7 @@ import com.intellij.platform.templates.github.ZipUtil
 import com.intellij.refactoring.RefactoringBundle
 import com.intellij.util.PathUtil
 import com.intellij.util.io.Decompressor
+import com.intellij.util.io.HttpRequests
 import org.jetbrains.tinygoplugin.configuration.TinyGoSdkList
 import java.io.IOException
 import java.io.UncheckedIOException
@@ -100,12 +101,22 @@ class TinyGoDownloadSdkService private constructor() {
                     logger.debug("Started downloading TinyGo SDK")
                     indicator.isIndeterminate = false
                     val extension = if (GoOsManager.isWindows()) ".zip" else ".tar.gz"
-                    val emulatedArch = osManager.emulatedArch(GoUtil.systemArch())
-                    val fileName = "tinygo${sdk.version}.${GoUtil.systemOS()}-$emulatedArch$extension"
+                    var arch = GoUtil.systemArch()
+                    val fileName = LazyString { "tinygo${sdk.version}.${GoUtil.systemOS()}-$arch$extension" }
+                    val url = LazyString {
+                        "https://github.com/$TINYGO_GITHUB/releases/download/v${sdk.version}/$fileName"
+                    }
+                    @Suppress("SwallowedException")
+                    try {
+                        HttpRequests.request(url.toString()).tryConnect()
+                    } catch (e: IOException) {
+                        arch = osManager.emulatedArch(arch)
+                    }
+
                     val downloadedArchive = Files.createTempFile("for-actual-downloading-", extension)
                     DownloadUtil.downloadContentToFile(
                         indicator,
-                        "https://github.com/$TINYGO_GITHUB/releases/download/v${sdk.version}/$fileName",
+                        url.toString(),
                         downloadedArchive.toFile()
                     )
                     logger.debug("Downloaded TinyGo SDK into temp")
@@ -119,6 +130,12 @@ class TinyGoDownloadSdkService private constructor() {
                 } catch (e: IOException) {
                     error("Unable to download TinyGo SDK from GitHub", e, null, onFinish)
                     logger.error(e.message)
+                }
+            }
+
+            private inner class LazyString(private val supplier: () -> String) {
+                override fun toString(): String {
+                    return supplier.invoke()
                 }
             }
 
