@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.project.wizard
 
 import com.goide.project.GoModuleBuilderBase
+import com.goide.project.GoProjectLifecycle
 import com.goide.vgo.wizard.VgoModuleBuilder
 import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
@@ -12,6 +13,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
@@ -47,6 +49,9 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
     ) {
         logger.debug("Begin configuring module for a new project")
         configureModule(newProjectSettings, project, module, baseDir.path)
+        GoProjectLifecycle.runWhenProjectSetupFinished(project) {
+            sendReloadLibrariesSignal(project)
+        }
         logger.debug("Finish configuring module for a new project")
     }
 
