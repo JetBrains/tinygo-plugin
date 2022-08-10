@@ -15,16 +15,20 @@
 
 ### Security
 
-## [0.3.4]
+## [0.3.5]
 ### Added
 
 ### Changed
+- Migration of UI components to Kotlin UI DSL 2.
+- Download native TinyGo SDK when both native and emulated available.
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
+- `cached GOROOT` resolving.
+- Auto imports for TinyGo projects.
 
 ### Security
 
