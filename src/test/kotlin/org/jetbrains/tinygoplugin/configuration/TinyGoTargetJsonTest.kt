@@ -20,7 +20,7 @@ class TinyGoTargetJsonTest : BasePlatformTestCase() {
             it.goOS = "linux"
             it.goArch = "arm"
             it.gc = GarbageCollector.CONSERVATIVE
-            it.scheduler = Scheduler.COROUTINES
+            it.scheduler = Scheduler.ASYNCIFY
             it.goTags = "myarch baremetal linux arm mycpu myboard tag anotherTag"
         }
     }

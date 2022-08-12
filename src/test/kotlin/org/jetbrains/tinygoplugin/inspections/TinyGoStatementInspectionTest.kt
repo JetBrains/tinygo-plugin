@@ -27,7 +27,7 @@ internal class TinyGoStatementInspectionTest : GoCodeInsightFixtureTestCase() {
     }
 
     fun testBlinkParallelCoroutinesOn() {
-        prepareTinyGoScheduler(Scheduler.COROUTINES)
+        prepareTinyGoScheduler(Scheduler.ASYNCIFY)
         doTest()
     }
 

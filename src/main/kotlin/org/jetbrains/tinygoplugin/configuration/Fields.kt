@@ -13,7 +13,7 @@ enum class GarbageCollector(val cmd: String) {
 enum class Scheduler(val cmd: String) {
     AUTO_DETECT("auto"),
     NONE("none"),
-    COROUTINES("coroutines"),
+    ASYNCIFY("asyncify"),
     TASKS("tasks");
 
     override fun toString(): String = cmd
