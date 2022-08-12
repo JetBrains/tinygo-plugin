@@ -39,7 +39,7 @@ data class TinyGoTarget constructor(
     @SerializedName("extra-files")          var extraFiles: MutableSet<String>? = mutableSetOf(),
     @SerializedName("rp2040-boot-patch")    var rp2040BootPatch: Boolean?,
     // inherited Emulator must not be appended
-    @SerializedName("emulator")             var emulator: MutableSet<String>? = mutableSetOf(),
+    @SerializedName("emulator")             var emulator: String?,
     @SerializedName("flash-command")        var flashCommand: String?,
     @SerializedName("gdb")                  var gdb: MutableSet<String>? = mutableSetOf(),
     @SerializedName("flash-1200-bps-reset") var portReset: String?,

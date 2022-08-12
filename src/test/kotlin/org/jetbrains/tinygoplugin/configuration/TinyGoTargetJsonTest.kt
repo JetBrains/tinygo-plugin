@@ -39,7 +39,7 @@ class TinyGoTargetJsonTest : BasePlatformTestCase() {
             target.serialPort
         )
         TestCase.assertEquals(
-            setOf("myboardsim", "-m", "myboard", "-f", "123456789"),
+            "myboardsim -m myboard -f 123456789",
             target.emulator
         )
         TestCase.assertEquals(
