@@ -72,4 +72,11 @@
         <rootsProvider implementation="org.jetbrains.tinygoplugin.services.TinyGoRootsProvider" order="first"/>
         <sdk.sdkVetoer implementation="org.jetbrains.tinygoplugin.sdk.TinyGoBasedSdkVetoer"/>
     </extensions>
+    <extensions defaultExtensionNs="org.intellij.intelliLang">
+        <languageSupport implementation="org.jetbrains.tinygoplugin.injection.TinyGoInjectionSupport"/>
+        <injectionConfig config="injections/tinygoInjections.xml"/>
+    </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <patterns.patternClass className="org.jetbrains.tinygoplugin.injection.TinyGoInjectionPatterns" alias="tinygo"/>
+    </extensions>
 </idea-plugin>

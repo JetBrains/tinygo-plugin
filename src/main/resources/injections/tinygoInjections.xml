@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="LanguageInjectionConfiguration">
+    <injection language="AVRASM" injector-id="tinygo">
+        <display-name>AVR assembly</display-name>
+        <place><![CDATA[
+            tinyGoInlineAssembly()
+            ]]></place>
+    </injection>
+</component>
