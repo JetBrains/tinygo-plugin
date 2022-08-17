@@ -17,6 +17,8 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
+sourceSets["main"].java.srcDirs("src/main/gen")
+
 // Import variables from gradle.properties file
 val pluginGroup: String by project
 // `pluginName_` variable ends with `_` because of the collision with Kotlin magic getter in the `intellij` closure.

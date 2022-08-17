@@ -1,0 +1,56 @@
+{
+  parserClass="org.jetbrains.tinygoplugin.lang.avrAsm.parser.AvrAsmParser"
+
+  extends="com.intellij.extapi.psi.ASTWrapperPsiElement"
+
+  psiClassPrefix="AvrAsm"
+  psiImplClassSuffix="Impl"
+  psiPackage="org.jetbrains.tinygoplugin.lang.avrAsm.psi"
+  psiImplPackage="org.jetbrains.tinygoplugin.lang.avrAsm.psi.impl"
+
+  elementTypeHolderClass="org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmTypes"
+  elementTypeClass="org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmElementType"
+  tokenTypeClass="org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmTokenType"
+}
+
+asmFile ::= (preprocessor | LABEL | instruction | directive | LINE_COMMENT | BLOCK_COMMENT)*
+
+preprocessor ::= MACROS_NAME | (PREPROCESSOR_NAME (expression)*) {recoverWhile=recovery}
+
+directive                 ::= (set_directive | equ_directive | def_directive | db_directive | report_directive | generic_directive) {recoverWhile=recovery}
+private generic_directive ::= GENERIC_DIRECTIVE (<<list_of expression>> | EQUAL expression)?
+private set_directive     ::= SET_DIRECTIVE variable EQUAL expression
+variable                  ::= symbol
+private equ_directive     ::= EQU_DIRECTIVE const EQUAL expression
+const                     ::= symbol
+private def_directive     ::= DEF_DIRECTIVE symbol EQUAL REGISTER
+private db_directive      ::= DB_DIRECTIVE <<list_of (expression | STRING)>>
+private report_directive  ::= REPORT_DIRECTIVE STRING
+
+instruction ::= (branch_instruction | generic_instruction) {recoverWhile=recovery}
+private generic_instruction ::= MNEMONIC <<max_two_list argument>>?
+private branch_instruction  ::= BR_MNEMONIC (IDENTIFIER | (INTEGER COMMA IDENTIFIER))?
+argument ::= memory | expression
+
+private recovery   ::= !(PREPROCESSOR_NAME | MACROS_NAME | LABEL | directives | mnemonics | LINE_COMMENT)
+private directives ::= GENERIC_DIRECTIVE | EQU_DIRECTIVE | SET_DIRECTIVE | DEF_DIRECTIVE | DB_DIRECTIVE | REPORT_DIRECTIVE
+private mnemonics  ::= MNEMONIC | BR_MNEMONIC
+
+expression ::= call | operand
+operand    ::= PC | number | symbol
+
+memory           ::= REGISTER | indirect_postfix | indirect_prefix | INDIRECT
+indirect_prefix  ::= (MINUS | PLUS) INDIRECT
+indirect_postfix ::= INDIRECT (MINUS | PLUS)
+
+symbol ::= (IDENTIFIER | SYMBOL_IDENTIFIER)
+number ::= MINUS? (INTEGER | CHAR)
+call   ::= defined | strlen | generic_func
+private defined      ::= (DEFINED_FUNC <<parenthesized (symbol)>>)
+private strlen       ::= (STRLEN_FUNC <<parenthesized (STRING)>>)
+private generic_func ::= (FUNC <<parenthesized <<list_of expression>> >>)
+
+
+private meta max_two_list  ::= <<element>> ( COMMA <<element>> )?
+private meta list_of       ::= <<element>> ( COMMA <<element>> )*
+private meta parenthesized ::= L_PAREN <<param>> R_PAREN

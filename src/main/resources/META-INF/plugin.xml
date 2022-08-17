@@ -65,6 +65,17 @@
         />
         <httpRequestHandler implementation="org.jetbrains.tinygoplugin.preview.TinyGoPreviewHttpHandler" order="first"/>
         <fileEditorProvider implementation="org.jetbrains.tinygoplugin.preview.TinyGoPreviewFileEditorProvider"/>
+        <fileType name="AVR assembly"
+                  implementationClass="org.jetbrains.tinygoplugin.lang.avrAsm.AvrAsmFileType"
+                  fieldName="INSTANCE"
+                  language="AVRASM"
+                  extensions="avr.asm"/>
+        <lang.parserDefinition
+                language="AVRASM"
+                implementationClass="org.jetbrains.tinygoplugin.lang.avrAsm.AvrAsmParserDefinition"/>
+        <lang.syntaxHighlighterFactory
+                language="AVRASM"
+                implementationClass="org.jetbrains.tinygoplugin.lang.avrAsm.AvrAsmSyntaxHighlighterFactory"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
