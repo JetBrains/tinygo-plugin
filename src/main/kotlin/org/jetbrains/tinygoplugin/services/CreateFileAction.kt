@@ -12,6 +12,7 @@ import com.intellij.openapi.vfs.VirtualFileVisitor
 import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
+import com.intellij.util.application
 import org.jetbrains.tinygoplugin.TinyGoBundle.message
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
@@ -116,11 +117,13 @@ class CreateFileAction :
             filename = "$name.go"
         }
         if (dir.findFile(filename) != null) {
-            Messages.showErrorDialog(
-                project,
-                message(TINYGO_FILE_EXISTS_MESSAGE, "${dir.virtualFile.path}/$filename"),
-                message(TINYGO_FILE_EXISTS_TITLE)
-            )
+            application.invokeLater {
+                Messages.showErrorDialog(
+                    project,
+                    message(TINYGO_FILE_EXISTS_MESSAGE, "${dir.virtualFile.path}/$filename"),
+                    message(TINYGO_FILE_EXISTS_TITLE)
+                )
+            }
             return null
         }
         val result = copyExample(project, exampleFile, dir.virtualFile, filename) ?: return null
@@ -137,11 +140,13 @@ class CreateFileAction :
     ): VirtualFile? {
         return if (example.isDirectory) {
             if (dir.children.any { it.name.substringAfterLast('/') != GO_MOD_FILENAME }) {
-                Messages.showErrorDialog(
-                    project,
-                    message(TINYGO_DIR_NOT_EMPTY_MESSAGE, dir.path),
-                    message(TINYGO_FILE_EXISTS_TITLE)
-                )
+                application.invokeLater {
+                    Messages.showErrorDialog(
+                        project,
+                        message(TINYGO_DIR_NOT_EMPTY_MESSAGE, dir.path),
+                        message(TINYGO_FILE_EXISTS_TITLE)
+                    )
+                }
                 return null
             }
 
