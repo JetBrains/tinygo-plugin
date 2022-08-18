@@ -3,7 +3,7 @@
     <injection language="AVRASM" injector-id="tinygo">
         <display-name>AVR assembly</display-name>
         <place><![CDATA[
-            tinyGoInlineAssembly()
+            tinyGoInlineAssembly("avr")
             ]]></place>
     </injection>
 </component>
