@@ -26,8 +26,7 @@ private const val TINYGO_TEMPLATES_NOT_FOUND_TITLE = "file.create.errors.templat
 private const val TINYGO_TEMPLATES_NOT_FOUND_MESSAGE = "file.create.errors.templatesCannotLoad.message"
 private const val TINYGO_FILE_EXISTS_TITLE = "file.create.errors.fileExists.title"
 private const val TINYGO_FILE_EXISTS_MESSAGE = "file.create.errors.fileExists.message"
-private const val TINYGO_DIR_NOT_EMPTY_TITLE = "file.create.warnings.dirNotEmpty.title"
-private const val TINYGO_DIR_NOT_EMPTY_MESSAGE = "file.create.warnings.dirNotEmpty.message"
+private const val TINYGO_DIR_NOT_EMPTY_MESSAGE = "file.create.errors.dirNotEmpty.message"
 
 private const val GO_MOD_FILENAME = "go.mod"
 
@@ -137,16 +136,13 @@ class CreateFileAction :
         filename: String
     ): VirtualFile? {
         return if (example.isDirectory) {
-            if (dir.children.any { (it as PsiFile).name != GO_MOD_FILENAME }) {
-                val copyToNonEmptyDir = Messages.showOkCancelDialog(
+            if (dir.children.any { it.name.substringAfterLast('/') != GO_MOD_FILENAME }) {
+                Messages.showErrorDialog(
                     project,
-                    message(TINYGO_DIR_NOT_EMPTY_MESSAGE),
-                    message(TINYGO_DIR_NOT_EMPTY_TITLE),
-                    Messages.getYesButton(),
-                    Messages.getCancelButton(),
-                    AllIcons.General.Warning
+                    message(TINYGO_DIR_NOT_EMPTY_MESSAGE, dir.path),
+                    message(TINYGO_FILE_EXISTS_TITLE)
                 )
-                if (copyToNonEmptyDir == Messages.CANCEL) return null
+                return null
             }
 
             VfsUtil.copyDirectory(project, example, dir, null)
