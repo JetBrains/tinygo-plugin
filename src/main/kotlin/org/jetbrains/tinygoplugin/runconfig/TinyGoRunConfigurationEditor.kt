@@ -10,6 +10,7 @@ import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.HorizontalAlign
+import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.MappedGraphProperty
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -33,6 +34,11 @@ class RunConfigurationWrapper(private val configurationProvider: ConfigurationPr
         objProperty = RunSettings::userArguments
     )
 }
+
+private const val TARGET_LABEL = "ui.target"
+private const val CLI_ARGUMENTS_LABEL = "ui.cli"
+private const val PATH_TO_SRC_LABEL = "ui.src"
+private const val ENVIRONMENT_LABEL = "ui.environment"
 
 class TinyGoRunConfigurationEditor(
     private val runConfiguration: TinyGoRunConfiguration,
@@ -68,25 +74,25 @@ class TinyGoRunConfigurationEditor(
 
     override fun createEditor(): JComponent {
         return panel {
-            row("Target") {
+            row(TinyGoBundle.message(TARGET_LABEL)) {
                 textField()
                     .horizontalAlign(HorizontalAlign.FILL)
                     .bindText(properties.target)
                     .enabled(false)
             }
-            row("Command line arguments") {
+            row(TinyGoBundle.message(CLI_ARGUMENTS_LABEL)) {
                 textField()
                     .horizontalAlign(HorizontalAlign.FILL)
                     .bindText(properties.cmdLineArguments)
                     .columns(COLUMNS_MEDIUM)
             }
-            row("Path to $pathKind") {
+            row(TinyGoBundle.message(PATH_TO_SRC_LABEL, pathKind)) {
                 val fileChooserDescriptor = FileChooserDescriptor(true, true, false, false, false, false)
                 textFieldWithBrowseButton(fileChooserDescriptor = fileChooserDescriptor)
                     .horizontalAlign(HorizontalAlign.FILL)
                     .bindText(properties.mainFile)
             }
-            row("Environment") {
+            row(TinyGoBundle.message(ENVIRONMENT_LABEL)) {
                 cell(environmentEditor).horizontalAlign(HorizontalAlign.FILL)
             }
         }
