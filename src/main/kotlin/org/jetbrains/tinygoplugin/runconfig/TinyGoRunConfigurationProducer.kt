@@ -1,7 +1,10 @@
 package org.jetbrains.tinygoplugin.runconfig
 
+import com.goide.execution.GoBuildingRunConfiguration
 import com.goide.execution.GoRunConfigurationProducerBase
+import com.goide.execution.application.GoApplicationConfiguration
 import com.intellij.execution.actions.ConfigurationContext
+import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
@@ -53,6 +56,14 @@ abstract class TinyGoRunConfigurationProducer(private val configurationName: Str
         val file = contextFile?.virtualFile ?: return false
         val configurationFullName = getConfigurationFullName(getConfigurationSubjectName(context) ?: return false)
         return configuration.runConfig.mainFile == file.path && configuration.name.startsWith(configurationFullName)
+    }
+
+    override fun shouldReplace(self: ConfigurationFromContext, other: ConfigurationFromContext): Boolean {
+        return when (other.configuration) {
+            is GoApplicationConfiguration -> true
+            is GoBuildingRunConfiguration<*> -> true
+            else -> false
+        }
     }
 }
 
