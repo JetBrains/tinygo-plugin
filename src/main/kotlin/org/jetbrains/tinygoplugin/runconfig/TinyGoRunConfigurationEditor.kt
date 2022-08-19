@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.runconfig
 
+import com.intellij.execution.configuration.EnvironmentVariablesTextFieldWithBrowseButton
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
@@ -42,6 +43,10 @@ class TinyGoRunConfigurationEditor(
         override fun toString(): String = string
     }
 
+    // Property binding mechanism isn't used because the EnvironmentVariablesTextFieldWithBrowseButton
+    // component fires its specific event, which is not captured by the mechanism
+    private val environmentEditor = EnvironmentVariablesTextFieldWithBrowseButton()
+
     private val properties = RunConfigurationWrapper(runConfiguration)
 
     init {
@@ -50,11 +55,15 @@ class TinyGoRunConfigurationEditor(
 
     override fun resetEditorFrom(configuration: TinyGoRunConfiguration) {
         runConfiguration.runConfig = configuration.runConfig
+        environmentEditor.envs = configuration.customEnvironment
+        environmentEditor.isPassParentEnvs = configuration.isPassParentEnvironment
         properties.reset()
     }
 
     override fun applyEditorTo(tinyGoRunConfiguration: TinyGoRunConfiguration) {
         tinyGoRunConfiguration.runConfig = runConfiguration.runConfig.deepCopy()
+        tinyGoRunConfiguration.customEnvironment = environmentEditor.envs
+        tinyGoRunConfiguration.isPassParentEnvironment = environmentEditor.isPassParentEnvs
     }
 
     override fun createEditor(): JComponent {
@@ -76,6 +85,9 @@ class TinyGoRunConfigurationEditor(
                 textFieldWithBrowseButton(fileChooserDescriptor = fileChooserDescriptor)
                     .horizontalAlign(HorizontalAlign.FILL)
                     .bindText(properties.mainFile)
+            }
+            row("Environment") {
+                cell(environmentEditor).horizontalAlign(HorizontalAlign.FILL)
             }
         }
     }
