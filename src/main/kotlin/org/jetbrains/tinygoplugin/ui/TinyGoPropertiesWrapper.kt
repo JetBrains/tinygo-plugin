@@ -1,7 +1,6 @@
 package org.jetbrains.tinygoplugin.ui
 
 import com.intellij.openapi.observable.properties.GraphProperty
-import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.observable.properties.PropertyGraph
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import kotlin.reflect.KMutableProperty1
@@ -21,20 +20,19 @@ interface ConfigurationProvider<out Configuration> {
 open class MappedGraphProperty<T, Configuration>(
     private val prop: GraphProperty<T>,
     private val objProperty: KMutableProperty1<Configuration, T>,
-    configuration: ConfigurationProvider<Configuration>,
+    private val configuration: ConfigurationProvider<Configuration>,
     propertyAggregator: ResetableCollection,
 ) : GraphProperty<T> by prop, ResetableProperty {
     init {
         prop.afterChange {
             objProperty.set(configuration.tinyGoSettings, it)
         }
-        prop.afterReset {
-            prop.set(objProperty.get(configuration.tinyGoSettings))
-        }
         propertyAggregator.resetableProperties.add(this)
     }
 
-    override fun reset() = prop.reset()
+    override fun reset() {
+        prop.set(objProperty.get(configuration.tinyGoSettings))
+    }
 }
 
 open class TinyGoPropertiesWrapper(val obj: ConfigurationProvider<TinyGoConfiguration>) :
@@ -48,36 +46,36 @@ open class TinyGoPropertiesWrapper(val obj: ConfigurationProvider<TinyGoConfigur
 
     override val resetableProperties: MutableCollection<ResetableProperty> = HashSet()
 
-    protected val propertyGraph = PropertyGraph()
+    protected val propertyGraph = PropertyGraph(isBlockPropagation = false)
 
     // set initial string
     val tinyGoSdkPath = InnerGraphProperty(
-        prop = propertyGraph.graphProperty(obj.tinyGoSettings::sdk),
+        prop = propertyGraph.lazyProperty(obj.tinyGoSettings::sdk),
         objProperty = TinyGoConfiguration::sdk
     )
     val target = InnerGraphProperty(
-        prop = propertyGraph.graphProperty(obj.tinyGoSettings::targetPlatform),
+        prop = propertyGraph.lazyProperty(obj.tinyGoSettings::targetPlatform),
         objProperty = TinyGoConfiguration::targetPlatform
     )
 
     val gc = InnerGraphProperty(
-        prop = propertyGraph.graphProperty(obj.tinyGoSettings::gc),
+        prop = propertyGraph.lazyProperty(obj.tinyGoSettings::gc),
         objProperty = TinyGoConfiguration::gc
     )
     val scheduler = InnerGraphProperty(
-        prop = propertyGraph.graphProperty(obj.tinyGoSettings::scheduler),
+        prop = propertyGraph.lazyProperty(obj.tinyGoSettings::scheduler),
         objProperty = TinyGoConfiguration::scheduler
     )
     val goOs = InnerGraphProperty(
-        prop = propertyGraph.graphProperty(obj.tinyGoSettings::goOS),
+        prop = propertyGraph.lazyProperty(obj.tinyGoSettings::goOS),
         objProperty = TinyGoConfiguration::goOS
     )
     val goArch = InnerGraphProperty(
-        prop = propertyGraph.graphProperty(obj.tinyGoSettings::goArch),
+        prop = propertyGraph.lazyProperty(obj.tinyGoSettings::goArch),
         objProperty = TinyGoConfiguration::goArch
     )
     val goTags = InnerGraphProperty(
-        prop = propertyGraph.graphProperty(obj.tinyGoSettings::goTags),
+        prop = propertyGraph.lazyProperty(obj.tinyGoSettings::goTags),
         objProperty = TinyGoConfiguration::goTags
     )
 

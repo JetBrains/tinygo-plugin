@@ -3,7 +3,6 @@ package org.jetbrains.tinygoplugin.runconfig
 import com.intellij.execution.configuration.EnvironmentVariablesTextFieldWithBrowseButton
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
-import com.intellij.openapi.observable.properties.GraphPropertyImpl.Companion.graphProperty
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.ui.dsl.builder.COLUMNS_MEDIUM
 import com.intellij.ui.dsl.builder.bindText
@@ -25,12 +24,12 @@ class RunConfigurationWrapper(private val configurationProvider: ConfigurationPr
     ) : MappedGraphProperty<T, RunSettings>(prop, objProperty, configurationProvider, this)
 
     val mainFile = RunConfigurationProperty(
-        prop = propertyGraph.graphProperty(configurationProvider.tinyGoSettings::mainFile),
+        prop = propertyGraph.lazyProperty(configurationProvider.tinyGoSettings::mainFile),
         objProperty = RunSettings::mainFile
     )
 
     val cmdLineArguments = RunConfigurationProperty(
-        prop = propertyGraph.graphProperty(configurationProvider.tinyGoSettings::userArguments),
+        prop = propertyGraph.lazyProperty(configurationProvider.tinyGoSettings::userArguments),
         objProperty = RunSettings::userArguments
     )
 }
