@@ -24,6 +24,7 @@ import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.heapAllocations.supplyHeapAllocsFromOutput
 import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocsViewManager
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
+import org.jetbrains.tinygoplugin.sdk.patchForWSLIfNeeded
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -37,7 +38,7 @@ open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configu
         val arguments = listOf(configuration.command) +
             hardwareArguments +
             additionalParameters +
-            listOf(configuration.runConfig.mainFile)
+            listOf(patchForWSLIfNeeded(configuration.runConfig.mainFile))
         val tinyGoExecutablePath = configuration.executable
         if (tinyGoExecutablePath == null) {
             notifyTinyGoNotConfigured(configuration.project, "TinyGo SDK is not set. Please configure TinyGo SDK")
@@ -45,7 +46,7 @@ open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configu
         }
 
         return GoExecutor.`in`(configuration.project, null)
-            .withExePath(tinyGoExecutablePath.path)
+            .withExePath(patchForWSLIfNeeded(tinyGoExecutablePath.path))
             .withParameters(arguments)
             .withWorkDirectory(configuration.workingDirectory)
             .withPassParentEnvironment(configuration.isPassParentEnvironment)
@@ -109,7 +110,7 @@ class TinyGoHeapAllocRunningState(
 
             override fun processTerminated(event: ProcessEvent) {
                 val heapAllocs = supplyHeapAllocsFromOutput(module!!, processOutput)
-                module?.project?.service<TinyGoHeapAllocsViewManager>()?.updateHeapAllocsList(heapAllocs)
+                module!!.project.service<TinyGoHeapAllocsViewManager>().updateHeapAllocsList(heapAllocs)
             }
         })
 

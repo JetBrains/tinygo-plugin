@@ -128,7 +128,8 @@ class TinyGoSettingsService(private val project: Project) :
         }
     }
 
-    override fun createPanel(): DialogPanel = generateSettingsPanel(propertiesWrapper, disposable!!)
+    override fun createPanel(): DialogPanel =
+        generateSettingsPanel({ project.basePath!! }, propertiesWrapper, disposable!!)
 
     private fun callExtractor() {
         project.service<TinyGoInfoExtractor>()

@@ -34,13 +34,15 @@ import org.jetbrains.tinygoplugin.sdk.nullSdk
 import java.awt.event.ItemEvent
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.function.Supplier
 import javax.swing.JPanel
 
 fun generateTinyGoParametersPanel(
+    projectPathSupplier: Supplier<String>,
     wrapper: TinyGoPropertiesWrapper,
     parent: Disposable,
 ): JPanel = panel {
-    tinyGoSettings(this, wrapper, parent)
+    tinyGoSettings(this, projectPathSupplier, wrapper, parent)
 }
 
 private fun AtomicBoolean.lockOrSkip(action: () -> Unit) {
@@ -71,10 +73,11 @@ fun TinyGoSdkChooserCombo.bind(property: GraphProperty<TinyGoSdk>) {
 
 fun tinyGoSdkComboChooser(
     row: Row,
+    projectPathSupplier: Supplier<String>,
     property: GraphProperty<TinyGoSdk>,
     parentDisposable: Disposable,
 ): Cell<TinyGoSdkChooserCombo> = with(row) {
-    cell(TinyGoSdkChooserCombo())
+    cell(TinyGoSdkChooserCombo(projectPathSupplier))
         .horizontalAlign(HorizontalAlign.FILL)
         .applyToComponent {
             var sdk: TinyGoSdk = property.get()
@@ -103,13 +106,15 @@ private const val TARGET_BROWSE_DIALOG_TITLE = "ui.target.dialogTitle"
 
 private fun tinyGoSettings(
     panel: Panel,
+    projectPathSupplier: Supplier<String>,
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
 ) {
     with(panel) {
         lateinit var tinyGoSdkComboChooser: Cell<TinyGoSdkChooserCombo>
         row(TinyGoBundle.message(SDK_LABEL)) {
-            tinyGoSdkComboChooser = tinyGoSdkComboChooser(this, wrapper.tinyGoSdkPath, parentDisposable)
+            tinyGoSdkComboChooser =
+                tinyGoSdkComboChooser(this, projectPathSupplier, wrapper.tinyGoSdkPath, parentDisposable)
         }
         panel {
             group(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
@@ -217,10 +222,11 @@ fun autoHelpLabel(row: Row) {
 }
 
 fun generateSettingsPanel(
+    projectPathSupplier: Supplier<String>,
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
 ) = panel {
-    tinyGoSettings(this, wrapper, parentDisposable)
+    tinyGoSettings(this, projectPathSupplier, wrapper, parentDisposable)
     row("GOOS") {
         textField()
             .bindText(wrapper.goOs)

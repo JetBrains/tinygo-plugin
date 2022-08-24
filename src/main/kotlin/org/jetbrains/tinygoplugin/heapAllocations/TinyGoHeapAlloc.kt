@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.heapAllocations
 
+import com.goide.execution.GoWslUtil
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
@@ -23,7 +24,11 @@ fun supplyHeapAllocsFromOutput(module: Module, processOutput: String): Map<Strin
     val tinyGoSettings = module.project.tinyGoConfiguration()
     val tinyGoSdkRoot = tinyGoSettings.sdk.sdkRoot!!
     for (match in matches) {
-        var file = VfsUtil.findFile(File(match.groupValues[1]).toPath(), false)!!
+        var pathCandidate = match.groupValues[1]
+        val wsl = GoWslUtil.getWsl(module)
+        if (wsl != null) pathCandidate = wsl.getWindowsPath(pathCandidate)
+
+        var file = VfsUtil.findFile(File(pathCandidate).toPath(), false)!!
         if (VfsUtil.isAncestor(tinyGoSdkRoot, file, false)) {
             val relativePath = VfsUtil.getRelativePath(file, tinyGoSdkRoot)
             if (relativePath != null) {

@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.services
 
 import com.goide.GoOsManager
+import com.goide.execution.GoWslUtil
 import com.goide.sdk.GoSdk
 import com.goide.sdk.GoSdkService
 import com.goide.sdk.download.GoDownloadingSdk
@@ -16,6 +17,7 @@ import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VfsUtilCore
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -23,8 +25,9 @@ import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.TinyGoExtractionFailureListener
 import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
+import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
-import org.jetbrains.tinygoplugin.sdk.osManager
+import org.jetbrains.tinygoplugin.sdk.patchForWSLIfNeeded
 import java.time.Duration
 import java.util.Locale
 import java.util.function.BiConsumer
@@ -57,7 +60,11 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         this.goOS = goOS.firstGroup()
         this.gc = GarbageCollector.valueOf(gc.firstGroup().uppercase(Locale.getDefault()))
         this.scheduler = Scheduler.valueOf(scheduler.firstGroup().uppercase(Locale.getDefault()))
-        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup().eraseLineBreaks()))
+
+        var cachedGoRootCandidate = cachedGoRoot.firstGroup().eraseLineBreaks()
+        val wsl = GoWslUtil.getWsl(VfsUtilCore.urlToPath(this.sdk.homeUrl))
+        if (wsl != null) cachedGoRootCandidate = wsl.getWindowsPath(cachedGoRootCandidate)
+        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRootCandidate))
 
         TinyGoInfoExtractor.logger.info("extraction finished")
     } catch (e: NoSuchElementException) {
@@ -75,13 +82,13 @@ private fun String.eraseLineBreaks(): String = replace(Regex("\n((,)? )?"), "")
 
 class TinyGoExecutable(private val project: Project) {
     fun execute(
-        sdkRoot: String,
+        sdk: TinyGoSdk,
         arguments: List<String>,
         failureListener: TinyGoExtractionFailureListener? = null,
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
         val processHistory = GoHistoryProcessListener()
-        val tinyGoExec = osManager.executablePath(sdkRoot)
+        val tinyGoExec = patchForWSLIfNeeded(sdk.executable?.path)
         val executor = GoExecutor.`in`(project, null)
             .withExePath(tinyGoExec)
             .withParameters(arguments)
@@ -168,7 +175,7 @@ class TinyGoInfoExtractor(private val project: Project) {
                     }
                     logger.debug("TinyGo SDK present")
                     executor.execute(
-                        settings.sdk.sdkRoot!!.path,
+                        settings.sdk,
                         tinyGoExtractionArguments(settings),
                         failureListener,
                         onFinish

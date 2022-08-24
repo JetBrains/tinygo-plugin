@@ -36,9 +36,10 @@ class TinyGoProjectGeneratorPeer :
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
         panel.add(createGridPanel(locationComponent, sdkCombo).resize().createPanel())
+        val projectPathSupplier = locationComponent!!.component::getText
         panel.add(
             decorateSettingsPanelForUI(
-                generateTinyGoParametersPanel(propertiesWrapper, parentDisposable)
+                generateTinyGoParametersPanel(projectPathSupplier, propertiesWrapper, parentDisposable)
             ).apply {
                 // TinyGo settings panel doesn't have borders
                 // like regular Go settings fields do, so they are inherited here

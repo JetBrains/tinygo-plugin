@@ -31,24 +31,24 @@ fun notifyTinyGoNotConfigured(
     notification.notify(project)
 }
 
-fun suggestSdkDirectoryStr(): String = suggestSdkDirectory()?.canonicalPath ?: ""
-
-fun suggestSdkDirectories(): Collection<File> {
-    return osManager.suggestedDirectories().asSequence().map { File(it) }.filter(File::exists)
+fun suggestSdkDirectories(pathContext: String?): Collection<File> {
+    return osManagerIn(pathContext).suggestedDirectories().asSequence().map { File(it) }.filter(File::exists)
         .filter(::checkBin).filter(::checkTargets).filter(::checkMachinesSources).toList()
 }
 
-fun findTinyGoInPath(): File? {
+fun findTinyGoInPath(pathContext: String?): File? {
     val tinyGoExec =
-        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(osManager.executableBaseName()) ?: return null
+        PathEnvironmentVariableUtil.findExecutableInPathOnAnyOS(
+            osManagerIn(pathContext).executableBaseName()
+        ) ?: return null
     // resolve links and go 2 directories up: -> bin -> tinygo
     return tinyGoExec.canonicalFile.parentFile?.parentFile
 }
 
-fun suggestSdkDirectory(): File? {
-    val tinyGoPath = findTinyGoInPath()
+fun suggestSdkDirectory(pathContext: String?): File? {
+    val tinyGoPath = findTinyGoInPath(pathContext)
     if (tinyGoPath != null) {
         return tinyGoPath
     }
-    return suggestSdkDirectories().firstOrNull()
+    return suggestSdkDirectories(pathContext).firstOrNull()
 }

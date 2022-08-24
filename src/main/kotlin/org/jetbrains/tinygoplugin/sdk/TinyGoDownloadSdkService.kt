@@ -1,7 +1,7 @@
 package org.jetbrains.tinygoplugin.sdk
 
+import com.goide.GoConstants
 import com.goide.GoNotifications
-import com.goide.GoOsManager
 import com.goide.sdk.GoSdk
 import com.goide.util.GoUtil
 import com.intellij.notification.Notification
@@ -98,9 +98,11 @@ class TinyGoDownloadSdkService private constructor() {
                 try {
                     logger.debug("Started downloading TinyGo SDK")
                     indicator.isIndeterminate = false
-                    val extension = if (GoOsManager.isWindows()) ".zip" else ".tar.gz"
+                    val osUtil = osManagerIn(sdk.homeUrl)
+                    val os = osUtil.osName()
+                    val extension = if (os == GoConstants.WINDOWS_OS) ".zip" else ".tar.gz"
                     var arch = GoUtil.systemArch()
-                    val fileName = LazyString { "tinygo${sdk.version}.${GoUtil.systemOS()}-$arch$extension" }
+                    val fileName = LazyString { "tinygo${sdk.version}.$os-$arch$extension" }
                     val url = LazyString {
                         "https://github.com/$TINYGO_GITHUB/releases/download/v${sdk.version}/$fileName"
                     }
@@ -108,7 +110,7 @@ class TinyGoDownloadSdkService private constructor() {
                     try {
                         HttpRequests.request(url.toString()).tryConnect()
                     } catch (e: IOException) {
-                        arch = osManager.emulatedArch(arch)
+                        arch = osUtil.emulatedArch(arch)
                     }
 
                     val downloadedArchive = Files.createTempFile("for-actual-downloading-", extension)
