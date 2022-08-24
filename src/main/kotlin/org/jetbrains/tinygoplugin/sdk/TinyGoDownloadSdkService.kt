@@ -98,7 +98,7 @@ class TinyGoDownloadSdkService private constructor() {
                 try {
                     logger.debug("Started downloading TinyGo SDK")
                     indicator.isIndeterminate = false
-                    val osUtil = osManagerIn(sdk.homeUrl)
+                    val osUtil = osManagerIn(VfsUtilCore.urlToPath(sdk.homeUrl))
                     val os = osUtil.osName()
                     val extension = if (os == GoConstants.WINDOWS_OS) ".zip" else ".tar.gz"
                     var arch = GoUtil.systemArch()

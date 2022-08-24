@@ -60,7 +60,7 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         this.scheduler = Scheduler.valueOf(scheduler.firstGroup().uppercase(Locale.getDefault()))
 
         var cachedGoRootCandidate = cachedGoRoot.firstGroup().eraseLineBreaks()
-        val wsl = GoWslUtil.getWsl(this.sdk.homeUrl)
+        val wsl = GoWslUtil.getWsl(this.sdk)
         if (wsl != null) cachedGoRootCandidate = wsl.getWindowsPath(cachedGoRootCandidate)
         this.cachedGoRoot = GoSdk.fromHomePath(cachedGoRootCandidate)
 

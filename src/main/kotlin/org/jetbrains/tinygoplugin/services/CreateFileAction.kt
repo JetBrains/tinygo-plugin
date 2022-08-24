@@ -5,6 +5,7 @@ import com.intellij.icons.AllIcons
 import com.intellij.ide.actions.CreateFileFromTemplateAction
 import com.intellij.ide.actions.CreateFileFromTemplateDialog
 import com.intellij.openapi.application.invokeLater
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -153,7 +154,7 @@ class CreateFileAction :
 
             VfsUtil.copyDirectory(project, example, dir, null)
             val mainFileName = mainFilesInDirs[example] ?: return null
-            val mainFile = dir.findChild(mainFileName) ?: return null
+            val mainFile = runReadAction { dir.findChild(mainFileName) } ?: return null
             mainFile.rename(project, filename)
             mainFile
         } else {

@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.sdk.GoBasedSdk
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
@@ -86,7 +87,7 @@ open class TinyGoSdk(
 
     override fun getHomeUrl(): String = tinyGoHomeUrl ?: ""
 
-    override fun getSrcDir(): VirtualFile? = sdkRoot?.findChild("src")
+    override fun getSrcDir(): VirtualFile? = runReadAction { sdkRoot?.findChild("src") }
 
     override fun getExecutable(): VirtualFile? = osManagerIn(sdkRoot?.canonicalPath).executableVFile(sdkRoot)
 

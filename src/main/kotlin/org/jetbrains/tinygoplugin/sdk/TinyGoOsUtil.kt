@@ -7,8 +7,8 @@ import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.ProcessOutput
 import com.intellij.execution.util.ExecUtil
 import com.intellij.execution.wsl.WSLDistribution
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 
 interface OSUtils {
@@ -28,7 +28,7 @@ internal abstract class OSUtilsImpl : OSUtils {
     }
 
     override fun executableVFile(sdkRoot: VirtualFile?): VirtualFile? =
-        sdkRoot?.findChild("bin")?.findChild(executableName())
+        runReadAction { sdkRoot?.findChild("bin")?.findChild(executableName()) }
 }
 
 internal class WindowsUtils : OSUtilsImpl() {
@@ -126,7 +126,7 @@ fun osManagerIn(pathContext: String?): OSUtils =
         }
 
         GoOsManager.isWindows() -> {
-            val wsl = GoWslUtil.getWsl(VfsUtilCore.urlToPath(pathContext))
+            val wsl = GoWslUtil.getWsl(pathContext)
             if (wsl != null) WSLUtils(wsl) else WindowsUtils()
         }
 
@@ -137,8 +137,7 @@ fun osManagerIn(pathContext: String?): OSUtils =
 
 fun patchForWSLIfNeeded(filePath: String?): String {
     if (filePath == null) return ""
-    return GoWslUtil
-        .getWsl(filePath)
+    return GoWslUtil.getWsl(filePath)
         ?.getWslPath(filePath)
         ?: filePath
 }
