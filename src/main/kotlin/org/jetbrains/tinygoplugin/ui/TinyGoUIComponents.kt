@@ -94,7 +94,7 @@ fun tinyGoSdkComboChooser(
 }
 
 private const val SDK_LABEL = "ui.sdk"
-private const val TARGET_LABEL = "ui.target"
+private const val TARGET_LABEL = "ui.target.platform"
 private const val COMPILER_PARAMETERS_LABEL = "ui.compiler"
 private const val HELP_AUTO = "ui.help.auto"
 private const val GC_LABEL = "ui.gc"

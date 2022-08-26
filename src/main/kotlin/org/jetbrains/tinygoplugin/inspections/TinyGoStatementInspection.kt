@@ -8,13 +8,11 @@ import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.LocalQuickFix
 import com.intellij.codeInspection.ProblemDescriptor
 import com.intellij.codeInspection.ProblemHighlightType
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
+import org.jetbrains.tinygoplugin.services.editTinyGoSettingsLater
 
 class TinyGoStatementInspection : GoInspectionBase() {
     companion object {
@@ -24,9 +22,7 @@ class TinyGoStatementInspection : GoInspectionBase() {
             override fun getFamilyName(): String = TinyGoBundle.message("inspection.go.statement.edit.settings.fix")
 
             override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-                ApplicationManager.getApplication().invokeLater {
-                    ShowSettingsUtil.getInstance().editConfigurable(project, TinyGoSettingsService(project))
-                }
+                editTinyGoSettingsLater(project)
             }
         }
     }

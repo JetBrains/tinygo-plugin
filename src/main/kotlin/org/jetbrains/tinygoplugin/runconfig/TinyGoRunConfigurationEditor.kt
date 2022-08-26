@@ -1,19 +1,26 @@
 package org.jetbrains.tinygoplugin.runconfig
 
 import com.intellij.execution.configuration.EnvironmentVariablesTextFieldWithBrowseButton
+import com.intellij.openapi.Disposable
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.options.SettingsEditor
+import com.intellij.openapi.rd.doIfAlive
+import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.COLUMNS_MEDIUM
+import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import org.jetbrains.tinygoplugin.TinyGoBundle
+import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.services.editTinyGoSettingsLater
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.MappedGraphProperty
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import javax.swing.JComponent
+import javax.swing.JTextField
 import kotlin.reflect.KMutableProperty1
 
 class RunConfigurationWrapper(private val configurationProvider: ConfigurationProvider<RunSettings>) :
@@ -74,10 +81,7 @@ class TinyGoRunConfigurationEditor(
     override fun createEditor(): JComponent {
         return panel {
             row(TinyGoBundle.message(TARGET_LABEL)) {
-                textField()
-                    .horizontalAlign(HorizontalAlign.FILL)
-                    .bindText(properties.target)
-                    .enabled(false)
+                targetPlatformFieldWithLink(this, properties, runConfiguration, this@TinyGoRunConfigurationEditor)
             }
             row(TinyGoBundle.message(CLI_ARGUMENTS_LABEL)) {
                 textField()
@@ -95,5 +99,26 @@ class TinyGoRunConfigurationEditor(
                 cell(environmentEditor).horizontalAlign(HorizontalAlign.FILL)
             }
         }
+    }
+}
+
+private fun targetPlatformFieldWithLink(
+    row: Row,
+    properties: RunConfigurationWrapper,
+    runConfiguration: TinyGoRunConfiguration,
+    parentDisposable: Disposable
+) {
+    with(row) {
+        val targetTextField = JTextField(properties.target.get())
+        targetTextField.isEnabled = false
+        val targetFieldWithLink = TextFieldWithBrowseButton(targetTextField) {
+            val project = runConfiguration.project
+            editTinyGoSettingsLater(project) {
+                parentDisposable.doIfAlive {
+                    targetTextField.text = TinyGoConfiguration.getInstance(project).targetPlatform
+                }
+            }
+        }
+        cell(targetFieldWithLink).horizontalAlign(HorizontalAlign.FILL)
     }
 }
