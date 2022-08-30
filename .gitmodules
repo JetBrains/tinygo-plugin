@@ -1,0 +1,3 @@
+[submodule "src/main/resources/tinygo-preview/playground"]
+	path = src/main/resources/tinygo-preview/playground
+	url = https://github.com/tinygo-org/playground

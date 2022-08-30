@@ -175,6 +175,9 @@
 
    END OF TERMS AND CONDITIONS
 
+    This product uses portions of TinyGo Playground, which is available under a
+    "3-clause BSD" license. For details, see src/main/resources/tinygo-preview/playground.
+
     This product uses portions of TinyGo, which is available under a
     "3-clause BSD" license. For details, see src/test/testData/mockTinyGo/ and
     src/test/testData/mockCachedGoRoot/.
