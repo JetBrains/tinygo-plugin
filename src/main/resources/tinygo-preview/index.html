@@ -1,0 +1,56 @@
+<html lang="en">
+<head>
+    <title>TinyGo Preview for GoLand</title>
+
+    <base href="tinygo-preview/">
+
+    <link rel="stylesheet" href="playground/resources/bootstrap-4.3.1.min.css">
+    <link rel="stylesheet" href="playground/simulator.css"/>
+    <link rel="stylesheet" href="playground/dashboard.css"/>
+
+    <script src="goland-preview.js" defer></script>
+
+    <script src="playground/simulator.js" defer></script>
+    <script src="playground/project.js" defer></script>
+
+    <script src="playground/resources/jquery-3.3.1.slim.min.js" defer></script>
+    <script src="playground/resources/popper-1.14.7.min.js" defer></script>
+    <script src="playground/resources/bootstrap-4.3.1.min.js" defer></script>
+</head>
+<body>
+<input type="hidden" id="projectPath" value="{PROJECT_PATH}">
+<input type="hidden" id="targetName" value="{TARGET_NAME}">
+<div id="middle">
+    <div id="output">
+        <div id="schematic-buttons">
+            <button id="schematic-button-pause" class="codicon schematic-button" title="Pause/resume the simulation">&#xead1;</button>
+        </div>
+        <svg id="schematic">
+            <g id="schematic-wrapper" style="transform: translate(50%, 50%)">
+                <g id="schematic-parts"></g>
+                <g id="schematic-wires"></g>
+            </g>
+        </svg>
+
+        <div id="panels">
+            <div class="tabbar">
+                <span class="tab active" data-for="#terminal-box"><a>Terminal</a></span>
+                <span class="tab" data-for="#properties"><a>Properties</a></span>
+                <span class="tab" data-for="#add"><a>Add</a></span>
+            </div>
+            <div class="tabcontent active" id="terminal-box">
+                <textarea id="terminal" readonly></textarea>
+            </div>
+            <div class="tabcontent" id="properties">
+                <div class="content"></div>
+            </div>
+            <div class="tabcontent" id="add">
+                Loading...
+            </div>
+        </div>
+
+        <div id="schematic-tooltip"></div>
+    </div>
+</div>
+</body>
+</html>

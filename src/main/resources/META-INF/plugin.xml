@@ -63,6 +63,7 @@
                     canCloseContents="true"
                     secondary="true"
         />
+        <httpRequestHandler implementation="org.jetbrains.tinygoplugin.preview.TinyGoPreviewHttpHandler" order="first"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
