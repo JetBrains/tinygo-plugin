@@ -1,12 +1,12 @@
 package org.jetbrains.tinygoplugin.preview
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.project.ProjectManager
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.http.EmptyHttpHeaders
 import io.netty.handler.codec.http.FullHttpRequest
 import io.netty.handler.codec.http.QueryStringDecoder
 import org.jetbrains.ide.HttpRequestHandler
-import java.io.File
 import java.net.URL
 
 class TinyGoPreviewHttpHandler : HttpRequestHandler() {
@@ -52,9 +52,9 @@ class TinyGoPreviewHttpHandler : HttpRequestHandler() {
     ): Boolean {
         val projectPath = urlDecoder.parameters()["project"]?.firstOrNull() ?: return false
         val project = ProjectManager.getInstance().openProjects.firstOrNull { it.basePath == projectPath }
+
         @Suppress("ForbiddenComment")
-        // TODO: retrieve wasm binary from project-based storage
-        val wasm = File("module.wasm").readBytes()
+        val wasm = project?.service<TinyGoPreviewWasmService>()?.getWasm() ?: return false
         return sendData(wasm, "module.wasm", request, context.channel(), EmptyHttpHeaders.INSTANCE)
     }
 
