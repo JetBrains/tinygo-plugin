@@ -64,6 +64,7 @@
                     secondary="true"
         />
         <httpRequestHandler implementation="org.jetbrains.tinygoplugin.preview.TinyGoPreviewHttpHandler" order="first"/>
+        <fileEditorProvider implementation="org.jetbrains.tinygoplugin.preview.TinyGoPreviewFileEditorProvider"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>
