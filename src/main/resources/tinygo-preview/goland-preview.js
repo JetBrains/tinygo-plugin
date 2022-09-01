@@ -1,14 +1,25 @@
 'use strict';
 
 let worker = null;
+let workerUpdate = null;
+let project = null;
+let db = null;
+let schematic = null;
 
-document.addEventListener('DOMContentLoaded', run);
+document.addEventListener('DOMContentLoaded', async function() {
+    let dbPromise = loadDB();
+    db = await dbPromise;
+    db.onerror = function(e) {
+        console.error('database error:', e);
+    };
+    await run();
+})
 async function run() {
     // ~> #getProject
     let target = document.querySelector('#targetName').value;
     let location = 'playground/parts/' + target + '.json'
     let partConfig = await loadJSON(location);
-    let project = new Project(partConfig, {
+    project = new Project(partConfig, {
         defaultHumanName: partConfig.humanName,
         parts: {
             main: {
@@ -21,7 +32,7 @@ async function run() {
     })
 
     // ~> #update
-    let schematic = new Schematic(project.data);
+    schematic = new Schematic(project.data);
     await schematic.refresh();
 
     let projectPath = document.querySelector('#projectPath').value;
@@ -56,7 +67,7 @@ async function run() {
                 break;
             }
             case 'notifyUpdate': {
-                let workerUpdate = requestAnimationFrame(() => {
+                workerUpdate = requestAnimationFrame(() => {
                     workerUpdate = null;
                     worker.postMessage({
                         type: 'getUpdate',
@@ -93,4 +104,27 @@ function workerPostMessage(message) {
 
 function saveState() {
 
+}
+
+function loadDB() {
+    return new Promise((resolve, reject) => {
+        // First get the database.
+        let request = indexedDB.open("tinygo-playground", 2);
+        request.onupgradeneeded = function (e) {
+            let db = e.target.result;
+            if (e.oldVersion === 1) {
+                // The proper way would be to upgrade the object store in place, but the
+                // easy way is to simply drop all existing data.
+                db.deleteObjectStore('projects');
+            }
+            let projects = db.createObjectStore('projects', {keyPath: 'name', autoIncrement: true});
+            projects.createIndex('target', 'target', {unique: false});
+        };
+        request.onsuccess = function (e) {
+            resolve(e.target.result);
+        };
+        request.onerror = function (e) {
+            reject(e);
+        };
+    })
 }
