@@ -16,8 +16,6 @@ import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.VfsUtil
-import com.intellij.openapi.vfs.VfsUtilCore
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -62,9 +60,9 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         this.scheduler = Scheduler.valueOf(scheduler.firstGroup().uppercase(Locale.getDefault()))
 
         var cachedGoRootCandidate = cachedGoRoot.firstGroup().eraseLineBreaks()
-        val wsl = GoWslUtil.getWsl(VfsUtilCore.urlToPath(this.sdk.homeUrl))
+        val wsl = GoWslUtil.getWsl(this.sdk.homeUrl)
         if (wsl != null) cachedGoRootCandidate = wsl.getWindowsPath(cachedGoRootCandidate)
-        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRootCandidate))
+        this.cachedGoRoot = GoSdk.fromHomePath(cachedGoRootCandidate)
 
         TinyGoInfoExtractor.logger.info("extraction finished")
     } catch (e: NoSuchElementException) {
