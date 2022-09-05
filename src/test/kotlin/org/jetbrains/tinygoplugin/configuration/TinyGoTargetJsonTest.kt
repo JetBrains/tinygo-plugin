@@ -29,7 +29,7 @@ class TinyGoTargetJsonTest : BasePlatformTestCase() {
         TestCase.assertEquals("linux", target.goOS)
         TestCase.assertEquals("arm", target.goArch)
         TestCase.assertEquals("conservative", target.gc)
-        TestCase.assertEquals("coroutines", target.scheduler)
+        TestCase.assertEquals("asyncify", target.scheduler)
         TestCase.assertEquals(123, target.defaultStackSize)
         TestCase.assertEquals("mycpu", target.cpu)
         TestCase.assertEquals("uart", target.serial)
