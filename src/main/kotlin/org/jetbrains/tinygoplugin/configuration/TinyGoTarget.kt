@@ -14,14 +14,12 @@ import java.util.stream.Collectors
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
 
-val COPY_ONLY_LISTS = setOf("emulator")
-
 /* ktlint-disable */
 data class TinyGoTarget constructor(
     @SerializedName("inherits")             var inherits: MutableSet<String>? = mutableSetOf(),
     @SerializedName("llvm-target")          var triple: String?,
     @SerializedName("cpu")                  var cpu: String?,
-    @SerializedName("features")             var features: MutableSet<String>? = mutableSetOf(),
+    @SerializedName("features")             var features: String?,
     @SerializedName("goos")                 var goOS: String?,
     @SerializedName("goarch")               var goArch: String?,
     @SerializedName("build-tags")           var buildTags: MutableSet<String>? = mutableSetOf(),
@@ -113,10 +111,8 @@ fun TinyGoTarget.performInheritance(sdkRoot: VirtualFile) {
             val myVal = flag.get(this)
             val parentVal = flag.get(parent)
             if (parentVal == null || parentVal == myVal || flag !is KMutableProperty<*>) continue
-            if (myVal is MutableSet<*> && !COPY_ONLY_LISTS.contains(flag.name)) {
-                val mySet = myVal as MutableSet<String>
-                val parentSet = parentVal as MutableSet<String>
-                mySet.addAll(parentSet)
+            if (myVal is MutableSet<*> && parentVal is MutableSet<*>) {
+                myVal.toMutableSet().addAll(parentVal.filterIsInstance<String>())
             } else if (myVal == null || myVal is Int) {
                 flag.setter.call(this, parentVal)
             }

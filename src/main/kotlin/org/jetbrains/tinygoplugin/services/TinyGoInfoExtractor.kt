@@ -24,6 +24,7 @@ import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.osManager
 import java.time.Duration
+import java.util.Locale
 import java.util.function.BiConsumer
 
 private const val GO_NOT_CONFIGURED_MESSAGE = "notifications.tinygoSDK.goSDKNotConfigured"
@@ -50,8 +51,8 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     this.goArch = goArch.groupValues[1]
     this.goTags = tags.groupValues[1]
     this.goOS = goOS.groupValues[1]
-    this.gc = GarbageCollector.valueOf(gc.groupValues[1].toUpperCase())
-    this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].toUpperCase())
+    this.gc = GarbageCollector.valueOf(gc.groupValues[1].uppercase(Locale.getDefault()))
+    this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].uppercase(Locale.getDefault()))
     this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
 
     TinyGoInfoExtractor.logger.info("extraction finished")
