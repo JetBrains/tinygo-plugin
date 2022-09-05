@@ -17,6 +17,19 @@
 
 ## [0.4.0]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.4.0]
+### Added
 - Field for editing run configuration's environment variables.
 - Multi-file example projects creation.
 - Link to target configuration from run configuration.
