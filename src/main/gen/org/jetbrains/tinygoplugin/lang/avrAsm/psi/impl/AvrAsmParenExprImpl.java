@@ -11,14 +11,14 @@ import static org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.jetbrains.tinygoplugin.lang.avrAsm.psi.*;
 
-public class AvrAsmOperandImpl extends ASTWrapperPsiElement implements AvrAsmOperand {
+public class AvrAsmParenExprImpl extends ASTWrapperPsiElement implements AvrAsmParenExpr {
 
-  public AvrAsmOperandImpl(@NotNull ASTNode node) {
+  public AvrAsmParenExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AvrAsmVisitor visitor) {
-    visitor.visitOperand(this);
+    visitor.visitParenExpr(this);
   }
 
   @Override
@@ -29,14 +29,8 @@ public class AvrAsmOperandImpl extends ASTWrapperPsiElement implements AvrAsmOpe
 
   @Override
   @Nullable
-  public AvrAsmNumber getNumber() {
-    return findChildByClass(AvrAsmNumber.class);
-  }
-
-  @Override
-  @Nullable
-  public AvrAsmSymbol getSymbol() {
-    return findChildByClass(AvrAsmSymbol.class);
+  public AvrAsmExpression getExpression() {
+    return findChildByClass(AvrAsmExpression.class);
   }
 
 }

@@ -11,14 +11,14 @@ import static org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.jetbrains.tinygoplugin.lang.avrAsm.psi.*;
 
-public class AvrAsmExpressionImpl extends ASTWrapperPsiElement implements AvrAsmExpression {
+public class AvrAsmUnaryImpl extends ASTWrapperPsiElement implements AvrAsmUnary {
 
-  public AvrAsmExpressionImpl(@NotNull ASTNode node) {
+  public AvrAsmUnaryImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AvrAsmVisitor visitor) {
-    visitor.visitExpression(this);
+    visitor.visitUnary(this);
   }
 
   @Override

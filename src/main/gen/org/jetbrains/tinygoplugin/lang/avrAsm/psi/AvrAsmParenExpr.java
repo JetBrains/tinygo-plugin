@@ -5,12 +5,9 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface AvrAsmOperand extends PsiElement {
+public interface AvrAsmParenExpr extends PsiElement {
 
   @Nullable
-  AvrAsmNumber getNumber();
-
-  @Nullable
-  AvrAsmSymbol getSymbol();
+  AvrAsmExpression getExpression();
 
 }

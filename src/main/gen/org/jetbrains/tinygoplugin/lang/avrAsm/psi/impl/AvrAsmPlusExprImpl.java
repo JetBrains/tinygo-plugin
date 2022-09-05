@@ -11,14 +11,14 @@ import static org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.jetbrains.tinygoplugin.lang.avrAsm.psi.*;
 
-public class AvrAsmExpressionImpl extends ASTWrapperPsiElement implements AvrAsmExpression {
+public class AvrAsmPlusExprImpl extends ASTWrapperPsiElement implements AvrAsmPlusExpr {
 
-  public AvrAsmExpressionImpl(@NotNull ASTNode node) {
+  public AvrAsmPlusExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AvrAsmVisitor visitor) {
-    visitor.visitExpression(this);
+    visitor.visitPlusExpr(this);
   }
 
   @Override
@@ -34,21 +34,21 @@ public class AvrAsmExpressionImpl extends ASTWrapperPsiElement implements AvrAsm
   }
 
   @Override
-  @Nullable
-  public AvrAsmLiteralExpr getLiteralExpr() {
-    return findChildByClass(AvrAsmLiteralExpr.class);
+  @NotNull
+  public List<AvrAsmLiteralExpr> getLiteralExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmLiteralExpr.class);
   }
 
   @Override
-  @Nullable
-  public AvrAsmMulExpr getMulExpr() {
-    return findChildByClass(AvrAsmMulExpr.class);
+  @NotNull
+  public List<AvrAsmMulExpr> getMulExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmMulExpr.class);
   }
 
   @Override
-  @Nullable
-  public AvrAsmParenExpr getParenExpr() {
-    return findChildByClass(AvrAsmParenExpr.class);
+  @NotNull
+  public List<AvrAsmParenExpr> getParenExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmParenExpr.class);
   }
 
   @Override
@@ -58,15 +58,9 @@ public class AvrAsmExpressionImpl extends ASTWrapperPsiElement implements AvrAsm
   }
 
   @Override
-  @Nullable
-  public AvrAsmRefExpr getRefExpr() {
-    return findChildByClass(AvrAsmRefExpr.class);
-  }
-
-  @Override
-  @Nullable
-  public AvrAsmUnary getUnary() {
-    return findChildByClass(AvrAsmUnary.class);
+  @NotNull
+  public List<AvrAsmRefExpr> getRefExprList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmRefExpr.class);
   }
 
 }

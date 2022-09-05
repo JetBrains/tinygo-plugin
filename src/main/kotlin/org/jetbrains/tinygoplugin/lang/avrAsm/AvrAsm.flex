@@ -93,24 +93,24 @@ REGISTER = r{DEC_DIGIT}+ | R{DEC_DIGIT}+
 {IDENTIFIER}                                                { return AvrAsmTypes.IDENTIFIER; }
 {SYMBOL_IDENTIFIER}                                         { return AvrAsmTypes.SYMBOL_IDENTIFIER; }
 
-/*<IN_OPERANDS> "!"                                           { return AvrAsmTypes.NOT; }
-<IN_OPERANDS> "~"                                           { return AvrAsmTypes.TILDA; }
-<IN_OPERANDS> "*"                                           { return AvrAsmTypes.STAR; }
-<IN_OPERANDS> "/"                                           { return AvrAsmTypes.DIVISION; }
-<IN_OPERANDS> "%"                                           { return AvrAsmTypes.MODULO; }*/
+//<IN_OPERANDS> "!"                                           { return AvrAsmTypes.NOT; }
+"~"                                                         { return AvrAsmTypes.TILDA; }
+"*"                                                         { return AvrAsmTypes.STAR; }
+"/"                                                         { return AvrAsmTypes.DIVISION; }
+//<IN_OPERANDS> "%"                                           { return AvrAsmTypes.MODULO; }*/
 "+"                                                         { return AvrAsmTypes.PLUS; }
 "-"                                                         { return AvrAsmTypes.MINUS; }
-/*<IN_OPERANDS> "<<"                                        { return AvrAsmTypes.SHIFT_LEFT; }
-<IN_OPERANDS> ">>"                                          { return AvrAsmTypes.SHIFT_RIGHT; }
-<IN_OPERANDS> "<"                                           { return AvrAsmTypes.LESS; }
-<IN_OPERANDS> "<="                                          { return AvrAsmTypes.LESS_EQUAL; }
-<IN_OPERANDS> ">"                                           { return AvrAsmTypes.GREATER; }
-<IN_OPERANDS> ">="                                          { return AvrAsmTypes.GREATER_EQUAL; }
-<IN_OPERANDS> "=="                                          { return AvrAsmTypes.EQUAL; }
-<IN_OPERANDS> "!="                                          { return AvrAsmTypes.NOT_EQUAL; }
-<IN_OPERANDS> "&"                                           { return AvrAsmTypes.AMP; }
-<IN_OPERANDS> "^"                                           { return AvrAsmTypes.XOR; }
-<IN_OPERANDS> "|"                                           { return AvrAsmTypes.OR; }*/
+"<<"                                                        { return AvrAsmTypes.SHIFT_LEFT; }
+">>"                                                        { return AvrAsmTypes.SHIFT_RIGHT; }
+//<IN_OPERANDS> "<"                                           { return AvrAsmTypes.LESS; }
+//<IN_OPERANDS> "<="                                          { return AvrAsmTypes.LESS_EQUAL; }
+//<IN_OPERANDS> ">"                                           { return AvrAsmTypes.GREATER; }
+//<IN_OPERANDS> ">="                                          { return AvrAsmTypes.GREATER_EQUAL; }
+//<IN_OPERANDS> "=="                                          { return AvrAsmTypes.EQUAL; }
+//<IN_OPERANDS> "!="                                          { return AvrAsmTypes.NOT_EQUAL; }
+"&"                                                         { return AvrAsmTypes.AMP; }
+"^"                                                         { return AvrAsmTypes.XOR; }
+"|"                                                         { return AvrAsmTypes.OR; }
 
 ","                                                         { return AvrAsmTypes.COMMA; }
 "("                                                         { return AvrAsmTypes.L_PAREN; }

@@ -11,6 +11,10 @@ public class AvrAsmVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitBitwiseExpr(@NotNull AvrAsmBitwiseExpr o) {
+    visitPsiElement(o);
+  }
+
   public void visitCall(@NotNull AvrAsmCall o) {
     visitPsiElement(o);
   }
@@ -39,7 +43,15 @@ public class AvrAsmVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitLiteralExpr(@NotNull AvrAsmLiteralExpr o) {
+    visitPsiElement(o);
+  }
+
   public void visitMemory(@NotNull AvrAsmMemory o) {
+    visitPsiElement(o);
+  }
+
+  public void visitMulExpr(@NotNull AvrAsmMulExpr o) {
     visitPsiElement(o);
   }
 
@@ -47,7 +59,11 @@ public class AvrAsmVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitOperand(@NotNull AvrAsmOperand o) {
+  public void visitParenExpr(@NotNull AvrAsmParenExpr o) {
+    visitPsiElement(o);
+  }
+
+  public void visitPlusExpr(@NotNull AvrAsmPlusExpr o) {
     visitPsiElement(o);
   }
 
@@ -55,7 +71,15 @@ public class AvrAsmVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
+  public void visitRefExpr(@NotNull AvrAsmRefExpr o) {
+    visitPsiElement(o);
+  }
+
   public void visitSymbol(@NotNull AvrAsmSymbol o) {
+    visitPsiElement(o);
+  }
+
+  public void visitUnary(@NotNull AvrAsmUnary o) {
     visitPsiElement(o);
   }
 

@@ -36,8 +36,20 @@ private recovery   ::= !(PREPROCESSOR_NAME | MACROS_NAME | LABEL | directives | 
 private directives ::= GENERIC_DIRECTIVE | EQU_DIRECTIVE | SET_DIRECTIVE | DEF_DIRECTIVE | DB_DIRECTIVE | REPORT_DIRECTIVE
 private mnemonics  ::= MNEMONIC | BR_MNEMONIC
 
-expression ::= call | operand
-operand    ::= PC | number | symbol
+expression ::= arithmetic_expr
+
+private arithmetic_expr ::= unary | factor (plus_expr | bitwise_expr)*
+unary ::= (TILDA | MINUS) arithmetic_expr
+
+private factor ::= primary mul_expr*
+left mul_expr ::= (STAR | DIVISION) primary
+left plus_expr ::= (PLUS | MINUS) factor
+left bitwise_expr ::= (SHIFT_LEFT | SHIFT_RIGHT | AMP | XOR | OR) factor
+
+private primary ::=  literal_expr | ref_expr | paren_expr
+paren_expr ::= L_PAREN expression R_PAREN {pin=1}
+ref_expr ::= call | symbol
+literal_expr ::= PC | number
 
 memory           ::= REGISTER | indirect_postfix | indirect_prefix | INDIRECT
 indirect_prefix  ::= (MINUS | PLUS) INDIRECT

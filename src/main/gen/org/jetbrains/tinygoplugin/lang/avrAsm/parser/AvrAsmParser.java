@@ -48,6 +48,49 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // unary | factor (plus_expr | bitwise_expr)*
+  static boolean arithmetic_expr(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "arithmetic_expr")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = unary(b, l + 1);
+    if (!r) r = arithmetic_expr_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // factor (plus_expr | bitwise_expr)*
+  private static boolean arithmetic_expr_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "arithmetic_expr_1")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = factor(b, l + 1);
+    r = r && arithmetic_expr_1_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // (plus_expr | bitwise_expr)*
+  private static boolean arithmetic_expr_1_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "arithmetic_expr_1_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!arithmetic_expr_1_1_0(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "arithmetic_expr_1_1", c)) break;
+    }
+    return true;
+  }
+
+  // plus_expr | bitwise_expr
+  private static boolean arithmetic_expr_1_1_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "arithmetic_expr_1_1_0")) return false;
+    boolean r;
+    r = plus_expr(b, l + 1);
+    if (!r) r = bitwise_expr(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
   // (preprocessor | LABEL | instruction | directive | LINE_COMMENT | BLOCK_COMMENT)*
   static boolean asmFile(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "asmFile")) return false;
@@ -71,6 +114,30 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
     if (!r) r = consumeToken(b, LINE_COMMENT);
     if (!r) r = consumeToken(b, BLOCK_COMMENT);
     exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // (SHIFT_LEFT | SHIFT_RIGHT | AMP | XOR | OR) factor
+  public static boolean bitwise_expr(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bitwise_expr")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _LEFT_, BITWISE_EXPR, "<bitwise expr>");
+    r = bitwise_expr_0(b, l + 1);
+    r = r && factor(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // SHIFT_LEFT | SHIFT_RIGHT | AMP | XOR | OR
+  private static boolean bitwise_expr_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "bitwise_expr_0")) return false;
+    boolean r;
+    r = consumeToken(b, SHIFT_LEFT);
+    if (!r) r = consumeToken(b, SHIFT_RIGHT);
+    if (!r) r = consumeToken(b, AMP);
+    if (!r) r = consumeToken(b, XOR);
+    if (!r) r = consumeToken(b, OR);
     return r;
   }
 
@@ -116,14 +183,14 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // defined | strlen | generic_funk
+  // defined | strlen | generic_func
   public static boolean call(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "call")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, CALL, "<call>");
     r = defined(b, l + 1);
     if (!r) r = strlen(b, l + 1);
-    if (!r) r = generic_funk(b, l + 1);
+    if (!r) r = generic_func(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
   }
@@ -245,15 +312,37 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // call | operand
+  // arithmetic_expr
   public static boolean expression(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "expression")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, EXPRESSION, "<expression>");
-    r = call(b, l + 1);
-    if (!r) r = operand(b, l + 1);
+    r = arithmetic_expr(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
+  }
+
+  /* ********************************************************** */
+  // primary mul_expr*
+  static boolean factor(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "factor")) return false;
+    boolean r;
+    Marker m = enter_section_(b);
+    r = primary(b, l + 1);
+    r = r && factor_1(b, l + 1);
+    exit_section_(b, m, null, r);
+    return r;
+  }
+
+  // mul_expr*
+  private static boolean factor_1(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "factor_1")) return false;
+    while (true) {
+      int c = current_position_(b);
+      if (!mul_expr(b, l + 1)) break;
+      if (!empty_element_parsed_guard_(b, "factor_1", c)) break;
+    }
+    return true;
   }
 
   /* ********************************************************** */
@@ -300,13 +389,13 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
 
   /* ********************************************************** */
   // FUNC <<parenthesized <<list_of expression>> >>
-  static boolean generic_funk(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "generic_funk")) return false;
+  static boolean generic_func(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "generic_func")) return false;
     if (!nextTokenIs(b, FUNC)) return false;
     boolean r;
     Marker m = enter_section_(b);
     r = consumeToken(b, FUNC);
-    r = r && parenthesized(b, l + 1, generic_funk_1_0_parser_);
+    r = r && parenthesized(b, l + 1, generic_func_1_0_parser_);
     exit_section_(b, m, null, r);
     return r;
   }
@@ -426,6 +515,18 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // PC | number
+  public static boolean literal_expr(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "literal_expr")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, LITERAL_EXPR, "<literal expr>");
+    r = consumeToken(b, PC);
+    if (!r) r = number(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  /* ********************************************************** */
   // <<element>> ( COMMA <<element>> )?
   static boolean max_two_list(PsiBuilder b, int l, Parser _element) {
     if (!recursion_guard_(b, l, "max_two_list")) return false;
@@ -481,6 +582,28 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // (STAR | DIVISION) primary
+  public static boolean mul_expr(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "mul_expr")) return false;
+    if (!nextTokenIs(b, "<mul expr>", DIVISION, STAR)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _LEFT_, MUL_EXPR, "<mul expr>");
+    r = mul_expr_0(b, l + 1);
+    r = r && primary(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // STAR | DIVISION
+  private static boolean mul_expr_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "mul_expr_0")) return false;
+    boolean r;
+    r = consumeToken(b, STAR);
+    if (!r) r = consumeToken(b, DIVISION);
+    return r;
+  }
+
+  /* ********************************************************** */
   // MINUS? (INTEGER | CHAR)
   public static boolean number(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "number")) return false;
@@ -509,16 +632,18 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // PC | number | symbol
-  public static boolean operand(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "operand")) return false;
-    boolean r;
-    Marker m = enter_section_(b, l, _NONE_, OPERAND, "<operand>");
-    r = consumeToken(b, PC);
-    if (!r) r = number(b, l + 1);
-    if (!r) r = symbol(b, l + 1);
-    exit_section_(b, l, m, r, false, null);
-    return r;
+  // L_PAREN expression R_PAREN
+  public static boolean paren_expr(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "paren_expr")) return false;
+    if (!nextTokenIs(b, L_PAREN)) return false;
+    boolean r, p;
+    Marker m = enter_section_(b, l, _NONE_, PAREN_EXPR, null);
+    r = consumeToken(b, L_PAREN);
+    p = r; // pin = 1
+    r = r && report_error_(b, expression(b, l + 1));
+    r = p && consumeToken(b, R_PAREN) && r;
+    exit_section_(b, l, m, r, p, null);
+    return r || p;
   }
 
   /* ********************************************************** */
@@ -532,6 +657,28 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
     r = r && _param.parse(b, l);
     r = r && consumeToken(b, R_PAREN);
     exit_section_(b, m, null, r);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // (PLUS | MINUS) factor
+  public static boolean plus_expr(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "plus_expr")) return false;
+    if (!nextTokenIs(b, "<plus expr>", MINUS, PLUS)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _LEFT_, PLUS_EXPR, "<plus expr>");
+    r = plus_expr_0(b, l + 1);
+    r = r && factor(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // PLUS | MINUS
+  private static boolean plus_expr_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "plus_expr_0")) return false;
+    boolean r;
+    r = consumeToken(b, PLUS);
+    if (!r) r = consumeToken(b, MINUS);
     return r;
   }
 
@@ -580,6 +727,17 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // literal_expr | ref_expr | paren_expr
+  static boolean primary(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "primary")) return false;
+    boolean r;
+    r = literal_expr(b, l + 1);
+    if (!r) r = ref_expr(b, l + 1);
+    if (!r) r = paren_expr(b, l + 1);
+    return r;
+  }
+
+  /* ********************************************************** */
   // !(PREPROCESSOR_NAME | MACROS_NAME | LABEL | directives | mnemonics | LINE_COMMENT)
   static boolean recovery(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "recovery")) return false;
@@ -600,6 +758,18 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
     if (!r) r = directives(b, l + 1);
     if (!r) r = mnemonics(b, l + 1);
     if (!r) r = consumeToken(b, LINE_COMMENT);
+    return r;
+  }
+
+  /* ********************************************************** */
+  // call | symbol
+  public static boolean ref_expr(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "ref_expr")) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _NONE_, REF_EXPR, "<ref expr>");
+    r = call(b, l + 1);
+    if (!r) r = symbol(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
     return r;
   }
 
@@ -657,6 +827,28 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
+  // (TILDA | MINUS) arithmetic_expr
+  public static boolean unary(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "unary")) return false;
+    if (!nextTokenIs(b, "<unary>", MINUS, TILDA)) return false;
+    boolean r;
+    Marker m = enter_section_(b, l, _COLLAPSE_, UNARY, "<unary>");
+    r = unary_0(b, l + 1);
+    r = r && arithmetic_expr(b, l + 1);
+    exit_section_(b, l, m, r, false, null);
+    return r;
+  }
+
+  // TILDA | MINUS
+  private static boolean unary_0(PsiBuilder b, int l) {
+    if (!recursion_guard_(b, l, "unary_0")) return false;
+    boolean r;
+    r = consumeToken(b, TILDA);
+    if (!r) r = consumeToken(b, MINUS);
+    return r;
+  }
+
+  /* ********************************************************** */
   // symbol
   public static boolean variable(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "variable")) return false;
@@ -670,5 +862,5 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
 
   static final Parser strlen_1_0_parser_ = (b, l) -> consumeToken(b, STRING);
 
-  private static final Parser generic_funk_1_0_parser_ = list_of_$(AvrAsmParser::expression);
+  private static final Parser generic_func_1_0_parser_ = list_of_$(AvrAsmParser::expression);
 }
