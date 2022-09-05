@@ -15,18 +15,19 @@
 
 ### Security
 
-## [0.3.5]
+## [0.4.0]
 ### Added
+- Field for editing run configuration's environment variables.
+- Multi-file example projects creation.
+- Link to target configuration from run configuration.
 
 ### Changed
-
-### Deprecated
-
-### Removed
+- Use the `asyncify` scheduler parameter instead of the obsolete `coroutines`.
+- Veto unsupported by TinyGo GoLand run configurations like `go build`, `go test`, etc.
 
 ### Fixed
-
-### Security
+- Capture run configuration's working directory during execution.
+- Import of custom target platforms from a .json file.
 
 ## [0.3.5]
 ### Changed
