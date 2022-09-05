@@ -35,8 +35,8 @@ public class AvrAsmBitwiseExprImpl extends ASTWrapperPsiElement implements AvrAs
 
   @Override
   @NotNull
-  public List<AvrAsmLiteralExpr> getLiteralExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmLiteralExpr.class);
+  public List<AvrAsmCall> getCallList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmCall.class);
   }
 
   @Override
@@ -47,8 +47,8 @@ public class AvrAsmBitwiseExprImpl extends ASTWrapperPsiElement implements AvrAs
 
   @Override
   @NotNull
-  public List<AvrAsmParenExpr> getParenExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmParenExpr.class);
+  public List<AvrAsmNumber> getNumberList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmNumber.class);
   }
 
   @Override
@@ -59,8 +59,8 @@ public class AvrAsmBitwiseExprImpl extends ASTWrapperPsiElement implements AvrAs
 
   @Override
   @NotNull
-  public List<AvrAsmRefExpr> getRefExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmRefExpr.class);
+  public List<AvrAsmSymbol> getSymbolList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmSymbol.class);
   }
 
 }

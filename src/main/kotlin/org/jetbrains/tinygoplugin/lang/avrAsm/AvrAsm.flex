@@ -93,7 +93,7 @@ REGISTER = r{DEC_DIGIT}+ | R{DEC_DIGIT}+
 {IDENTIFIER}                                                { return AvrAsmTypes.IDENTIFIER; }
 {SYMBOL_IDENTIFIER}                                         { return AvrAsmTypes.SYMBOL_IDENTIFIER; }
 
-//<IN_OPERANDS> "!"                                           { return AvrAsmTypes.NOT; }
+"!"                                                         { return AvrAsmTypes.NOT; }
 "~"                                                         { return AvrAsmTypes.TILDA; }
 "*"                                                         { return AvrAsmTypes.STAR; }
 "/"                                                         { return AvrAsmTypes.DIVISION; }
@@ -102,15 +102,17 @@ REGISTER = r{DEC_DIGIT}+ | R{DEC_DIGIT}+
 "-"                                                         { return AvrAsmTypes.MINUS; }
 "<<"                                                        { return AvrAsmTypes.SHIFT_LEFT; }
 ">>"                                                        { return AvrAsmTypes.SHIFT_RIGHT; }
-//<IN_OPERANDS> "<"                                           { return AvrAsmTypes.LESS; }
-//<IN_OPERANDS> "<="                                          { return AvrAsmTypes.LESS_EQUAL; }
-//<IN_OPERANDS> ">"                                           { return AvrAsmTypes.GREATER; }
-//<IN_OPERANDS> ">="                                          { return AvrAsmTypes.GREATER_EQUAL; }
-//<IN_OPERANDS> "=="                                          { return AvrAsmTypes.EQUAL; }
-//<IN_OPERANDS> "!="                                          { return AvrAsmTypes.NOT_EQUAL; }
-"&"                                                         { return AvrAsmTypes.AMP; }
-"^"                                                         { return AvrAsmTypes.XOR; }
-"|"                                                         { return AvrAsmTypes.OR; }
+"<"                                                         { return AvrAsmTypes.LESS; }
+"<="                                                        { return AvrAsmTypes.LESS_EQUAL; }
+">"                                                         { return AvrAsmTypes.GREATER; }
+">="                                                        { return AvrAsmTypes.GREATER_EQUAL; }
+"=="                                                        { return AvrAsmTypes.EQUAL; }
+"!="                                                        { return AvrAsmTypes.NOT_EQUAL; }
+"&"                                                         { return AvrAsmTypes.AND_BIN; }
+"^"                                                         { return AvrAsmTypes.XOR_BIN; }
+"|"                                                         { return AvrAsmTypes.OR_BIN; }
+"&&"                                                        { return AvrAsmTypes.AND; }
+"||"                                                        { return AvrAsmTypes.OR; }
 
 ","                                                         { return AvrAsmTypes.COMMA; }
 "("                                                         { return AvrAsmTypes.L_PAREN; }

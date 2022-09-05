@@ -7,6 +7,10 @@ import com.intellij.psi.PsiElement;
 
 public class AvrAsmVisitor extends PsiElementVisitor {
 
+  public void visitAndExpr(@NotNull AvrAsmAndExpr o) {
+    visitPsiElement(o);
+  }
+
   public void visitArgument(@NotNull AvrAsmArgument o) {
     visitPsiElement(o);
   }
@@ -16,6 +20,10 @@ public class AvrAsmVisitor extends PsiElementVisitor {
   }
 
   public void visitCall(@NotNull AvrAsmCall o) {
+    visitPsiElement(o);
+  }
+
+  public void visitComparisonExpr(@NotNull AvrAsmComparisonExpr o) {
     visitPsiElement(o);
   }
 
@@ -43,10 +51,6 @@ public class AvrAsmVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitLiteralExpr(@NotNull AvrAsmLiteralExpr o) {
-    visitPsiElement(o);
-  }
-
   public void visitMemory(@NotNull AvrAsmMemory o) {
     visitPsiElement(o);
   }
@@ -59,7 +63,11 @@ public class AvrAsmVisitor extends PsiElementVisitor {
     visitPsiElement(o);
   }
 
-  public void visitParenExpr(@NotNull AvrAsmParenExpr o) {
+  public void visitOrExpr(@NotNull AvrAsmOrExpr o) {
+    visitPsiElement(o);
+  }
+
+  public void visitParen(@NotNull AvrAsmParen o) {
     visitPsiElement(o);
   }
 
@@ -68,10 +76,6 @@ public class AvrAsmVisitor extends PsiElementVisitor {
   }
 
   public void visitPreprocessor(@NotNull AvrAsmPreprocessor o) {
-    visitPsiElement(o);
-  }
-
-  public void visitRefExpr(@NotNull AvrAsmRefExpr o) {
     visitPsiElement(o);
   }
 

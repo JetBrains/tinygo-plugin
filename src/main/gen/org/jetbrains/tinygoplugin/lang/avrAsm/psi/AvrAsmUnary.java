@@ -7,25 +7,7 @@ import com.intellij.psi.PsiElement;
 
 public interface AvrAsmUnary extends PsiElement {
 
-  @Nullable
-  AvrAsmBitwiseExpr getBitwiseExpr();
-
-  @Nullable
-  AvrAsmLiteralExpr getLiteralExpr();
-
-  @Nullable
-  AvrAsmMulExpr getMulExpr();
-
-  @Nullable
-  AvrAsmParenExpr getParenExpr();
-
-  @Nullable
-  AvrAsmPlusExpr getPlusExpr();
-
-  @Nullable
-  AvrAsmRefExpr getRefExpr();
-
-  @Nullable
-  AvrAsmUnary getUnary();
+  @NotNull
+  AvrAsmExpression getExpression();
 
 }

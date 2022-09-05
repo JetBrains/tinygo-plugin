@@ -28,45 +28,9 @@ public class AvrAsmUnaryImpl extends ASTWrapperPsiElement implements AvrAsmUnary
   }
 
   @Override
-  @Nullable
-  public AvrAsmBitwiseExpr getBitwiseExpr() {
-    return findChildByClass(AvrAsmBitwiseExpr.class);
-  }
-
-  @Override
-  @Nullable
-  public AvrAsmLiteralExpr getLiteralExpr() {
-    return findChildByClass(AvrAsmLiteralExpr.class);
-  }
-
-  @Override
-  @Nullable
-  public AvrAsmMulExpr getMulExpr() {
-    return findChildByClass(AvrAsmMulExpr.class);
-  }
-
-  @Override
-  @Nullable
-  public AvrAsmParenExpr getParenExpr() {
-    return findChildByClass(AvrAsmParenExpr.class);
-  }
-
-  @Override
-  @Nullable
-  public AvrAsmPlusExpr getPlusExpr() {
-    return findChildByClass(AvrAsmPlusExpr.class);
-  }
-
-  @Override
-  @Nullable
-  public AvrAsmRefExpr getRefExpr() {
-    return findChildByClass(AvrAsmRefExpr.class);
-  }
-
-  @Override
-  @Nullable
-  public AvrAsmUnary getUnary() {
-    return findChildByClass(AvrAsmUnary.class);
+  @NotNull
+  public AvrAsmExpression getExpression() {
+    return findNotNullChildByClass(AvrAsmExpression.class);
   }
 
 }

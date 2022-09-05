@@ -29,14 +29,26 @@ public class AvrAsmExpressionImpl extends ASTWrapperPsiElement implements AvrAsm
 
   @Override
   @Nullable
+  public AvrAsmAndExpr getAndExpr() {
+    return findChildByClass(AvrAsmAndExpr.class);
+  }
+
+  @Override
+  @Nullable
   public AvrAsmBitwiseExpr getBitwiseExpr() {
     return findChildByClass(AvrAsmBitwiseExpr.class);
   }
 
   @Override
   @Nullable
-  public AvrAsmLiteralExpr getLiteralExpr() {
-    return findChildByClass(AvrAsmLiteralExpr.class);
+  public AvrAsmCall getCall() {
+    return findChildByClass(AvrAsmCall.class);
+  }
+
+  @Override
+  @Nullable
+  public AvrAsmComparisonExpr getComparisonExpr() {
+    return findChildByClass(AvrAsmComparisonExpr.class);
   }
 
   @Override
@@ -47,8 +59,20 @@ public class AvrAsmExpressionImpl extends ASTWrapperPsiElement implements AvrAsm
 
   @Override
   @Nullable
-  public AvrAsmParenExpr getParenExpr() {
-    return findChildByClass(AvrAsmParenExpr.class);
+  public AvrAsmNumber getNumber() {
+    return findChildByClass(AvrAsmNumber.class);
+  }
+
+  @Override
+  @Nullable
+  public AvrAsmOrExpr getOrExpr() {
+    return findChildByClass(AvrAsmOrExpr.class);
+  }
+
+  @Override
+  @Nullable
+  public AvrAsmParen getParen() {
+    return findChildByClass(AvrAsmParen.class);
   }
 
   @Override
@@ -59,8 +83,8 @@ public class AvrAsmExpressionImpl extends ASTWrapperPsiElement implements AvrAsm
 
   @Override
   @Nullable
-  public AvrAsmRefExpr getRefExpr() {
-    return findChildByClass(AvrAsmRefExpr.class);
+  public AvrAsmSymbol getSymbol() {
+    return findChildByClass(AvrAsmSymbol.class);
   }
 
   @Override

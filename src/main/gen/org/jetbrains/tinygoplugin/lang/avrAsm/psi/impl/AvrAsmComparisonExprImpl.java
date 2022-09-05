@@ -11,14 +11,14 @@ import static org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.jetbrains.tinygoplugin.lang.avrAsm.psi.*;
 
-public class AvrAsmPlusExprImpl extends ASTWrapperPsiElement implements AvrAsmPlusExpr {
+public class AvrAsmComparisonExprImpl extends ASTWrapperPsiElement implements AvrAsmComparisonExpr {
 
-  public AvrAsmPlusExprImpl(@NotNull ASTNode node) {
+  public AvrAsmComparisonExprImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AvrAsmVisitor visitor) {
-    visitor.visitPlusExpr(this);
+    visitor.visitComparisonExpr(this);
   }
 
   @Override
@@ -34,21 +34,33 @@ public class AvrAsmPlusExprImpl extends ASTWrapperPsiElement implements AvrAsmPl
   }
 
   @Override
-  @NotNull
-  public List<AvrAsmCall> getCallList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmCall.class);
+  @Nullable
+  public AvrAsmCall getCall() {
+    return findChildByClass(AvrAsmCall.class);
   }
 
   @Override
   @NotNull
-  public List<AvrAsmMulExpr> getMulExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmMulExpr.class);
+  public AvrAsmExpression getExpression() {
+    return findNotNullChildByClass(AvrAsmExpression.class);
   }
 
   @Override
-  @NotNull
-  public List<AvrAsmNumber> getNumberList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmNumber.class);
+  @Nullable
+  public AvrAsmMulExpr getMulExpr() {
+    return findChildByClass(AvrAsmMulExpr.class);
+  }
+
+  @Override
+  @Nullable
+  public AvrAsmNumber getNumber() {
+    return findChildByClass(AvrAsmNumber.class);
+  }
+
+  @Override
+  @Nullable
+  public AvrAsmParen getParen() {
+    return findChildByClass(AvrAsmParen.class);
   }
 
   @Override
@@ -58,9 +70,15 @@ public class AvrAsmPlusExprImpl extends ASTWrapperPsiElement implements AvrAsmPl
   }
 
   @Override
-  @NotNull
-  public List<AvrAsmSymbol> getSymbolList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmSymbol.class);
+  @Nullable
+  public AvrAsmSymbol getSymbol() {
+    return findChildByClass(AvrAsmSymbol.class);
+  }
+
+  @Override
+  @Nullable
+  public AvrAsmUnary getUnary() {
+    return findChildByClass(AvrAsmUnary.class);
   }
 
 }

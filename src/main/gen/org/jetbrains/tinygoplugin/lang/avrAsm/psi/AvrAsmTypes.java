@@ -8,28 +8,30 @@ import org.jetbrains.tinygoplugin.lang.avrAsm.psi.impl.*;
 
 public interface AvrAsmTypes {
 
+  IElementType AND_EXPR = new AvrAsmElementType("AND_EXPR");
   IElementType ARGUMENT = new AvrAsmElementType("ARGUMENT");
   IElementType BITWISE_EXPR = new AvrAsmElementType("BITWISE_EXPR");
   IElementType CALL = new AvrAsmElementType("CALL");
+  IElementType COMPARISON_EXPR = new AvrAsmElementType("COMPARISON_EXPR");
   IElementType CONST = new AvrAsmElementType("CONST");
   IElementType DIRECTIVE = new AvrAsmElementType("DIRECTIVE");
   IElementType EXPRESSION = new AvrAsmElementType("EXPRESSION");
   IElementType INDIRECT_POSTFIX = new AvrAsmElementType("INDIRECT_POSTFIX");
   IElementType INDIRECT_PREFIX = new AvrAsmElementType("INDIRECT_PREFIX");
   IElementType INSTRUCTION = new AvrAsmElementType("INSTRUCTION");
-  IElementType LITERAL_EXPR = new AvrAsmElementType("LITERAL_EXPR");
   IElementType MEMORY = new AvrAsmElementType("MEMORY");
   IElementType MUL_EXPR = new AvrAsmElementType("MUL_EXPR");
   IElementType NUMBER = new AvrAsmElementType("NUMBER");
-  IElementType PAREN_EXPR = new AvrAsmElementType("PAREN_EXPR");
+  IElementType OR_EXPR = new AvrAsmElementType("OR_EXPR");
+  IElementType PAREN = new AvrAsmElementType("PAREN");
   IElementType PLUS_EXPR = new AvrAsmElementType("PLUS_EXPR");
   IElementType PREPROCESSOR = new AvrAsmElementType("PREPROCESSOR");
-  IElementType REF_EXPR = new AvrAsmElementType("REF_EXPR");
   IElementType SYMBOL = new AvrAsmElementType("SYMBOL");
   IElementType UNARY = new AvrAsmElementType("UNARY");
   IElementType VARIABLE = new AvrAsmElementType("VARIABLE");
 
-  IElementType AMP = new AvrAsmTokenType("AMP");
+  IElementType AND = new AvrAsmTokenType("AND");
+  IElementType AND_BIN = new AvrAsmTokenType("AND_BIN");
   IElementType BLOCK_COMMENT = new AvrAsmTokenType("BLOCK_COMMENT");
   IElementType BR_MNEMONIC = new AvrAsmTokenType("BR_MNEMONIC");
   IElementType CHAR = new AvrAsmTokenType("CHAR");
@@ -39,19 +41,27 @@ public interface AvrAsmTypes {
   IElementType DEF_DIRECTIVE = new AvrAsmTokenType("DEF_DIRECTIVE");
   IElementType DIVISION = new AvrAsmTokenType("DIVISION");
   IElementType EQUAL = new AvrAsmTokenType("EQUAL");
+  IElementType EQUAL_LOGIC = new AvrAsmTokenType("EQUAL_LOGIC");
   IElementType EQU_DIRECTIVE = new AvrAsmTokenType("EQU_DIRECTIVE");
   IElementType FUNC = new AvrAsmTokenType("FUNC");
   IElementType GENERIC_DIRECTIVE = new AvrAsmTokenType("GENERIC_DIRECTIVE");
+  IElementType GREATER = new AvrAsmTokenType("GREATER");
+  IElementType GREATER_EQUAL = new AvrAsmTokenType("GREATER_EQUAL");
   IElementType IDENTIFIER = new AvrAsmTokenType("IDENTIFIER");
   IElementType INDIRECT = new AvrAsmTokenType("INDIRECT");
   IElementType INTEGER = new AvrAsmTokenType("INTEGER");
   IElementType LABEL = new AvrAsmTokenType("LABEL");
+  IElementType LESS = new AvrAsmTokenType("LESS");
+  IElementType LESS_EQUAL = new AvrAsmTokenType("LESS_EQUAL");
   IElementType LINE_COMMENT = new AvrAsmTokenType("LINE_COMMENT");
   IElementType L_PAREN = new AvrAsmTokenType("L_PAREN");
   IElementType MACROS_NAME = new AvrAsmTokenType("MACROS_NAME");
   IElementType MINUS = new AvrAsmTokenType("MINUS");
   IElementType MNEMONIC = new AvrAsmTokenType("MNEMONIC");
+  IElementType NOT = new AvrAsmTokenType("NOT");
+  IElementType NOT_EQUAL = new AvrAsmTokenType("NOT_EQUAL");
   IElementType OR = new AvrAsmTokenType("OR");
+  IElementType OR_BIN = new AvrAsmTokenType("OR_BIN");
   IElementType PC = new AvrAsmTokenType("PC");
   IElementType PLUS = new AvrAsmTokenType("PLUS");
   IElementType PREPROCESSOR_NAME = new AvrAsmTokenType("PREPROCESSOR_NAME");
@@ -66,12 +76,15 @@ public interface AvrAsmTypes {
   IElementType STRLEN_FUNC = new AvrAsmTokenType("STRLEN_FUNC");
   IElementType SYMBOL_IDENTIFIER = new AvrAsmTokenType("SYMBOL_IDENTIFIER");
   IElementType TILDA = new AvrAsmTokenType("TILDA");
-  IElementType XOR = new AvrAsmTokenType("XOR");
+  IElementType XOR_BIN = new AvrAsmTokenType("XOR_BIN");
 
   class Factory {
     public static PsiElement createElement(ASTNode node) {
       IElementType type = node.getElementType();
-      if (type == ARGUMENT) {
+      if (type == AND_EXPR) {
+        return new AvrAsmAndExprImpl(node);
+      }
+      else if (type == ARGUMENT) {
         return new AvrAsmArgumentImpl(node);
       }
       else if (type == BITWISE_EXPR) {
@@ -79,6 +92,9 @@ public interface AvrAsmTypes {
       }
       else if (type == CALL) {
         return new AvrAsmCallImpl(node);
+      }
+      else if (type == COMPARISON_EXPR) {
+        return new AvrAsmComparisonExprImpl(node);
       }
       else if (type == CONST) {
         return new AvrAsmConstImpl(node);
@@ -98,9 +114,6 @@ public interface AvrAsmTypes {
       else if (type == INSTRUCTION) {
         return new AvrAsmInstructionImpl(node);
       }
-      else if (type == LITERAL_EXPR) {
-        return new AvrAsmLiteralExprImpl(node);
-      }
       else if (type == MEMORY) {
         return new AvrAsmMemoryImpl(node);
       }
@@ -110,17 +123,17 @@ public interface AvrAsmTypes {
       else if (type == NUMBER) {
         return new AvrAsmNumberImpl(node);
       }
-      else if (type == PAREN_EXPR) {
-        return new AvrAsmParenExprImpl(node);
+      else if (type == OR_EXPR) {
+        return new AvrAsmOrExprImpl(node);
+      }
+      else if (type == PAREN) {
+        return new AvrAsmParenImpl(node);
       }
       else if (type == PLUS_EXPR) {
         return new AvrAsmPlusExprImpl(node);
       }
       else if (type == PREPROCESSOR) {
         return new AvrAsmPreprocessorImpl(node);
-      }
-      else if (type == REF_EXPR) {
-        return new AvrAsmRefExprImpl(node);
       }
       else if (type == SYMBOL) {
         return new AvrAsmSymbolImpl(node);

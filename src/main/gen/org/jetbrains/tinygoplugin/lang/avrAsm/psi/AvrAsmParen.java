@@ -5,7 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface AvrAsmParenExpr extends PsiElement {
+public interface AvrAsmParen extends PsiElement {
 
   @Nullable
   AvrAsmExpression getExpression();

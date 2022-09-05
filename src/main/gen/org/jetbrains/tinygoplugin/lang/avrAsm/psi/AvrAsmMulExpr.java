@@ -8,15 +8,15 @@ import com.intellij.psi.PsiElement;
 public interface AvrAsmMulExpr extends PsiElement {
 
   @NotNull
-  List<AvrAsmLiteralExpr> getLiteralExprList();
+  List<AvrAsmCall> getCallList();
 
   @Nullable
   AvrAsmMulExpr getMulExpr();
 
   @NotNull
-  List<AvrAsmParenExpr> getParenExprList();
+  List<AvrAsmNumber> getNumberList();
 
   @NotNull
-  List<AvrAsmRefExpr> getRefExprList();
+  List<AvrAsmSymbol> getSymbolList();
 
 }

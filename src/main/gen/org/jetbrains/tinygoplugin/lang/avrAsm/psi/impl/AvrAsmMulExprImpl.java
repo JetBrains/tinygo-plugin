@@ -29,8 +29,8 @@ public class AvrAsmMulExprImpl extends ASTWrapperPsiElement implements AvrAsmMul
 
   @Override
   @NotNull
-  public List<AvrAsmLiteralExpr> getLiteralExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmLiteralExpr.class);
+  public List<AvrAsmCall> getCallList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmCall.class);
   }
 
   @Override
@@ -41,14 +41,14 @@ public class AvrAsmMulExprImpl extends ASTWrapperPsiElement implements AvrAsmMul
 
   @Override
   @NotNull
-  public List<AvrAsmParenExpr> getParenExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmParenExpr.class);
+  public List<AvrAsmNumber> getNumberList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmNumber.class);
   }
 
   @Override
   @NotNull
-  public List<AvrAsmRefExpr> getRefExprList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmRefExpr.class);
+  public List<AvrAsmSymbol> getSymbolList() {
+    return PsiTreeUtil.getChildrenOfTypeAsList(this, AvrAsmSymbol.class);
   }
 
 }

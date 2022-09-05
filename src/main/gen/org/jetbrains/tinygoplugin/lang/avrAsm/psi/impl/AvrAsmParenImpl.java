@@ -11,14 +11,14 @@ import static org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmTypes.*;
 import com.intellij.extapi.psi.ASTWrapperPsiElement;
 import org.jetbrains.tinygoplugin.lang.avrAsm.psi.*;
 
-public class AvrAsmParenExprImpl extends ASTWrapperPsiElement implements AvrAsmParenExpr {
+public class AvrAsmParenImpl extends ASTWrapperPsiElement implements AvrAsmParen {
 
-  public AvrAsmParenExprImpl(@NotNull ASTNode node) {
+  public AvrAsmParenImpl(@NotNull ASTNode node) {
     super(node);
   }
 
   public void accept(@NotNull AvrAsmVisitor visitor) {
-    visitor.visitParenExpr(this);
+    visitor.visitParen(this);
   }
 
   @Override

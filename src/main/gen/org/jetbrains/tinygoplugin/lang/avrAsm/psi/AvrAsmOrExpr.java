@@ -5,10 +5,7 @@ import java.util.List;
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
-public interface AvrAsmExpression extends PsiElement {
-
-  @Nullable
-  AvrAsmAndExpr getAndExpr();
+public interface AvrAsmOrExpr extends PsiElement {
 
   @Nullable
   AvrAsmBitwiseExpr getBitwiseExpr();
@@ -16,17 +13,14 @@ public interface AvrAsmExpression extends PsiElement {
   @Nullable
   AvrAsmCall getCall();
 
-  @Nullable
-  AvrAsmComparisonExpr getComparisonExpr();
+  @NotNull
+  AvrAsmExpression getExpression();
 
   @Nullable
   AvrAsmMulExpr getMulExpr();
 
   @Nullable
   AvrAsmNumber getNumber();
-
-  @Nullable
-  AvrAsmOrExpr getOrExpr();
 
   @Nullable
   AvrAsmParen getParen();

@@ -11,18 +11,18 @@ public interface AvrAsmPlusExpr extends PsiElement {
   AvrAsmBitwiseExpr getBitwiseExpr();
 
   @NotNull
-  List<AvrAsmLiteralExpr> getLiteralExprList();
+  List<AvrAsmCall> getCallList();
 
   @NotNull
   List<AvrAsmMulExpr> getMulExprList();
 
   @NotNull
-  List<AvrAsmParenExpr> getParenExprList();
+  List<AvrAsmNumber> getNumberList();
 
   @Nullable
   AvrAsmPlusExpr getPlusExpr();
 
   @NotNull
-  List<AvrAsmRefExpr> getRefExprList();
+  List<AvrAsmSymbol> getSymbolList();
 
 }
