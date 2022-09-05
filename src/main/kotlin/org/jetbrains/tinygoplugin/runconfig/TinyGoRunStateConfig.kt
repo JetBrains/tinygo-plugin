@@ -43,6 +43,7 @@ open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configu
         return GoExecutor.`in`(configuration.project, null)
             .withExePath(tinyGoExecutablePath.path)
             .withParameters(arguments)
+            .withWorkDirectory(configuration.workingDirectory)
             .withPassParentEnvironment(configuration.isPassParentEnvironment)
             .withExtraEnvironment(configuration.customEnvironment)
     }
