@@ -50,7 +50,7 @@ class TinyGoFileEditorWithPreview private constructor(
             val editor = textEditorProvider.createEditor(project, file)
 
             return (editor as? TextEditor)?.let {
-                TinyGoFileEditorWithPreview(it, TinyGoPreviewEditor(project, target))
+                TinyGoFileEditorWithPreview(it, TinyGoPreviewEditor(project, editor.file.path, target))
             } ?: editor
         }
     }

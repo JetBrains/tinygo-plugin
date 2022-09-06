@@ -11,13 +11,13 @@ import org.jetbrains.builtInWebServer.BuiltInServerOptions
 import java.beans.PropertyChangeListener
 import javax.swing.JComponent
 
-class TinyGoPreviewEditor(val project: Project, target: String) : FileEditor, UserDataHolderBase() {
+class TinyGoPreviewEditor(val project: Project, filePath: String, target: String) : FileEditor, UserDataHolderBase() {
     companion object {
         private val webServerPort = service<BuiltInServerOptions>().effectiveBuiltInServerPort
     }
 
     private val previewUrl: String =
-        "http://localhost:$webServerPort/tinygo-preview?project=${project.basePath}&target=$target"
+        "http://localhost:$webServerPort/tinygo-preview?project=${project.basePath}&file=$filePath&target=$target"
 
     private val jcefPanel: JCEFHtmlPanel = JCEFHtmlPanel(previewUrl)
 

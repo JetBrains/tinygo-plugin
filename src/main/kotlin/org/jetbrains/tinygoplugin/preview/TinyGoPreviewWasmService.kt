@@ -8,25 +8,28 @@ import com.intellij.openapi.vfs.VirtualFile
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import java.io.File
 import java.nio.file.Files
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
+import java.util.concurrent.atomic.AtomicReference
 
 @Service
 internal class TinyGoPreviewWasmService(val project: Project) {
-    private val compiled = AtomicBoolean()
+    private val compilationStatus: ConcurrentMap<String, AtomicReference<CompilationStatus>> = ConcurrentHashMap()
 
-    private val outputFile: String =
-        GoUtil.getGoLandTempDirectory().toString() + "tinygo-temp-output-${project.locationHash}.wasm"
+    private fun getOutputFile(scratchFile: String): String =
+        GoUtil.getGoLandTempDirectory().toString() +
+            "tinygo-temp-output-${Integer.toHexString(scratchFile.hashCode())}.wasm"
 
     fun compileWasm(scratchFile: VirtualFile, onFinish: () -> Unit) {
-        compiled.set(false)
+        compilationStatus[scratchFile.path] = AtomicReference(CompilationStatus.InProgress)
 
         val tinyGoConfiguration = TinyGoConfiguration.getInstance(project)
-        val arguments = mutableListOf(
+        val arguments = listOf(
             "build",
             "-tags=${tinyGoConfiguration.targetPlatform}",
             "-opt=1",
             "-no-debug",
-            "-o=$outputFile",
+            "-o=${getOutputFile(scratchFile.path)}",
             scratchFile.canonicalPath!!
         )
         val executor = GoExecutor.`in`(project, null)
@@ -35,24 +38,36 @@ internal class TinyGoPreviewWasmService(val project: Project) {
 
         executor.executeWithProgress {
             if (it.status.ordinal == 0) {
-                compiled.set(true)
+                compilationStatus[scratchFile.path]!!.set(CompilationStatus.OK)
                 onFinish.invoke()
+            } else {
+                compilationStatus[scratchFile.path]!!.set(CompilationStatus.Failed)
             }
         }
     }
 
     companion object {
+        private enum class CompilationStatus {
+            OK,
+            Failed,
+            InProgress
+        }
+
         const val COMPILATION_WAIT_INTERVAL: Long = 100
     }
 
-    fun getWasm(): ByteArray {
-        while (!compiled.get()) {
+    fun getWasm(scratchFile: String): ByteArray? {
+        while (compilationStatus[scratchFile]?.get() == CompilationStatus.InProgress) {
             Thread.sleep(COMPILATION_WAIT_INTERVAL)
         }
-        return File(outputFile).readBytes()
+        return if (compilationStatus[scratchFile]?.get() == CompilationStatus.OK) {
+            File(getOutputFile(scratchFile)).readBytes()
+        } else null
     }
 
     fun disposeWasm() {
-        Files.deleteIfExists(File(outputFile).toPath())
+        compilationStatus.keys.forEach {
+            Files.deleteIfExists(File(it).toPath())
+        }
     }
 }

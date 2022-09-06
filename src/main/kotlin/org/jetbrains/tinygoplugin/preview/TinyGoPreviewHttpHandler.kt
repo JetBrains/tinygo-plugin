@@ -33,12 +33,16 @@ class TinyGoPreviewHttpHandler : HttpRequestHandler() {
         request: FullHttpRequest,
         context: ChannelHandlerContext
     ): Boolean {
-        if ("project" !in urlDecoder.parameters().keys || "target" !in urlDecoder.parameters().keys)
-            return false
+        if ("project" !in urlDecoder.parameters().keys ||
+            "file" !in urlDecoder.parameters().keys ||
+            "target" !in urlDecoder.parameters().keys
+        ) return false
         val projectPath = urlDecoder.parameters()["project"]!!.first()
+        val filePath = urlDecoder.parameters()["file"]!!.first()
         val target = urlDecoder.parameters()["target"]!!.first()
         val indexHtml = getResource("/tinygo-preview/index.html")?.readText()
             ?.replace("{PROJECT_PATH}", projectPath)
+            ?.replace("{FILE_PATH}", filePath)
             ?.replace("{TARGET_NAME}", target)
             ?.encodeToByteArray()
             ?: return false
@@ -50,11 +54,13 @@ class TinyGoPreviewHttpHandler : HttpRequestHandler() {
         request: FullHttpRequest,
         context: ChannelHandlerContext
     ): Boolean {
-        val projectPath = urlDecoder.parameters()["project"]?.firstOrNull() ?: return false
+        if ("project" !in urlDecoder.parameters().keys ||
+            "file" !in urlDecoder.parameters().keys
+        ) return false
+        val filePath = urlDecoder.parameters()["file"]!!.first()
+        val projectPath = urlDecoder.parameters()["project"]!!.first()
         val project = ProjectManager.getInstance().openProjects.firstOrNull { it.basePath == projectPath }
-
-        @Suppress("ForbiddenComment")
-        val wasm = project?.service<TinyGoPreviewWasmService>()?.getWasm() ?: return false
+        val wasm = project?.service<TinyGoPreviewWasmService>()?.getWasm(filePath) ?: return false
         return sendData(wasm, "module.wasm", request, context.channel(), EmptyHttpHeaders.INSTANCE)
     }
 

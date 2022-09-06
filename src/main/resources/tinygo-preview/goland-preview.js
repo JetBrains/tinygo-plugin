@@ -36,12 +36,17 @@ async function run() {
     await schematic.refresh();
 
     let projectPath = document.querySelector('#projectPath').value;
+    let filePath = document.querySelector('#filePath').value;
+    const url = '/tinygo-preview/wasm?project=' + projectPath + '&file=' + filePath;
+    const request = { url: url, method: 'GET' }
+
+    if ((await fetch(url, request)).status === 404) {
+        return;
+    }
+
     let message = {
         type: 'start',
-        fetch: {
-            url: '/tinygo-preview/wasm?project=' + projectPath,
-            method: 'GET',
-        },
+        fetch: request,
         config: schematic.configForWorker(),
     }
     worker = new Worker('playground/worker/webworker.js');
