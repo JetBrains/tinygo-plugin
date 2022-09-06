@@ -21,11 +21,13 @@ import com.intellij.openapi.fileTypes.FileTypeRegistry
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.ui.jcef.JBCefApp
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 
 class TinyGoPreviewFileEditorProvider : FileEditorProvider, DumbAware {
     override fun accept(project: Project, file: VirtualFile): Boolean {
+        if (!JBCefApp.isSupported()) return false
         val isGoFile = FileTypeRegistry.getInstance().isFileOfType(file, GoFileType.INSTANCE)
         val tinyGoEnabled = TinyGoConfiguration.getInstance(project).enabled
         val isScratch = ScratchUtil.isScratch(file)
