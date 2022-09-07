@@ -1,0 +1,9 @@
+targets:
+  - arduino
+  - arduino-nano33
+  - circuitplay-bluefruit
+  - circuitplay-express
+  - hifive1b
+  - microbit
+  - pinetime-devkit0
+  - reelboard

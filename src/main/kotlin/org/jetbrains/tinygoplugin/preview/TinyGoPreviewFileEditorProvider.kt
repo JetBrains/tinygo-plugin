@@ -10,6 +10,7 @@ import com.intellij.openapi.actionSystem.ActionToolbar
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileEditor.FileEditor
 import com.intellij.openapi.fileEditor.FileEditorPolicy
@@ -24,14 +25,17 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.jcef.JBCefApp
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.yaml.snakeyaml.Yaml
 
 class TinyGoPreviewFileEditorProvider : FileEditorProvider, DumbAware {
     override fun accept(project: Project, file: VirtualFile): Boolean {
         if (!JBCefApp.isSupported()) return false
         val isGoFile = FileTypeRegistry.getInstance().isFileOfType(file, GoFileType.INSTANCE)
-        val tinyGoEnabled = TinyGoConfiguration.getInstance(project).enabled
+        val tinyGoConfiguration = TinyGoConfiguration.getInstance(project)
+        val tinyGoEnabled = tinyGoConfiguration.enabled
+        val targetSupported = tinyGoConfiguration.targetPlatform in service<PreviewTargetsProvider>().supportedTargets
         val isScratch = ScratchUtil.isScratch(file)
-        return isGoFile && tinyGoEnabled && isScratch
+        return isGoFile && tinyGoEnabled && targetSupported && isScratch
     }
 
     override fun createEditor(project: Project, file: VirtualFile): FileEditor =
@@ -90,4 +94,17 @@ class TinyGoPreviewRunAction(private val manager: TinyGoPreviewManager) :
             manager.refreshJcef()
         }
     }
+}
+
+@Service
+private class PreviewTargetsProvider {
+    val supportedTargets: Set<String>
+        get() {
+            val stream = this.javaClass.classLoader.getResourceAsStream("tinygo-preview/supportedTargets.yaml")
+                ?: error("Cannot load a list of supported targets for TinyGo Preview")
+            val data: Map<String, Any> = Yaml().load(stream)
+            val targets = data["targets"]
+            if (targets !is Collection<*>) return emptySet()
+            return targets.filterIsInstance<String>().toSet()
+        }
 }
