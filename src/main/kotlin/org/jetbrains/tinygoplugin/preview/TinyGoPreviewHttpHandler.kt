@@ -40,12 +40,13 @@ class TinyGoPreviewHttpHandler : HttpRequestHandler() {
         val projectPath = urlDecoder.parameters()["project"]!!.first()
         val filePath = urlDecoder.parameters()["file"]!!.first()
         val target = urlDecoder.parameters()["target"]!!.first()
-        val indexHtml = getResource("/tinygo-preview/index.html")?.readText()
-            ?.replace("{PROJECT_PATH}", projectPath)
-            ?.replace("{FILE_PATH}", filePath)
-            ?.replace("{TARGET_NAME}", target)
-            ?.encodeToByteArray()
-            ?: return false
+        val indexHtmlResource = getResource("/tinygo-preview/index.html")
+            ?: error("tinygo-preview/index.html resource not found!")
+        val indexHtml = indexHtmlResource.readText()
+            .replace("{PROJECT_PATH}", projectPath)
+            .replace("{FILE_PATH}", filePath)
+            .replace("{TARGET_NAME}", target)
+            .encodeToByteArray()
         return sendData(indexHtml, "index.html", request, context.channel(), EmptyHttpHeaders.INSTANCE)
     }
 
@@ -70,9 +71,10 @@ class TinyGoPreviewHttpHandler : HttpRequestHandler() {
         context: ChannelHandlerContext
     ): Boolean {
         val truePath = urlDecoder.path().removePrefix("/tinygo-preview")
-        val hypertext = getResource("/tinygo-preview/$truePath")?.readBytes()
-            ?: getResource("/tinygo-preview/playground/$truePath")?.readBytes()
-            ?: return false
+        val hypertextResource = getResource("/tinygo-preview/$truePath")
+            ?: getResource("/tinygo-preview/playground/$truePath")
+            ?: error("Neither /tinygo-preview/$truePath nor /tinygo-preview/playground/$truePath resources found!")
+        val hypertext = hypertextResource.readBytes()
         return sendData(hypertext, truePath, request, context.channel(), EmptyHttpHeaders.INSTANCE)
     }
 
