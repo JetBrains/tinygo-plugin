@@ -1,7 +1,7 @@
 package org.jetbrains.tinygoplugin.heapAllocations.toolWindow
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -45,7 +45,7 @@ class TinyGoHeapAllocsViewManager(val project: Project) {
     }
 
     private fun activateToolWindow(heapAllocsView: TinyGoHeapAllocsWindow) {
-        ApplicationManager.getApplication().invokeLater {
+        invokeLater {
             val toolWindow: ToolWindow = project.service<ToolWindowManager>()
                 .getToolWindow(TINYGO_HEAP_ALLOC_TOOLWINDOW_ID)
                 ?: return@invokeLater

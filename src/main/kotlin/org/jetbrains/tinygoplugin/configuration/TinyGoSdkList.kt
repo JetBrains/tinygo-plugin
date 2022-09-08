@@ -1,6 +1,5 @@
 package org.jetbrains.tinygoplugin.configuration
 
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
@@ -30,10 +29,6 @@ data class TinyGoSdkListStorage(
 @State(name = "TinyGoSdkList", storages = [Storage("tinygo.sdk.xml")])
 @Service(Service.Level.APP)
 class TinyGoSdkList : PersistentStateComponent<TinyGoSdkListStorage> {
-    companion object {
-        fun getInstance(): TinyGoSdkList = ApplicationManager.getApplication().getService(TinyGoSdkList::class.java)
-    }
-
     internal var storedSdks = TinyGoSdkListStorage()
 
     @Transient

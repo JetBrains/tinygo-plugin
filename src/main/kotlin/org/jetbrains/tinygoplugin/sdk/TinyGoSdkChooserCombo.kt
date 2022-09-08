@@ -8,6 +8,7 @@ import com.goide.sdk.download.GoDownloadSdkAction
 import com.goide.sdk.download.GoSdkDownloaderDialog
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
@@ -39,7 +40,7 @@ class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkD
         }
         val result = TinyGoDownloadingSdk(version, path)
         logger.debug("Download of TinyGo SDK requested")
-        TinyGoDownloadSdkService.getInstance().downloadTinyGoSdk(result, onFinish)
+        service<TinyGoDownloadSdkService>().downloadTinyGoSdk(result, onFinish)
         return result
     }
 
@@ -112,10 +113,10 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
         ) { selectedFile ->
             val sdk = TinyGoSdk(selectedFile.url, null)
             if (sdk.isValid) {
-                val project = e.project ?: DefaultProjectFactory.getInstance().defaultProject
+                val project = e.project ?: service<DefaultProjectFactory>().defaultProject
                 sdk.computeVersion(project) {
                     combo.addSdk(sdk, true)
-                    TinyGoSdkList.getInstance().addSdk(sdk)
+                    service<TinyGoSdkList>().addSdk(sdk)
                 }
                 logger.debug("Selected local TinyGo SDK is valid")
             } else {
@@ -134,8 +135,8 @@ class TinyGoSdkChooserCombo :
     GoBasedSdkChooserCombo<TinyGoSdk>(
         object : GoSdkListProvider<TinyGoSdk> {
             override fun getAllKnownSdks(): MutableList<TinyGoSdk> {
-                val loadedSdks = TinyGoSdkList.getInstance().loadedSdks.toList()
-                val downloadingSdks = TinyGoDownloadSdkService.getInstance().downloadingTinyGoSdks.toList()
+                val loadedSdks = service<TinyGoSdkList>().loadedSdks.toList()
+                val downloadingSdks = service<TinyGoDownloadSdkService>().downloadingTinyGoSdks.toList()
                 return (loadedSdks + downloadingSdks).toMutableList()
             }
 

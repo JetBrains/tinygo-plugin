@@ -9,6 +9,7 @@ import com.goide.util.GoUtil
 import com.intellij.execution.lineMarker.ExecutorAction
 import com.intellij.execution.lineMarker.RunLineMarkerContributor.Info
 import com.intellij.lang.injection.InjectedLanguageManager
+import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
@@ -20,7 +21,7 @@ interface TinyGoFunctionRunLineMarkerContributor {
         if (e.node.elementType === GoTypes.IDENTIFIER) {
             val parent = e.parent
             val file = e.containingFile
-            if (InjectedLanguageManager.getInstance(e.project).isInjectedFragment(file)) {
+            if (e.project.service<InjectedLanguageManager>().isInjectedFragment(file)) {
                 return null
             }
             val settings = TinyGoConfiguration.getInstance(e.project)

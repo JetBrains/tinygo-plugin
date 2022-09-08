@@ -5,6 +5,7 @@ import com.goide.psi.impl.GoPsiImplUtil
 import com.goide.psi.impl.imports.GoImportReference
 import com.goide.psi.impl.imports.GoImportResolver
 import com.goide.util.GoUtil
+import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolder
@@ -38,7 +39,7 @@ class TinyGoImportResolver : GoImportResolver {
         val importPath = extractImportPath(reference)
         val resolveResult = innerResolve(importPath, project, module)
         return resolveResult?.asSequence()?.map { it.directories }?.flatten()?.filterNotNull()
-            ?.mapNotNull { PsiManager.getInstance(project).findDirectory(it) }
+            ?.mapNotNull { project.service<PsiManager>().findDirectory(it) }
             ?.map { PsiElementResolveResult(it) }?.toList()?.toTypedArray()
     }
 
@@ -54,7 +55,7 @@ class TinyGoImportResolver : GoImportResolver {
         val tinyGoCachedGoRootSrc = tinyGoCachedGoRoot.srcDir
         val importFile = tinyGoCachedGoRootSrc?.findFileByRelativePath(importPath)
         return if (importFile != null) {
-            GoPackage.`in`(PsiManager.getInstance(project).findDirectory(importFile), module)
+            GoPackage.`in`(project.service<PsiManager>().findDirectory(importFile), module)
         } else {
             null
         }

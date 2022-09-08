@@ -8,9 +8,10 @@ import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -40,10 +41,7 @@ import java.util.function.Consumer
 @Suppress("NestedBlockDepth")
 class TinyGoDownloadSdkService private constructor() {
     companion object {
-        val logger: Logger = Logger.getInstance(TinyGoDownloadSdkService::class.java)
-
-        fun getInstance(): TinyGoDownloadSdkService =
-            ApplicationManager.getApplication().getService(TinyGoDownloadSdkService::class.java)
+        val logger: Logger = logger<TinyGoDownloadSdkService>()
     }
 
     val downloadingTinyGoSdks: MutableSet<TinyGoDownloadingSdk> = mutableSetOf()
@@ -82,7 +80,7 @@ class TinyGoDownloadSdkService private constructor() {
                     logger.debug("Converting of downloading SDK to local failed")
                     return
                 }
-                TinyGoSdkList.getInstance().addSdk(localSdk)
+                service<TinyGoSdkList>().addSdk(localSdk)
                 logger.debug("Added downloaded TinyGo SDK to the list of local SDKs")
                 sdk.isDownloaded = true
                 synchronized(lock) {

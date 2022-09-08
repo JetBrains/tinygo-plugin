@@ -2,7 +2,7 @@ package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoModuleSettings
 import com.intellij.execution.RunManager
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.ShowSettingsUtil
@@ -13,7 +13,7 @@ import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfiguration
 
 fun editTinyGoSettingsLater(project: Project, afterSettingsApply: () -> Unit = {}) {
-    ApplicationManager.getApplication().invokeLater {
+    invokeLater {
         if (service<ShowSettingsUtil>().editConfigurable(project, TinyGoSettingsService(project))) {
             afterSettingsApply.invoke()
         }

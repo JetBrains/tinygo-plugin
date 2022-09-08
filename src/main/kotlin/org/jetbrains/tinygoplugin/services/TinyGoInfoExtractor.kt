@@ -8,6 +8,7 @@ import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
@@ -95,7 +96,7 @@ class TinyGoExecutable(private val project: Project) {
 @Service
 class TinyGoInfoExtractor(private val project: Project) {
     companion object {
-        val logger: Logger = Logger.getInstance(TinyGoInfoExtractor::class.java)
+        val logger: Logger = logger<TinyGoInfoExtractor>()
     }
 
     private val executor = TinyGoExecutable(project)
@@ -109,7 +110,7 @@ class TinyGoInfoExtractor(private val project: Project) {
         failureListener: TinyGoExtractionFailureListener? = null,
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
-        val currentGoSdk = GoSdkService.getInstance(project).getSdk(null)
+        val currentGoSdk = project.service<GoSdkService>().getSdk(null)
         if (currentGoSdk == GoSdk.NULL) {
             notifyTinyGoNotConfigured(
                 project,

@@ -60,7 +60,7 @@ class TinyGoPreviewHttpHandler : HttpRequestHandler() {
         ) return false
         val filePath = urlDecoder.parameters()["file"]!!.first()
         val projectPath = urlDecoder.parameters()["project"]!!.first()
-        val project = ProjectManager.getInstance().openProjects.firstOrNull { it.basePath == projectPath }
+        val project = service<ProjectManager>().openProjects.firstOrNull { it.basePath == projectPath }
         val wasm = project?.service<TinyGoPreviewWasmService>()?.getWasm(filePath) ?: return false
         return sendData(wasm, "module.wasm", request, context.channel(), EmptyHttpHeaders.INSTANCE)
     }

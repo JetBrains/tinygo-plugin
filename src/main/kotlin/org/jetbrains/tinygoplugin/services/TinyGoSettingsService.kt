@@ -3,6 +3,7 @@ package org.jetbrains.tinygoplugin.services
 import com.goide.project.GoModuleSettings
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
@@ -102,7 +103,7 @@ class TinyGoConfigurationWithTagUpdate(
 class TinyGoSettingsService(private val project: Project) :
     BoundConfigurable("TinyGo"), ConfigurationProvider<TinyGoConfiguration> {
     companion object {
-        val logger: Logger = Logger.getInstance(TinyGoSettingsService::class.java)
+        val logger: Logger = logger<TinyGoSettingsService>()
     }
 
     // local copy of the settings

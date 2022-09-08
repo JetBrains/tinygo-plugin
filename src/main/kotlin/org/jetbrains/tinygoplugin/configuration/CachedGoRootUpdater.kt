@@ -6,13 +6,12 @@ import com.goide.project.GoModuleSettings
 import com.goide.sdk.GoSdk
 import com.goide.sdk.GoSdkService
 import com.goide.util.GoUtil
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.EmptyRunnable
+import com.intellij.util.application
 import com.intellij.util.messages.MessageBus
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
@@ -60,10 +59,10 @@ class CachedGoRootInvalidator(private val project: Project) : TinyGoExtractionFa
 
 private fun updateExtLibrariesAndCleanCache(project: Project) {
     if (!project.isDisposed) {
-        ApplicationManager.getApplication().assertIsDispatchThread()
-        GoSdkService.getInstance(project).incModificationCount()
+        application.assertIsDispatchThread()
+        project.service<GoSdkService>().incModificationCount()
         GoUtil.cleanResolveCache(project)
-        GoLibrariesUtil.updateLibraries(project, EmptyRunnable.getInstance(), null)
+        GoLibrariesUtil.updateLibraries(project, { }, null)
     }
 }
 
