@@ -17,14 +17,13 @@ asmFile ::= (preprocessor | LABEL | instruction | directive | LINE_COMMENT | BLO
 
 preprocessor ::= MACROS_NAME | (PREPROCESSOR_NAME (expression)*) {recoverWhile=recovery}
 
-directive                 ::= (set_directive | equ_directive | def_directive | db_directive | report_directive | generic_directive) {recoverWhile=recovery}
+directive                 ::= (set_directive | equ_directive | def_directive | report_directive | generic_directive) {recoverWhile=recovery}
 private generic_directive ::= GENERIC_DIRECTIVE (<<list_of expression>> | EQUAL expression)?
 private set_directive     ::= SET_DIRECTIVE variable EQUAL expression
 variable                  ::= symbol
 private equ_directive     ::= EQU_DIRECTIVE const EQUAL expression
 const                     ::= symbol
 private def_directive     ::= DEF_DIRECTIVE symbol EQUAL REGISTER
-private db_directive      ::= DB_DIRECTIVE <<list_of (expression | STRING)>>
 private report_directive  ::= REPORT_DIRECTIVE STRING
 
 instruction ::= (branch_instruction | generic_instruction) {recoverWhile=recovery}
@@ -52,7 +51,7 @@ private factor ::= primary mul_expr*
 left mul_expr ::= (STAR | DIVISION) primary
 left plus_expr ::= (PLUS | MINUS) factor
 left bitwise_expr ::= (SHIFT_LEFT | SHIFT_RIGHT) factor
-private primary ::= PC | call | symbol | number
+private primary ::= PC | call | symbol | number | STRING
 
 
 memory           ::= REGISTER | indirect_postfix | indirect_prefix | INDIRECT

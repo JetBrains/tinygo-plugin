@@ -50,7 +50,6 @@ REGISTER = r{DEC_DIGIT}+ | R{DEC_DIGIT}+
 <YYINITIAL> (".set"|".SET")                                 { yybegin(IN_OPERANDS);       return AvrAsmTypes.SET_DIRECTIVE; }
 <YYINITIAL> (".equ"|".EQU")                                 { yybegin(IN_OPERANDS);       return AvrAsmTypes.EQU_DIRECTIVE; }
 <YYINITIAL> (".def"|".DEF")                                 { yybegin(IN_OPERANDS);       return AvrAsmTypes.DEF_DIRECTIVE; }
-<YYINITIAL> (".db"|".DB")                                   { yybegin(IN_OPERANDS);       return AvrAsmTypes.DB_DIRECTIVE; }
 <YYINITIAL> (".message"|".MESSAGE")                         { yybegin(IN_OPERANDS);       return AvrAsmTypes.REPORT_DIRECTIVE; }
 <YYINITIAL> (".warning"|".WARNING")                         { yybegin(IN_OPERANDS);       return AvrAsmTypes.REPORT_DIRECTIVE; }
 <YYINITIAL> (".error"|".ERROR")                             { yybegin(IN_OPERANDS);       return AvrAsmTypes.REPORT_DIRECTIVE; }

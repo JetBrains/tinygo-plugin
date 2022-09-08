@@ -254,28 +254,6 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // DB_DIRECTIVE <<list_of (expression | STRING)>>
-  static boolean db_directive(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "db_directive")) return false;
-    if (!nextTokenIs(b, DB_DIRECTIVE)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, DB_DIRECTIVE);
-    r = r && list_of(b, l + 1, AvrAsmParser::db_directive_1_0);
-    exit_section_(b, m, null, r);
-    return r;
-  }
-
-  // expression | STRING
-  private static boolean db_directive_1_0(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "db_directive_1_0")) return false;
-    boolean r;
-    r = expression(b, l + 1);
-    if (!r) r = consumeToken(b, STRING);
-    return r;
-  }
-
-  /* ********************************************************** */
   // DEF_DIRECTIVE symbol EQUAL REGISTER
   static boolean def_directive(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "def_directive")) return false;
@@ -313,7 +291,7 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // set_directive | equ_directive | def_directive | db_directive | report_directive | generic_directive
+  // set_directive | equ_directive | def_directive | report_directive | generic_directive
   public static boolean directive(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "directive")) return false;
     boolean r;
@@ -321,7 +299,6 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
     r = set_directive(b, l + 1);
     if (!r) r = equ_directive(b, l + 1);
     if (!r) r = def_directive(b, l + 1);
-    if (!r) r = db_directive(b, l + 1);
     if (!r) r = report_directive(b, l + 1);
     if (!r) r = generic_directive(b, l + 1);
     exit_section_(b, l, m, r, false, AvrAsmParser::recovery);
@@ -822,7 +799,7 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // PC | call | symbol | number
+  // PC | call | symbol | number | STRING
   static boolean primary(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "primary")) return false;
     boolean r;
@@ -830,6 +807,7 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
     if (!r) r = call(b, l + 1);
     if (!r) r = symbol(b, l + 1);
     if (!r) r = number(b, l + 1);
+    if (!r) r = consumeToken(b, STRING);
     return r;
   }
 
