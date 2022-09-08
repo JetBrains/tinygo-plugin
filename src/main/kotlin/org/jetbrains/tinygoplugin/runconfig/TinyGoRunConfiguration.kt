@@ -17,7 +17,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationEditor.PathKind
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
@@ -52,7 +52,7 @@ open class TinyGoRunConfiguration(
         get() = runConfig
 
     val executable: VirtualFile?
-        get() = TinyGoConfiguration.getInstance(project).sdk.executable
+        get() = project.tinyGoConfiguration().sdk.executable
 
     init {
         val tinyGoSettings = ConfigurationWithHistory(project)
@@ -137,7 +137,7 @@ class TinyGoHeapAllocRunConfiguration(project: Project, factory: ConfigurationFa
     override fun checkConfiguration() {
         super.checkConfiguration()
 
-        val sdk = TinyGoConfiguration.getInstance(project).sdk
+        val sdk = project.tinyGoConfiguration().sdk
         if (sdk.sdkVersion.isLessThan(TINYGO_PRINT_HEAP_ALLOCS_MIN_VER)) {
             throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_HEAP_ALLOCS_OUTDATED_COMPILER))
         }

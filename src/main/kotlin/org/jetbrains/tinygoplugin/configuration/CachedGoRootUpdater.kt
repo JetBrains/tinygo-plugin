@@ -27,7 +27,7 @@ internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
         logger.debug("cached GOROOT update signal caught")
 
         val project = module.project
-        val settings = TinyGoConfiguration.getInstance(project)
+        val settings = project.tinyGoConfiguration()
         if (!settings.enabled) return
 
         val tinyGoSettings: TinyGoConfiguration = ConfigurationWithHistory(project)
@@ -50,7 +50,7 @@ interface TinyGoExtractionFailureListener : EventListener {
 
 class CachedGoRootInvalidator(private val project: Project) : TinyGoExtractionFailureListener {
     override fun onExtractionFailure() {
-        val tinyGoSettings = TinyGoConfiguration.getInstance(project)
+        val tinyGoSettings = project.tinyGoConfiguration()
         tinyGoSettings.cachedGoRoot = GoSdk.NULL
         tinyGoSettings.saveState(project)
         updateExtLibrariesAndCleanCache(project)

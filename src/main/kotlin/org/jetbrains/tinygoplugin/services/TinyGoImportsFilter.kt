@@ -5,7 +5,7 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
 import org.jetbrains.tinygoplugin.sdk.unknownVersion
 import org.yaml.snakeyaml.Yaml
@@ -28,7 +28,7 @@ class UnsupportedPackageProvider(private val project: Project) {
 
     private val unsupportedLibrariesCache: ConcurrentMap<TinyGoSdkVersion, Set<String>> = ConcurrentHashMap()
     fun unsupportedLibraries(): Set<String> {
-        val settings = TinyGoConfiguration.getInstance(project)
+        val settings = project.tinyGoConfiguration()
         val version = settings.sdk.sdkVersion
         if (version == unknownVersion) {
             return emptySet()

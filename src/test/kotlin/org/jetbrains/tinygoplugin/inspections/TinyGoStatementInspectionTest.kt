@@ -2,7 +2,7 @@ package org.jetbrains.tinygoplugin.inspections
 
 import com.goide.GoCodeInsightFixtureTestCase
 import org.jetbrains.tinygoplugin.configuration.Scheduler
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.testFramework.setupTinyGo
 
 internal class TinyGoStatementInspectionTest : GoCodeInsightFixtureTestCase() {
@@ -16,7 +16,7 @@ internal class TinyGoStatementInspectionTest : GoCodeInsightFixtureTestCase() {
 
     private fun prepareTinyGoScheduler(scheduler: Scheduler) {
         val project = myFixture.project
-        val tinyGoSettings = TinyGoConfiguration.getInstance(project)
+        val tinyGoSettings = project.tinyGoConfiguration()
         tinyGoSettings.scheduler = scheduler
         tinyGoSettings.saveState(project)
     }

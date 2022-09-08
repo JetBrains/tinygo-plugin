@@ -3,20 +3,20 @@ package org.jetbrains.tinygoplugin.liveTemplates
 import com.goide.psi.GoFile
 import com.intellij.codeInsight.template.TemplateActionContext
 import com.intellij.codeInsight.template.TemplateContextType
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 
 abstract class TinyGoAsmContext(id: String, presentableName: String) : TemplateContextType(id, presentableName) {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val file = templateActionContext.file
         val project = file.project
-        return file is GoFile && TinyGoConfiguration.getInstance(project).enabled
+        return file is GoFile && project.tinyGoConfiguration().enabled
     }
 }
 
 class TinyGoAsmAvr : TinyGoAsmContext("TINYGOAVR", "TinyGo AVR") {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val project = templateActionContext.file.project
-        val goTags = TinyGoConfiguration.getInstance(project).goTags.split(" ")
+        val goTags = project.tinyGoConfiguration().goTags.split(" ")
         return super.isInContext(templateActionContext) && goTags.contains("avr")
     }
 }
@@ -24,7 +24,7 @@ class TinyGoAsmAvr : TinyGoAsmContext("TINYGOAVR", "TinyGo AVR") {
 class TinyGoAsmArm : TinyGoAsmContext("TINYGOARM", "TinyGo ARM") {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val project = templateActionContext.file.project
-        val goTags = TinyGoConfiguration.getInstance(project).goTags.split(" ")
+        val goTags = project.tinyGoConfiguration().goTags.split(" ")
 
         val notArm32BitDevices = setOf("avr", "arm64", "kendryte")
 
@@ -36,7 +36,7 @@ class TinyGoAsmArm : TinyGoAsmContext("TINYGOARM", "TinyGo ARM") {
 class TinyGoAsmArm64 : TinyGoAsmContext("TINYGOARM64", "TinyGo ARM64") {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val project = templateActionContext.file.project
-        val goTags = TinyGoConfiguration.getInstance(project).goTags.split(" ")
+        val goTags = project.tinyGoConfiguration().goTags.split(" ")
         return super.isInContext(templateActionContext) && goTags.contains("arm64")
     }
 }

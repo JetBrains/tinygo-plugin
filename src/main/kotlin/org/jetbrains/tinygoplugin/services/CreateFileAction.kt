@@ -15,7 +15,7 @@ import com.intellij.psi.PsiDirectory
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import org.jetbrains.tinygoplugin.TinyGoBundle.message
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.nullSdk
@@ -41,7 +41,7 @@ class CreateFileAction :
     private val mainFilesInDirs: MutableMap<VirtualFile, String> = hashMapOf()
 
     override fun buildDialog(project: Project, directory: PsiDirectory, builder: CreateFileFromTemplateDialog.Builder) {
-        val tinyGoSettings = TinyGoConfiguration.getInstance(project)
+        val tinyGoSettings = project.tinyGoConfiguration()
         if (tinyGoSettings.sdk != nullSdk) {
             if (!tinyGoSettings.sdk.isValid) {
                 Messages.showErrorDialog(
@@ -104,7 +104,7 @@ class CreateFileAction :
     @Suppress("ReturnCount")
     override fun createFile(name: String?, templateName: String?, dir: PsiDirectory?): PsiFile? {
         val project = dir?.project ?: return null
-        val sdkPath = TinyGoConfiguration.getInstance(project).sdk.sdkRoot ?: return null
+        val sdkPath = project.tinyGoConfiguration().sdk.sdkRoot ?: return null
         val examples = VfsUtil.findRelativeFile(sdkPath, "src", "examples")
         if (templateName == null || templateName.isEmpty()) {
             return null

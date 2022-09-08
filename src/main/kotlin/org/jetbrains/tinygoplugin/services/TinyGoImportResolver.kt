@@ -13,7 +13,7 @@ import com.intellij.psi.PsiElementResolveResult
 import com.intellij.psi.PsiManager
 import com.intellij.psi.ResolveResult
 import com.intellij.psi.ResolveState
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 
 class TinyGoImportResolver : GoImportResolver {
     override fun resolve(
@@ -22,7 +22,7 @@ class TinyGoImportResolver : GoImportResolver {
         module: Module?,
         resolveState: ResolveState?,
     ): Collection<GoPackage>? {
-        if (!TinyGoConfiguration.getInstance(project).enabled) {
+        if (!project.tinyGoConfiguration().enabled) {
             return null
         }
         return innerResolve(importPath, project, module)
@@ -31,7 +31,7 @@ class TinyGoImportResolver : GoImportResolver {
     override fun resolve(reference: GoImportReference): Array<ResolveResult>? {
         val element = reference.element
         val project = element.project
-        if (!TinyGoConfiguration.getInstance(project).enabled) {
+        if (!project.tinyGoConfiguration().enabled) {
             return null
         }
         val module = GoUtil.module(element)
@@ -51,7 +51,7 @@ class TinyGoImportResolver : GoImportResolver {
         if (importPath.isEmpty()) {
             return emptyList()
         }
-        val tinyGoCachedGoRoot = TinyGoConfiguration.getInstance(project).cachedGoRoot
+        val tinyGoCachedGoRoot = project.tinyGoConfiguration().cachedGoRoot
         val tinyGoCachedGoRootSrc = tinyGoCachedGoRoot.srcDir
         val importFile = tinyGoCachedGoRootSrc?.findFileByRelativePath(importPath)
         return if (importFile != null) {

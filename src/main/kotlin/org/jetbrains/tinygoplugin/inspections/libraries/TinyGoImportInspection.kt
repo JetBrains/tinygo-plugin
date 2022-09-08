@@ -21,7 +21,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.ResolveState
 import org.jetbrains.tinygoplugin.TinyGoBundle
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.inspections.inspectionMessage
 import org.jetbrains.tinygoplugin.runconfig.isTestGoFile
 import org.jetbrains.tinygoplugin.services.UnsupportedPackageProvider
@@ -91,7 +91,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
         return object : GoVisitor() {
             override fun visitReferenceExpression(reference: GoReferenceExpression) {
                 super.visitReferenceExpression(reference)
-                if (!TinyGoConfiguration.getInstance(reference.project).enabled || !customContextPredicate(reference)) {
+                if (!reference.project.tinyGoConfiguration().enabled || !customContextPredicate(reference)) {
                     return
                 }
                 val target = reference.resolve()
@@ -114,7 +114,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
                 super.visitImportSpec(import)
                 val importConditions = import.isCImport || import.isBlank
                 val tinyGoContextConditions =
-                    !TinyGoConfiguration.getInstance(import.project).enabled || !customContextPredicate(import)
+                    !import.project.tinyGoConfiguration().enabled || !customContextPredicate(import)
                 if (importConditions || tinyGoContextConditions) {
                     return
                 }
@@ -147,7 +147,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
 
             override fun visitType(type: GoType) {
                 super.visitType(type)
-                if (!TinyGoConfiguration.getInstance(type.project).enabled || !customContextPredicate(type)) {
+                if (!project.tinyGoConfiguration().enabled || !customContextPredicate(type)) {
                     return
                 }
                 val resolvedType = unwrapPointerTypeIfNeeded(type) ?: return
@@ -223,7 +223,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
             private fun tryToFindImportPathAlt(file: GoFile): String? {
                 val pkg = GoPackage.of(file)
                 val dir = pkg?.directories?.first() ?: return null
-                val goRoot = TinyGoConfiguration.getInstance(holder.manager.project).cachedGoRoot.sdkRoot ?: return null
+                val goRoot = holder.manager.project.tinyGoConfiguration().cachedGoRoot.sdkRoot ?: return null
                 return if (VfsUtil.isAncestor(goRoot, dir, false)) {
                     dir.toString().removePrefix("$goRoot/src/")
                 } else null

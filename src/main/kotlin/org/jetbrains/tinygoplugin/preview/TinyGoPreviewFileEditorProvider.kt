@@ -24,14 +24,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.jcef.JBCefApp
 import org.jetbrains.tinygoplugin.TinyGoBundle
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.yaml.snakeyaml.Yaml
 
 class TinyGoPreviewFileEditorProvider : FileEditorProvider, DumbAware {
     override fun accept(project: Project, file: VirtualFile): Boolean {
         if (!JBCefApp.isSupported()) return false
         val isGoFile = FileTypeRegistry.getInstance().isFileOfType(file, GoFileType.INSTANCE)
-        val tinyGoConfiguration = TinyGoConfiguration.getInstance(project)
+        val tinyGoConfiguration = project.tinyGoConfiguration()
         val tinyGoEnabled = tinyGoConfiguration.enabled
         val targetSupported = tinyGoConfiguration.targetPlatform in service<PreviewTargetsProvider>().supportedTargets
         val isScratch = ScratchUtil.isScratch(file)
@@ -39,7 +39,7 @@ class TinyGoPreviewFileEditorProvider : FileEditorProvider, DumbAware {
     }
 
     override fun createEditor(project: Project, file: VirtualFile): FileEditor =
-        TinyGoFileEditorWithPreview.create(project, file, TinyGoConfiguration.getInstance(project).targetPlatform)
+        TinyGoFileEditorWithPreview.create(project, file, project.tinyGoConfiguration().targetPlatform)
 
     override fun getEditorTypeId(): String = "TinyGoPreviewFileEditor"
 

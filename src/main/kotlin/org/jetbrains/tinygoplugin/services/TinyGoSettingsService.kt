@@ -14,6 +14,7 @@ import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -116,7 +117,7 @@ class TinyGoSettingsService(private val project: Project) :
 
     override fun apply() {
         logger.warn("Apply called")
-        val oldConfiguration = TinyGoConfiguration.getInstance(project)
+        val oldConfiguration = project.tinyGoConfiguration()
         val oldSdk = oldConfiguration.sdk
         val oldTarget = oldConfiguration.targetPlatform
         tinyGoSettings.saveState(project)

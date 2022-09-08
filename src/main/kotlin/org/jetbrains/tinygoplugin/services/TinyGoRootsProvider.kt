@@ -5,7 +5,7 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import java.util.Collections
 
 class TinyGoRootsProvider : GoRootsProvider {
@@ -24,7 +24,7 @@ class TinyGoRootsProvider : GoRootsProvider {
         module: Module?,
         file: VirtualFile?,
     ): MutableCollection<VirtualFile>? {
-        val projectSettings = TinyGoConfiguration.getInstance(project)
+        val projectSettings = project.tinyGoConfiguration()
         if (file == null || module == null || !projectSettings.enabled) {
             return null
         }

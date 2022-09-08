@@ -11,7 +11,7 @@ import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.Scheduler
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.services.editTinyGoSettingsLater
 
 class TinyGoStatementInspection : GoInspectionBase() {
@@ -35,7 +35,7 @@ class TinyGoStatementInspection : GoInspectionBase() {
             override fun visitGoStatement(goStatement: GoGoStatement) {
                 super.visitGoStatement(goStatement)
                 val project = goStatement.project
-                val settings = TinyGoConfiguration.getInstance(project)
+                val settings = project.tinyGoConfiguration()
                 if (settings.enabled && settings.scheduler == Scheduler.NONE) {
                     problemsHolder.registerProblem(
                         goStatement,

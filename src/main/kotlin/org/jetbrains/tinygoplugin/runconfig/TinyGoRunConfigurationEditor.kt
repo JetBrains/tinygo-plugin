@@ -14,7 +14,7 @@ import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import org.jetbrains.tinygoplugin.TinyGoBundle
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.services.editTinyGoSettingsLater
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.MappedGraphProperty
@@ -115,7 +115,7 @@ private fun targetPlatformFieldWithLink(
             val project = runConfiguration.project
             editTinyGoSettingsLater(project) {
                 parentDisposable.doIfAlive {
-                    targetTextField.text = TinyGoConfiguration.getInstance(project).targetPlatform
+                    targetTextField.text = project.tinyGoConfiguration().targetPlatform
                 }
             }
         }

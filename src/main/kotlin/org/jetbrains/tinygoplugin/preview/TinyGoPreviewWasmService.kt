@@ -5,7 +5,7 @@ import com.goide.util.GoUtil
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import java.io.File
 import java.nio.file.Files
 import java.util.concurrent.ConcurrentHashMap
@@ -23,7 +23,7 @@ internal class TinyGoPreviewWasmService(val project: Project) {
     fun compileWasm(scratchFile: VirtualFile, onFinish: () -> Unit) {
         compilationStatus[scratchFile.path] = AtomicReference(CompilationStatus.InProgress)
 
-        val tinyGoConfiguration = TinyGoConfiguration.getInstance(project)
+        val tinyGoConfiguration = project.tinyGoConfiguration()
         val arguments = listOf(
             "build",
             "-tags=${tinyGoConfiguration.targetPlatform}",

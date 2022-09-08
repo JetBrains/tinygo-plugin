@@ -51,3 +51,5 @@ internal data class TinyGoConfigurationImpl(
     override val enabled: Boolean
         get() = sdk != nullSdk
 }
+
+fun Project.tinyGoConfiguration(): TinyGoConfiguration = TinyGoConfiguration.getInstance(this)

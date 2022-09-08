@@ -12,7 +12,7 @@ import com.intellij.lang.injection.InjectedLanguageManager
 import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 
 interface TinyGoFunctionRunLineMarkerContributor {
@@ -24,7 +24,7 @@ interface TinyGoFunctionRunLineMarkerContributor {
             if (e.project.service<InjectedLanguageManager>().isInjectedFragment(file)) {
                 return null
             }
-            val settings = TinyGoConfiguration.getInstance(e.project)
+            val settings = e.project.tinyGoConfiguration()
             if (!settings.enabled) return null
             if (GoUtil.isInProject(file) && filePredicate(file) && parent is GoFunctionDeclaration) {
                 if (functionPredicate(parent)) {

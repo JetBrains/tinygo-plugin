@@ -28,7 +28,7 @@ class ConfigurationWithHistory(
 ) :
     TinyGoConfiguration by settings {
     constructor(project: Project) : this(
-        TinyGoConfiguration.getInstance(project),
+        project.tinyGoConfiguration(),
     )
 
     override var sdk: TinyGoSdk
