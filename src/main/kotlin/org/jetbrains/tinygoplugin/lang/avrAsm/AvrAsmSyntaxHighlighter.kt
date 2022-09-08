@@ -65,6 +65,10 @@ class AvrAsmSyntaxHighlighter : SyntaxHighlighterBase() {
             "AVR_STRING",
             DefaultLanguageHighlighterColors.STRING
         )
+        private val INJECTED_PARAMETER = TextAttributesKey.createTextAttributesKey(
+            "AVR_INJECTED_PARAMETER",
+            DefaultLanguageHighlighterColors.CONSTANT
+        )
 
         private val CONST = TextAttributesKey.createTextAttributesKey(
             "AVR_CONST",
@@ -117,6 +121,7 @@ class AvrAsmSyntaxHighlighter : SyntaxHighlighterBase() {
             ourAttributes[AvrAsmTypes.INTEGER] = pack(NUMBER)
             ourAttributes[AvrAsmTypes.CHAR] = pack(NUMBER)
             ourAttributes[AvrAsmTypes.STRING] = pack(STRING)
+            ourAttributes[AvrAsmTypes.INJECTED_PARAMETER] = pack(INJECTED_PARAMETER)
 
             ourAttributes[AvrAsmTypes.CONST] = pack(CONST)
             ourAttributes[AvrAsmTypes.VARIABLE] = pack(VARIABLE)

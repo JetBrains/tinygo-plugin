@@ -799,7 +799,7 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // PC | call | symbol | number | STRING
+  // PC | call | symbol | number | STRING | INJECTED_PARAMETER
   static boolean primary(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "primary")) return false;
     boolean r;
@@ -808,6 +808,7 @@ public class AvrAsmParser implements PsiParser, LightPsiParser {
     if (!r) r = symbol(b, l + 1);
     if (!r) r = number(b, l + 1);
     if (!r) r = consumeToken(b, STRING);
+    if (!r) r = consumeToken(b, INJECTED_PARAMETER);
     return r;
   }
 

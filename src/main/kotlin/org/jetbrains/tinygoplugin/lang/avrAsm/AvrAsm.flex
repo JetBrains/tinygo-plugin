@@ -36,6 +36,7 @@ INTEGER = 0|[1-9]{DEC_DIGIT}*|0{OCT_DIGIT}+|(\$|0[Xx]){HEX_DIGIT}+
 ESCAPE = \n | \r | \a | \b | \f | \t | \v | \\ | \0
 CHAR = \'[^\']\'
 STRING = \"[^\"]*\"
+INJECTED_PARAMETER = \{[^\}]*\}
 
 INDIRECT = X | Y | Z
 REGISTER = r{DEC_DIGIT}+ | R{DEC_DIGIT}+
@@ -72,6 +73,7 @@ REGISTER = r{DEC_DIGIT}+ | R{DEC_DIGIT}+
 {INTEGER}                                                   { return AvrAsmTypes.INTEGER; }
 {CHAR}                                                      { return AvrAsmTypes.CHAR; }
 {STRING}                                                    { return AvrAsmTypes.STRING; }
+{INJECTED_PARAMETER}                                        { return AvrAsmTypes.INJECTED_PARAMETER; }
 
 ("low"|"LOW")                                               { return AvrAsmTypes.FUNC; }
 ("high"|"HIGH")                                             { return AvrAsmTypes.FUNC; }

@@ -51,7 +51,7 @@ private factor ::= primary mul_expr*
 left mul_expr ::= (STAR | DIVISION) primary
 left plus_expr ::= (PLUS | MINUS) factor
 left bitwise_expr ::= (SHIFT_LEFT | SHIFT_RIGHT) factor
-private primary ::= PC | call | symbol | number | STRING
+private primary ::= PC | call | symbol | number | STRING | INJECTED_PARAMETER
 
 
 memory           ::= REGISTER | indirect_postfix | indirect_prefix | INDIRECT

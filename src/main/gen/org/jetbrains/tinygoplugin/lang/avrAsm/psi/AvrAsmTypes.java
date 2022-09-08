@@ -49,6 +49,7 @@ public interface AvrAsmTypes {
   IElementType GREATER_EQUAL = new AvrAsmTokenType("GREATER_EQUAL");
   IElementType IDENTIFIER = new AvrAsmTokenType("IDENTIFIER");
   IElementType INDIRECT = new AvrAsmTokenType("INDIRECT");
+  IElementType INJECTED_PARAMETER = new AvrAsmTokenType("INJECTED_PARAMETER");
   IElementType INTEGER = new AvrAsmTokenType("INTEGER");
   IElementType LABEL = new AvrAsmTokenType("LABEL");
   IElementType LESS = new AvrAsmTokenType("LESS");
