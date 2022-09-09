@@ -81,7 +81,7 @@ class TinyGoHeapAllocRunningState(env: ExecutionEnvironment, module: Module, con
             }
 
             override fun processTerminated(event: ProcessEvent) {
-                val heapAllocs = supplyHeapAllocsFromOutput(processOutput)
+                val heapAllocs = supplyHeapAllocsFromOutput(module!!, processOutput)
                 module?.project?.service<TinyGoHeapAllocsViewManager>()?.updateHeapAllocsList(heapAllocs)
             }
         })
