@@ -67,7 +67,15 @@ abstract class TinyGoRunConfigurationProducer(private val configurationName: Str
     }
 }
 
-class TinyGoFlashRunConfigurationProducer : TinyGoRunConfigurationProducer("Flash") {
+abstract class TinyGoHardwareRunConfigurationProducer(configurationName: String) :
+    TinyGoRunConfigurationProducer(configurationName) {
+    override fun contextPredicate(contextFile: PsiFile): Boolean {
+        val targetsWasm = isWasmTarget(contextFile.project.tinyGoConfiguration().targetPlatform)
+        return super.contextPredicate(contextFile) && !targetsWasm
+    }
+}
+
+class TinyGoFlashRunConfigurationProducer : TinyGoHardwareRunConfigurationProducer("Flash") {
     override fun getConfigurationFactory(): ConfigurationFactory =
         TinyGoRunConfigurationType.getInstance().flashFactory
 }

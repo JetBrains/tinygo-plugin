@@ -14,3 +14,6 @@ fun isMainFunction(declaration: GoFunctionOrMethodDeclaration) = GoConstants.MAI
 
 fun isTestFunction(declaration: GoFunctionOrMethodDeclaration): Boolean =
     GoTestFinder.isTestOrExampleFunction(declaration)
+
+fun isWasmTarget(targetPlatform: String): Boolean = targetPlatform in wasmTargets
+private val wasmTargets = arrayOf("wasm", "wasi")
