@@ -18,7 +18,7 @@ open class TinyGoConfigurationFactory(
     private val runType: TinyGoCommandType,
 ) : GoConfigurationFactoryBase(type) {
     override fun createTemplateConfiguration(project: Project): RunConfiguration {
-        return TinyGoRunConfiguration(project, this, project.name, runType)
+        return TinyGoRunConfigurationImpl(project, this, project.name, runType)
     }
 
     override fun getId(): String =
@@ -35,10 +35,23 @@ class TinyGoTestConfigurationFactory(type: ConfigurationType) : TinyGoConfigurat
     }
 }
 
+class TinyGoBuildConfigurationFactory(type: ConfigurationType) : TinyGoConfigurationFactory(type, TinyGoBuildCommand()) {
+    override fun createTemplateConfiguration(project: Project): RunConfiguration {
+        return TinyGoBuildRunConfiguration(project, this, project.name)
+    }
+}
+
 class TinyGoHeapAllocConfigurationFactory(type: ConfigurationType) :
     TinyGoConfigurationFactory(type, TinyGoBuildCommand()) {
     override fun createTemplateConfiguration(project: Project): RunConfiguration {
         return TinyGoHeapAllocRunConfiguration(project, this, project.name)
+    }
+
+    override fun getId(): String =
+        FACTORY_ID + "heapalloc"
+
+    override fun getName(): String {
+        return "$CONFIGURATION_NAME heapalloc"
     }
 }
 
@@ -47,12 +60,14 @@ class TinyGoRunConfigurationType :
     val runFactory = TinyGoConfigurationFactory(this, TinyGoRunCommand())
     val flashFactory = TinyGoConfigurationFactory(this, TinyGoFlashCommand())
     val testFactory = TinyGoTestConfigurationFactory(this)
+    val buildFactory = TinyGoBuildConfigurationFactory(this)
     val heapAllocFactory = TinyGoHeapAllocConfigurationFactory(this)
 
     init {
         addFactory(runFactory)
         addFactory(flashFactory)
         addFactory(testFactory)
+        addFactory(buildFactory)
         addFactory(heapAllocFactory)
     }
 

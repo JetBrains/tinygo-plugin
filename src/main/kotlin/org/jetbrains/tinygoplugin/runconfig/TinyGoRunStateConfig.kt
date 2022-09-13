@@ -13,10 +13,14 @@ import com.intellij.execution.runners.ProgramRunner
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.util.Key
+import com.intellij.util.io.exists
+import com.intellij.util.io.isDirectory
+import com.intellij.util.io.isFile
 import org.codehaus.plexus.util.cli.CommandLineUtils.translateCommandline
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.heapAllocations.supplyHeapAllocsFromOutput
 import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocsViewManager
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
@@ -54,19 +58,42 @@ class TinyGoTestRunningState(env: ExecutionEnvironment, module: Module, configur
     override val hardwareArguments: List<String> = emptyList()
 }
 
-class TinyGoHeapAllocRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
-    TinyGoRunningState(env, module, configuration) {
-    private val outputFile: String
-        get() {
-            val outputFilePrefix = "tinygo-temp-output-${module?.project?.locationHash}"
-            val tempDir = System.getProperty("java.io.tmpdir")
-            val candidate = Paths.get(tempDir, "$outputFilePrefix.out")
+open class TinyGoBuildRunningState(
+    env: ExecutionEnvironment,
+    module: Module,
+    configuration: TinyGoRunConfiguration
+) : TinyGoRunningState(env, module, configuration) {
+    override val additionalParameters: List<String> = listOf("-o", getOutputFile())
 
-            return if (Files.exists(candidate)) candidate.toString()
-            else Files.createTempFile(outputFilePrefix, ".out").toString()
+    private fun getOutputFile(): String {
+        val fileExtension =
+            if (module?.project?.tinyGoConfiguration()?.targetPlatform == "wasm") ".wasm" else ".out"
+
+        val outputPathFromEditor = configuration.runConfig.outputPath
+        if (outputPathFromEditor.isNotEmpty()) {
+            val candidate = Paths.get(outputPathFromEditor)
+            if (candidate.isDirectory())
+                return Paths.get(outputPathFromEditor, module!!.name + fileExtension).toString()
+            if (candidate.isFile() || !candidate.exists() && candidate.parent.isDirectory())
+                return outputPathFromEditor
         }
 
-    override val additionalParameters: List<String> = listOf("-o", outputFile, "-print-allocs=.")
+        val outputFilePrefix = "tinygo-temp-output-${module?.project?.locationHash}"
+        val tempDir = System.getProperty("java.io.tmpdir")
+        val candidate = Paths.get(tempDir, "$outputFilePrefix$fileExtension")
+
+        return if (Files.exists(candidate)) candidate.toString()
+        else Files.createTempFile(outputFilePrefix, fileExtension).toString()
+    }
+}
+
+class TinyGoHeapAllocRunningState(
+    env: ExecutionEnvironment,
+    module: Module,
+    configuration: TinyGoRunConfiguration
+) :
+    TinyGoBuildRunningState(env, module, configuration) {
+    override val additionalParameters: List<String> = super.additionalParameters + listOf("-print-allocs=.")
 
     override fun execute(
         executor: Executor,
@@ -94,11 +121,13 @@ data class RunSettings(
     val tinyGoConfiguration: TinyGoConfiguration,
     var userArguments: String,
     var mainFile: String,
+    var outputPath: String
 ) : TinyGoConfiguration by tinyGoConfiguration {
     override fun deepCopy(): RunSettings = RunSettings(
         tinyGoConfiguration.deepCopy(),
         userArguments,
-        mainFile
+        mainFile,
+        outputPath
     )
 
     val cmdlineOptions: List<String>

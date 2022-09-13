@@ -8,6 +8,7 @@ import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.rd.doIfAlive
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.COLUMNS_MEDIUM
+import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
@@ -39,6 +40,11 @@ class RunConfigurationWrapper(private val configurationProvider: ConfigurationPr
         prop = propertyGraph.lazyProperty(configurationProvider.tinyGoSettings::userArguments),
         objProperty = RunSettings::userArguments
     )
+
+    val outputPath = RunConfigurationProperty(
+        prop = propertyGraph.lazyProperty(configurationProvider.tinyGoSettings::outputPath),
+        objProperty = RunSettings::outputPath
+    )
 }
 
 private const val TARGET_LABEL = "ui.target"
@@ -46,10 +52,10 @@ private const val CLI_ARGUMENTS_LABEL = "ui.cli"
 private const val PATH_TO_SRC_LABEL = "ui.src"
 private const val ENVIRONMENT_LABEL = "ui.environment"
 
-class TinyGoRunConfigurationEditor(
-    private val runConfiguration: TinyGoRunConfiguration,
+open class TinyGoRunConfigurationEditor<RunConfigurationType : TinyGoRunConfiguration>(
+    private val runConfiguration: RunConfigurationType,
     private val pathKind: PathKind
-) : SettingsEditor<TinyGoRunConfiguration>() {
+) : SettingsEditor<RunConfigurationType>() {
     enum class PathKind(private val string: String) {
         MAIN("main.go"), TEST("test file");
         override fun toString(): String = string
@@ -59,20 +65,20 @@ class TinyGoRunConfigurationEditor(
     // component fires its specific event, which is not captured by the mechanism
     private val environmentEditor = EnvironmentVariablesTextFieldWithBrowseButton()
 
-    private val properties = RunConfigurationWrapper(runConfiguration)
+    protected val properties = RunConfigurationWrapper(runConfiguration)
 
     init {
         resetEditorFrom(runConfiguration)
     }
 
-    override fun resetEditorFrom(configuration: TinyGoRunConfiguration) {
+    final override fun resetEditorFrom(configuration: RunConfigurationType) {
         runConfiguration.runConfig = configuration.runConfig
         environmentEditor.envs = configuration.customEnvironment
         environmentEditor.isPassParentEnvs = configuration.isPassParentEnvironment
         properties.reset()
     }
 
-    override fun applyEditorTo(tinyGoRunConfiguration: TinyGoRunConfiguration) {
+    final override fun applyEditorTo(tinyGoRunConfiguration: RunConfigurationType) {
         tinyGoRunConfiguration.runConfig = runConfiguration.runConfig.deepCopy()
         tinyGoRunConfiguration.customEnvironment = environmentEditor.envs
         tinyGoRunConfiguration.isPassParentEnvironment = environmentEditor.isPassParentEnvs
@@ -97,6 +103,25 @@ class TinyGoRunConfigurationEditor(
             }
             row(TinyGoBundle.message(ENVIRONMENT_LABEL)) {
                 cell(environmentEditor).horizontalAlign(HorizontalAlign.FILL)
+            }
+            createAdditionalComponent(this)
+        }
+    }
+
+    protected open fun createAdditionalComponent(panel: Panel) = Unit
+}
+
+private const val OUTPUT_PATH_LABEL = "ui.output.path"
+
+class TinyGoBuildRunConfigurationEditor(runConfiguration: TinyGoBuildRunConfiguration) :
+    TinyGoRunConfigurationEditor<TinyGoBuildRunConfiguration>(runConfiguration, PathKind.MAIN) {
+    override fun createAdditionalComponent(panel: Panel) {
+        with(panel) {
+            row(TinyGoBundle.message(OUTPUT_PATH_LABEL)) {
+                val fileChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
+                textFieldWithBrowseButton(fileChooserDescriptor = fileChooserDescriptor)
+                    .horizontalAlign(HorizontalAlign.FILL)
+                    .bindText(properties.outputPath)
             }
         }
     }

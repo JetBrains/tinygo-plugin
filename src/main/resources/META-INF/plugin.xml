@@ -46,6 +46,8 @@
                                   implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoEmulateRunConfigurationProducer"/>
         <runConfigurationProducer id="TinyGoTestConfigurationProducer"
                                   implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoTestRunConfigurationProducer"/>
+        <runConfigurationProducer id="TinyGoBuildConfigurationProducer"
+                                  implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoBuildRunConfigurationProducer"/>
         <runConfigurationProducer id="TinyGoHeapAllocConfigurationProducer"
                                   implementation="org.jetbrains.tinygoplugin.runconfig.TinyGoHeapAllocRunConfigurationProducer"/>
         <runLineMarkerContributor language="go"
