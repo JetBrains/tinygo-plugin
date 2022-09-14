@@ -131,6 +131,8 @@ open class TinyGoRunConfigurationImpl(
         result.addEditor(TinyGoBundle.message(CONFIGURATION_EDITOR_NAME, command), editor)
         return result
     }
+
+    override fun supportsDelve(): Boolean = false
 }
 
 class TinyGoTestRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
