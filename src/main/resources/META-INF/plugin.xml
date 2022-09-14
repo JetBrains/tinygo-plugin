@@ -55,9 +55,9 @@
         <runLineMarkerContributor language="go"
                                   implementationClass="org.jetbrains.tinygoplugin.runconfig.TinyGoTestRunLineMarkerContributor"/>
         <defaultLiveTemplates file="/liveTemplates/TinyGoAsm.xml"/>
-        <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmAvr"/>
-        <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm"/>
-        <liveTemplateContext implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm64"/>
+        <liveTemplateContext contextId="TINYGOAVR" implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmAvr"/>
+        <liveTemplateContext contextId="TINYGOARM" implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm"/>
+        <liveTemplateContext contextId="TINYGOARM64" implementation="org.jetbrains.tinygoplugin.liveTemplates.TinyGoAsmArm64"/>
         <toolWindow id="TinyGo: Heap Allocations"
                     factoryClass="org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocsToolWindowFactory"
                     icon="/icons/tinyGo.svg"

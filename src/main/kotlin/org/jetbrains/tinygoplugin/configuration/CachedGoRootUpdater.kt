@@ -11,6 +11,7 @@ import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.RootsChangeRescanningInfo
 import com.intellij.util.application
 import com.intellij.util.messages.MessageBus
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
@@ -62,7 +63,7 @@ private fun updateExtLibrariesAndCleanCache(project: Project) {
         application.assertIsDispatchThread()
         project.service<GoSdkService>().incModificationCount()
         GoUtil.cleanResolveCache(project)
-        GoLibrariesUtil.updateLibraries(project, { }, null)
+        GoLibrariesUtil.updateLibraries(project, RootsChangeRescanningInfo.TOTAL_RESCAN, { }, null)
     }
 }
 

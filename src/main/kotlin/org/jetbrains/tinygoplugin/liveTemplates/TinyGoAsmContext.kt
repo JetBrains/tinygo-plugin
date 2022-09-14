@@ -5,7 +5,7 @@ import com.intellij.codeInsight.template.TemplateActionContext
 import com.intellij.codeInsight.template.TemplateContextType
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 
-abstract class TinyGoAsmContext(id: String, presentableName: String) : TemplateContextType(id, presentableName) {
+abstract class TinyGoAsmContext(presentableName: String) : TemplateContextType(presentableName) {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val file = templateActionContext.file
         val project = file.project
@@ -13,7 +13,7 @@ abstract class TinyGoAsmContext(id: String, presentableName: String) : TemplateC
     }
 }
 
-class TinyGoAsmAvr : TinyGoAsmContext("TINYGOAVR", "TinyGo AVR") {
+class TinyGoAsmAvr : TinyGoAsmContext("TinyGo AVR") {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val project = templateActionContext.file.project
         val goTags = project.tinyGoConfiguration().goTags.split(" ")
@@ -21,7 +21,7 @@ class TinyGoAsmAvr : TinyGoAsmContext("TINYGOAVR", "TinyGo AVR") {
     }
 }
 
-class TinyGoAsmArm : TinyGoAsmContext("TINYGOARM", "TinyGo ARM") {
+class TinyGoAsmArm : TinyGoAsmContext("TinyGo ARM") {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val project = templateActionContext.file.project
         val goTags = project.tinyGoConfiguration().goTags.split(" ")
@@ -33,7 +33,7 @@ class TinyGoAsmArm : TinyGoAsmContext("TINYGOARM", "TinyGo ARM") {
     }
 }
 
-class TinyGoAsmArm64 : TinyGoAsmContext("TINYGOARM64", "TinyGo ARM64") {
+class TinyGoAsmArm64 : TinyGoAsmContext("TinyGo ARM64") {
     override fun isInContext(templateActionContext: TemplateActionContext): Boolean {
         val project = templateActionContext.file.project
         val goTags = project.tinyGoConfiguration().goTags.split(" ")
