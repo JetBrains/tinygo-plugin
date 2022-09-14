@@ -6,9 +6,9 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.7.10"
+    id("org.jetbrains.kotlin.jvm") version "1.7.20"
     // Gradle IntelliJ Plugin
-    id("org.jetbrains.intellij") version "1.6.0"
+    id("org.jetbrains.intellij") version "1.10.0-SNAPSHOT"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "1.3.1"
     // detekt linter - read more: https://detekt.github.io/detekt/gradle.html
@@ -41,11 +41,12 @@ version = pluginVersion
 repositories {
     maven("https://cache-redirector.jetbrains.com/maven-central")
     maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
+    maven("https://cache-redirector.jetbrains.com/intellij-repository/snapshots")
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 dependencies {
-    testImplementation("com.jetbrains.intellij.go:go-test-framework:222.3345.118") {
+    testImplementation("com.jetbrains.intellij.go:go-test-framework:GOLAND-223-EAP-SNAPSHOT") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
         exclude("org.jetbrains.kotlin", "kotlin-reflect")
         exclude("com.jetbrains.rd", "rd-core")
@@ -54,11 +55,20 @@ dependencies {
         exclude("org.jetbrains.teamcity", "serviceMessages")
         exclude("io.ktor", "ktor-network-jvm")
         exclude("com.jetbrains.infra", "download-pgp-verifier")
-        exclude("ai.grazie.utils", "utils-common")
-        exclude("ai.grazie.nlp", "nlp-common")
-        exclude("ai.grazie.nlp", "nlp-tokenizer")
-        exclude("ai.grazie.spell", "hunspell-en")
-        exclude("ai.grazie.spell", "gec-spell-local-engine")
+        exclude("ai.grazie.utils", "utils-common-jvm")
+        exclude("ai.grazie.model", "model-common-jvm")
+        exclude("ai.grazie.model", "model-gec-jvm")
+        exclude("ai.grazie.model", "model-text-jvm")
+        exclude("ai.grazie.nlp", "nlp-common-jvm")
+        exclude("ai.grazie.nlp", "nlp-detect-jvm")
+        exclude("ai.grazie.nlp", "nlp-langs-jvm")
+        exclude("ai.grazie.nlp", "nlp-patterns-jvm")
+        exclude("ai.grazie.nlp", "nlp-phonetics-jvm")
+        exclude("ai.grazie.nlp", "nlp-similarity-jvm")
+        exclude("ai.grazie.nlp", "nlp-stemmer-jvm")
+        exclude("ai.grazie.nlp", "nlp-tokenizer-jvm")
+        exclude("ai.grazie.spell", "hunspell-en-jvm")
+        exclude("ai.grazie.spell", "gec-spell-engine-local-jvm")
     }
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
@@ -85,20 +95,20 @@ detekt {
 }
 
 tasks {
-    // Set the compatibility versions to 11
+    // Set the compatibility versions to 17
     withType<JavaCompile> {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
     withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "11"
+            jvmTarget = "17"
             freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
         }
     }
 
     withType<Detekt> {
-        jvmTarget = "11"
+        jvmTarget = "17"
         reports {
             html.required.set(false)
             xml.required.set(false)
