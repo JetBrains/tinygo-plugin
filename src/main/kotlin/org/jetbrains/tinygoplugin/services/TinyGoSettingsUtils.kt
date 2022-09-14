@@ -20,9 +20,9 @@ fun editTinyGoSettingsLater(project: Project, afterSettingsApply: () -> Unit = {
     }
 }
 fun propagateGoFlags(project: Project, settings: TinyGoConfiguration) {
-    val goSettings = ModuleManager.getInstance(project).modules.mapNotNull {
-        it?.getService(GoModuleSettings::class.java)
-    }.firstOrNull()
+    val goSettings = ModuleManager.getInstance(project).modules.firstNotNullOfOrNull {
+        it.getService(GoModuleSettings::class.java)
+    }
     if (goSettings == null) {
         TinyGoSettingsService.logger.warn("Could not find go module settings")
         return

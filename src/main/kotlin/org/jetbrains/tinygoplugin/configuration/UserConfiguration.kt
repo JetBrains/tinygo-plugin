@@ -37,7 +37,7 @@ internal fun TinyGoSdk.toStorage(): TinyGoSdkStorage {
 }
 
 internal fun TinyGoSdkStorage.toImpl(): TinyGoSdk {
-    val homeUrl = if (sdkUrl.isEmpty()) null else sdkUrl
+    val homeUrl = sdkUrl.ifEmpty { null }
     return TinyGoSdk(homeUrl, this.version)
 }
 
@@ -46,7 +46,7 @@ internal fun GoSdk.toStorage(): CachedGoRootStorage {
 }
 
 internal fun CachedGoRootStorage.toImpl(): GoSdk {
-    val homeUrl = if (sdkUrl.isEmpty()) null else sdkUrl
+    val homeUrl = sdkUrl.ifEmpty { null }
     return GoSdk.fromUrl(homeUrl)
 }
 

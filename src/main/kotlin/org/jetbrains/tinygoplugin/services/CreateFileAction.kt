@@ -106,11 +106,11 @@ class CreateFileAction :
         val project = dir?.project ?: return null
         val sdkPath = project.tinyGoConfiguration().sdk.sdkRoot ?: return null
         val examples = VfsUtil.findRelativeFile(sdkPath, "src", "examples")
-        if (templateName == null || templateName.isEmpty()) {
+        if (templateName.isNullOrEmpty()) {
             return null
         }
         val exampleFile = examples?.findFileByRelativePath(templateName) ?: return null
-        if (name == null || name.isEmpty()) {
+        if (name.isNullOrEmpty()) {
             return null
         }
         var filename = name

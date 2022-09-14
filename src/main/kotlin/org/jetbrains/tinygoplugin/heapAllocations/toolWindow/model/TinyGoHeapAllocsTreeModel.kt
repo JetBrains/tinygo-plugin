@@ -41,7 +41,7 @@ class TinyGoHeapAllocsTreeModel(parent: Disposable) : BaseTreeModel<Node?>(), In
     override fun getChildren(`object`: Any): List<Node> {
         val node = if (`object` is Node) `object` else null
         val children = node?.getChildren()
-        if (children == null || children.isEmpty()) return emptyList()
+        if (children.isNullOrEmpty()) return emptyList()
         assert(null != comparator.get()) { "set comparator before" }
         node.update()
         children.forEach { it.update() }
