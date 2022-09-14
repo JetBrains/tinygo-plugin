@@ -91,7 +91,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "11"
-            freeCompilerArgs = listOf("-Xjvm-default=enable")
+            freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
         }
     }
 
