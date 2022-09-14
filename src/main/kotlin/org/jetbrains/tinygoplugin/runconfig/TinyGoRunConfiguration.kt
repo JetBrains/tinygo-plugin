@@ -134,14 +134,14 @@ open class TinyGoRunConfigurationImpl(
 }
 
 class TinyGoTestRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
-    TinyGoRunConfigurationImpl(project, factory, name, TinyGoTestCommand(), PathKind.TEST) {
+    TinyGoRunConfigurationImpl(project, factory, name, TinyGoTestCommand, PathKind.TEST) {
     override fun newRunningState(environment: ExecutionEnvironment, module: Module): TinyGoRunningState {
         return TinyGoTestRunningState(environment, module, this)
     }
 }
 
 open class TinyGoBuildRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
-    TinyGoRunConfiguration(project, factory, name, TinyGoBuildCommand()) {
+    TinyGoRunConfiguration(project, factory, name, TinyGoBuildCommand) {
     @Throws(RuntimeConfigurationException::class)
     override fun checkConfiguration() {
         super.checkConfiguration()
@@ -169,7 +169,7 @@ open class TinyGoBuildRunConfiguration(project: Project, factory: ConfigurationF
 }
 
 class TinyGoHeapAllocRunConfiguration(project: Project, factory: ConfigurationFactory, name: String) :
-    TinyGoRunConfigurationImpl(project, factory, name, TinyGoBuildCommand(), PathKind.MAIN) {
+    TinyGoRunConfigurationImpl(project, factory, name, TinyGoBuildCommand, PathKind.MAIN) {
     @Suppress("MagicNumber")
     companion object {
         private val TINYGO_PRINT_HEAP_ALLOCS_MIN_VER = TinyGoSdkVersion(0, 18, 0)

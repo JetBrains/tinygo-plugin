@@ -21,44 +21,38 @@ open class TinyGoConfigurationFactory(
         return TinyGoRunConfigurationImpl(project, this, project.name, runType)
     }
 
-    override fun getId(): String =
-        FACTORY_ID + runType.command
+    override fun getId(): String = FACTORY_ID + runType.command
 
-    override fun getName(): String {
-        return "$CONFIGURATION_NAME ${runType.command}"
-    }
+    override fun getName(): String = "$CONFIGURATION_NAME ${runType.command}"
 }
 
-class TinyGoTestConfigurationFactory(type: ConfigurationType) : TinyGoConfigurationFactory(type, TinyGoTestCommand()) {
+class TinyGoTestConfigurationFactory(type: ConfigurationType) : TinyGoConfigurationFactory(type, TinyGoTestCommand) {
     override fun createTemplateConfiguration(project: Project): RunConfiguration {
         return TinyGoTestRunConfiguration(project, this, project.name)
     }
 }
 
-class TinyGoBuildConfigurationFactory(type: ConfigurationType) : TinyGoConfigurationFactory(type, TinyGoBuildCommand()) {
+class TinyGoBuildConfigurationFactory(type: ConfigurationType) : TinyGoConfigurationFactory(type, TinyGoBuildCommand) {
     override fun createTemplateConfiguration(project: Project): RunConfiguration {
         return TinyGoBuildRunConfiguration(project, this, project.name)
     }
 }
 
 class TinyGoHeapAllocConfigurationFactory(type: ConfigurationType) :
-    TinyGoConfigurationFactory(type, TinyGoBuildCommand()) {
+    TinyGoConfigurationFactory(type, TinyGoBuildCommand) {
     override fun createTemplateConfiguration(project: Project): RunConfiguration {
         return TinyGoHeapAllocRunConfiguration(project, this, project.name)
     }
 
-    override fun getId(): String =
-        FACTORY_ID + "heapalloc"
+    override fun getId(): String = FACTORY_ID + "heapalloc"
 
-    override fun getName(): String {
-        return "$CONFIGURATION_NAME heapalloc"
-    }
+    override fun getName(): String = "$CONFIGURATION_NAME heapalloc"
 }
 
 class TinyGoRunConfigurationType :
     ConfigurationTypeBase(TINYGO_CONFIGURATION_ID, CONFIGURATION_NAME, DESCRIPTION, TinyGoPluginIcons.TinyGoIcon) {
-    val runFactory = TinyGoConfigurationFactory(this, TinyGoRunCommand())
-    val flashFactory = TinyGoConfigurationFactory(this, TinyGoFlashCommand())
+    val runFactory = TinyGoConfigurationFactory(this, TinyGoRunCommand)
+    val flashFactory = TinyGoConfigurationFactory(this, TinyGoFlashCommand)
     val testFactory = TinyGoTestConfigurationFactory(this)
     val buildFactory = TinyGoBuildConfigurationFactory(this)
     val heapAllocFactory = TinyGoHeapAllocConfigurationFactory(this)

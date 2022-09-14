@@ -4,18 +4,18 @@ interface TinyGoCommandType {
     val command: String
 }
 
-class TinyGoBuildCommand : TinyGoCommandType {
+object TinyGoBuildCommand : TinyGoCommandType {
     override val command: String = "build"
 }
 
-class TinyGoRunCommand : TinyGoCommandType {
+object TinyGoRunCommand : TinyGoCommandType {
     override val command: String = "run"
 }
 
-class TinyGoFlashCommand : TinyGoCommandType {
+object TinyGoFlashCommand : TinyGoCommandType {
     override val command: String = "flash"
 }
 
-class TinyGoTestCommand : TinyGoCommandType {
+object TinyGoTestCommand : TinyGoCommandType {
     override val command: String = "test"
 }
