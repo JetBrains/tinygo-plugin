@@ -15,18 +15,21 @@
 
 ### Security
 
-## [0.4.0]
+## [0.5.0]
 ### Added
+- TinyGo Preview integration for Go scratch files in projects with enabled TinyGo.
+- AVR assembly language injection in `avr.Asm` and `avr.AsmFull` functions from `device/avr` package.
+- TinyGo Build run configuration for only compiling a binary to a concrete location.
 
 ### Changed
-
-### Deprecated
-
-### Removed
+- Link TinyGo sources appeared in heap allocations window to the `cached GOROOT` library
+  for correct symbols resolving and better library code readability.
 
 ### Fixed
-
-### Security
+- Add lists of unsupported packages for TinyGo versions 0.23.0, 0.24.0 and 0.25.0.
+- Make inspection for unsupported libraries don't mark library as unsupported
+  when only extracted by build constraints files point to an unsupported library.
+- Fix link to a description of an unsupported package at the TinyGo website.
 
 ## [0.4.0]
 ### Added
