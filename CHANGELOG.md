@@ -17,6 +17,19 @@
 
 ## [0.5.0]
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.5.0]
+### Added
 - TinyGo Preview integration for Go scratch files in projects with enabled TinyGo.
 - AVR assembly language injection in `avr.Asm` and `avr.AsmFull` functions from `device/avr` package.
 - TinyGo Build run configuration for only compiling a binary to a concrete location.
