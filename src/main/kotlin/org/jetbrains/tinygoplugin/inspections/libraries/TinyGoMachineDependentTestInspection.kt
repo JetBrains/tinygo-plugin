@@ -9,6 +9,7 @@ class TinyGoMachineDependentTestInspection : TinyGoImportInspection() {
         private const val HARDWARE_TEST_INSPECTION_MESSAGE = "inspection.import.machine.test.message"
     }
 
+    override val produceLink: Boolean = false
     override val defaultInspectionMessage: String = HARDWARE_TEST_INSPECTION_MESSAGE
 
     override fun getDefinedUnsupportedPackages(project: Project): Set<String> = setOf("machine")

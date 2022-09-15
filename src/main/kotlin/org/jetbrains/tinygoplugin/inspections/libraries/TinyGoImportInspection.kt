@@ -28,10 +28,9 @@ import org.jetbrains.tinygoplugin.runconfig.isTestGoFile
 import org.jetbrains.tinygoplugin.services.UnsupportedPackageProvider
 
 private fun tinyGoLink(packageName: String): String =
-    "https://tinygo.org/lang-support/stdlib/#${packageName.replace('/', '-')}"
+    "https://tinygo.org/lang-support/stdlib/#${packageName.replace("/", "")}"
 
 open class TinyGoImportInspection : GoInspectionBase() {
-
     companion object {
         private const val IMPORT_INSPECTION_MESSAGE = "inspection.import.unsupported.message"
         private const val IMPORT_QUICK_FIX_FAMILY = "inspection.import.unsupported.fix"
@@ -55,14 +54,14 @@ open class TinyGoImportInspection : GoInspectionBase() {
         }
     }
 
+    protected open val produceLink: Boolean = true
     protected open val defaultInspectionMessage = IMPORT_INSPECTION_MESSAGE
 
     protected fun GoProblemsHolder.registerImportProblem(
         o: PsiElement,
         messageName: String,
         importPath: String,
-        packageName: String,
-        produceLink: Boolean
+        packageName: String
     ) {
         val concatenatedMessage = if (importPath.isEmpty()) inspectionMessage(messageName)
         else if (produceLink) inspectionMessage(messageName, importPath, tinyGoLink(importPath))
@@ -170,7 +169,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
                 else if (computedUnsupportedImports.contains(importPath)) messageNameComp
                 else ""
                 return if (problem.isNotEmpty()) {
-                    holder.registerImportProblem(element, problem, arg, importPath, false)
+                    holder.registerImportProblem(element, problem, arg, importPath)
                     false
                 } else true
             }
@@ -198,8 +197,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
                             element,
                             IMPORT_DEPENDENCY_INSPECTION_MESSAGE,
                             arg,
-                            fileImport.path,
-                            false
+                            fileImport.path
                         )
                         return false
                     }
