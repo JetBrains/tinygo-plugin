@@ -5,6 +5,8 @@ import com.goide.sdk.GoSdkService
 import com.goide.sdk.download.GoDownloadingSdk
 import com.goide.util.GoExecutor
 import com.goide.util.GoHistoryProcessListener
+import com.intellij.execution.process.AnsiEscapeDecoder
+import com.intellij.execution.process.ProcessOutputType
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -35,28 +37,31 @@ private const val DETECTION_INDICATOR_TEXT = "notifications.tinygoSDK.detection.
 private const val DETECTION_ERROR_MESSAGE = "notifications.tinygoSDK.detection.errorMessage"
 
 fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
-    val tagPattern = Regex("""build tags:\s+(.+)\n""")
-    val goArchPattern = Regex("""GOARCH:\s+(.+)\n""")
-    val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
-    val gcPattern = Regex("""garbage collector:\s+(.+)\n""")
-    val schedulerPattern = Regex("""scheduler:\s+(.+)\n""")
-    val cachedGoRootPattern = Regex("""cached GOROOT:\s+(.+)\n""")
+    val decoder = AnsiEscapeDecoder()
+    decoder.escapeText(msg, ProcessOutputType.STDOUT) { escapedMsg: String, _ ->
+        val tagPattern = Regex("""build tags:\s+(.+)\n""")
+        val goArchPattern = Regex("""GOARCH:\s+(.+)\n""")
+        val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
+        val gcPattern = Regex("""garbage collector:\s+(.+)\n""")
+        val schedulerPattern = Regex("""scheduler:\s+(.+)\n""")
+        val cachedGoRootPattern = Regex("""cached GOROOT:\s+(.+)\n""")
 
-    val tags = tagPattern.findAll(msg).first()
-    val goArch = goArchPattern.findAll(msg).first()
-    val goOS = goOSPattern.findAll(msg).first()
-    val gc = gcPattern.findAll(msg).first()
-    val scheduler = schedulerPattern.findAll(msg).first()
-    val cachedGoRoot = cachedGoRootPattern.findAll(msg).first()
+        val tags = tagPattern.findAll(escapedMsg).first()
+        val goArch = goArchPattern.findAll(escapedMsg).first()
+        val goOS = goOSPattern.findAll(escapedMsg).first()
+        val gc = gcPattern.findAll(escapedMsg).first()
+        val scheduler = schedulerPattern.findAll(escapedMsg).first()
+        val cachedGoRoot = cachedGoRootPattern.findAll(escapedMsg).first()
 
-    this.goArch = goArch.groupValues[1]
-    this.goTags = tags.groupValues[1]
-    this.goOS = goOS.groupValues[1]
-    this.gc = GarbageCollector.valueOf(gc.groupValues[1].uppercase(Locale.getDefault()))
-    this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].uppercase(Locale.getDefault()))
-    this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
+        this.goArch = goArch.groupValues[1]
+        this.goTags = tags.groupValues[1]
+        this.goOS = goOS.groupValues[1]
+        this.gc = GarbageCollector.valueOf(gc.groupValues[1].uppercase(Locale.getDefault()))
+        this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].uppercase(Locale.getDefault()))
+        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
 
-    TinyGoInfoExtractor.logger.info("extraction finished")
+        TinyGoInfoExtractor.logger.info("extraction finished")
+    }
 }
 
 class TinyGoExecutable(private val project: Project) {
