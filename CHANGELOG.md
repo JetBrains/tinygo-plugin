@@ -16,6 +16,19 @@
 ### Security
 
 ## [0.5.1]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.5.1]
 ### Fixed
 - Ignore ANSI escape sequences while extracting TinyGo parameters
 
