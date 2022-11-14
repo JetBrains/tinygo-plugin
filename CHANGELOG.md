@@ -15,6 +15,14 @@
 
 ### Security
 
+## [0.5.2]
+### Changed
+- Make the plugin compatible with 2022.3 EAP.
+
+### Fixed
+- More correct inspection results for SDK-related inspections (e.g. do not show errors in `builtin.go`).
+- Disable debug button for TinyGo run configurations.
+
 ## [0.5.1]
 ### Fixed
 - Ignore ANSI escape sequences while extracting TinyGo parameters
