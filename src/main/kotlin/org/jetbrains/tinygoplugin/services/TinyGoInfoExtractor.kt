@@ -28,6 +28,7 @@ import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.osManager
 import java.time.Duration
 import java.util.Locale
+import java.util.NoSuchElementException
 import java.util.function.BiConsumer
 
 private const val GO_NOT_CONFIGURED_MESSAGE = "notifications.tinygoSDK.goSDKNotConfigured"
@@ -46,21 +47,28 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         val schedulerPattern = Regex("""scheduler:\s+(.+)\n""")
         val cachedGoRootPattern = Regex("""cached GOROOT:\s+(.+)\n""")
 
-        val tags = tagPattern.findAll(escapedMsg).first()
-        val goArch = goArchPattern.findAll(escapedMsg).first()
-        val goOS = goOSPattern.findAll(escapedMsg).first()
-        val gc = gcPattern.findAll(escapedMsg).first()
-        val scheduler = schedulerPattern.findAll(escapedMsg).first()
-        val cachedGoRoot = cachedGoRootPattern.findAll(escapedMsg).first()
+        try {
+            val tags = tagPattern.findAll(escapedMsg).first()
+            val goArch = goArchPattern.findAll(escapedMsg).first()
+            val goOS = goOSPattern.findAll(escapedMsg).first()
+            val gc = gcPattern.findAll(escapedMsg).first()
+            val scheduler = schedulerPattern.findAll(escapedMsg).first()
+            val cachedGoRoot = cachedGoRootPattern.findAll(escapedMsg).first()
 
-        this.goArch = goArch.groupValues[1]
-        this.goTags = tags.groupValues[1]
-        this.goOS = goOS.groupValues[1]
-        this.gc = GarbageCollector.valueOf(gc.groupValues[1].uppercase(Locale.getDefault()))
-        this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].uppercase(Locale.getDefault()))
-        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
+            this.goArch = goArch.groupValues[1]
+            this.goTags = tags.groupValues[1]
+            this.goOS = goOS.groupValues[1]
+            this.gc = GarbageCollector.valueOf(gc.groupValues[1].uppercase(Locale.getDefault()))
+            this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].uppercase(Locale.getDefault()))
+            this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
 
-        TinyGoInfoExtractor.logger.info("extraction finished")
+            TinyGoInfoExtractor.logger.info("extraction finished")
+        } catch (e: NoSuchElementException) {
+            TinyGoInfoExtractor.logger.error(
+                "error while extracting parameters from tinygo command output", e,
+                "unescaped process output: \"$msg\"\n escaped process output: \"$escapedMsg\""
+            )
+        }
     }
 }
 
