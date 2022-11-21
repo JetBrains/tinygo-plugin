@@ -15,18 +15,9 @@
 
 ### Security
 
-## [0.5.1]
-### Added
-
+## [0.5.3]
 ### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+- Provide more logs during parameters extraction
 
 ## [0.5.1]
 ### Fixed
