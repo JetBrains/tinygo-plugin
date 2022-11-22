@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.services
 
+import com.goide.GoOsManager
 import com.goide.sdk.GoSdk
 import com.goide.sdk.GoSdkService
 import com.goide.sdk.download.GoDownloadingSdk
@@ -42,21 +43,28 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val schedulerPattern = Regex("""scheduler:\s+(.+)\n""")
     val cachedGoRootPattern = Regex("""cached GOROOT:\s+(.+)\n""")
 
-    val tags = tagPattern.findAll(msg).first()
-    val goArch = goArchPattern.findAll(msg).first()
-    val goOS = goOSPattern.findAll(msg).first()
-    val gc = gcPattern.findAll(msg).first()
-    val scheduler = schedulerPattern.findAll(msg).first()
-    val cachedGoRoot = cachedGoRootPattern.findAll(msg).first()
+    try {
+        val tags = tagPattern.findAll(msg).first()
+        val goArch = goArchPattern.findAll(msg).first()
+        val goOS = goOSPattern.findAll(msg).first()
+        val gc = gcPattern.findAll(msg).first()
+        val scheduler = schedulerPattern.findAll(msg).first()
+        val cachedGoRoot = cachedGoRootPattern.findAll(msg).first()
 
-    this.goArch = goArch.groupValues[1]
-    this.goTags = tags.groupValues[1]
-    this.goOS = goOS.groupValues[1]
-    this.gc = GarbageCollector.valueOf(gc.groupValues[1].uppercase(Locale.getDefault()))
-    this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].uppercase(Locale.getDefault()))
-    this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
+        this.goArch = goArch.groupValues[1]
+        this.goTags = tags.groupValues[1]
+        this.goOS = goOS.groupValues[1]
+        this.gc = GarbageCollector.valueOf(gc.groupValues[1].uppercase(Locale.getDefault()))
+        this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].uppercase(Locale.getDefault()))
+        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
 
-    TinyGoInfoExtractor.logger.info("extraction finished")
+        TinyGoInfoExtractor.logger.info("extraction finished")
+    } catch (e: NoSuchElementException) {
+        TinyGoInfoExtractor.logger.error(
+            "error while extracting parameters from tinygo command output", e,
+            "process output: \"$msg\"\n"
+        )
+    }
 }
 
 class TinyGoExecutable(private val project: Project) {
@@ -72,6 +80,9 @@ class TinyGoExecutable(private val project: Project) {
             .withExePath(tinyGoExec)
             .withParameters(arguments)
             .showNotifications(true, false)
+        if (GoOsManager.isWindows()) {
+            executor.withConsoleMode()
+        }
         executor.executeWithProgress(true, true, processHistory, null) {
             val processOutput = processHistory.output.toString()
             if (it.status.ordinal == 0) {
