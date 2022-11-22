@@ -15,18 +15,11 @@
 
 ### Security
 
-## [0.5.3]
-### Added
-
+## [0.5.4]
 ### Changed
+- Escape ANSI control sequences not on process output explicitly,
+  but by using a prepared process executor for Windows
 
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## [0.5.3]
 ### Changed
