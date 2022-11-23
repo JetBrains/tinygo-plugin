@@ -7,6 +7,7 @@ import com.goide.sdk.GoSdkService
 import com.goide.sdk.download.GoDownloadingSdk
 import com.goide.util.GoExecutor
 import com.goide.util.GoHistoryProcessListener
+import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -62,7 +63,7 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         var cachedGoRootCandidate = cachedGoRoot.firstGroup().eraseLineBreaks()
         val wsl = GoWslUtil.getWsl(this.sdk)
         if (wsl != null) cachedGoRootCandidate = wsl.getWindowsPath(cachedGoRootCandidate)
-        this.cachedGoRoot = GoSdk.fromHomePath(cachedGoRootCandidate)
+        this.cachedGoRoot = GoSdk.fromHomePath(cachedGoRootCandidate, true, ModalityState.defaultModalityState())
 
         TinyGoInfoExtractor.logger.info("extraction finished")
     } catch (e: NoSuchElementException) {
