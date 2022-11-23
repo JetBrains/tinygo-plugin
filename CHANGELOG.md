@@ -15,18 +15,9 @@
 
 ### Security
 
-## [0.5.4]
-### Added
-
+## [0.5.5]
 ### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+- Improve matching of build tags and `cached GOROOT` parameters while extracting TinyGo parameters.
 
 ## [0.5.4]
 ### Changed
