@@ -28,6 +28,7 @@ import org.jetbrains.tinygoplugin.sdk.osManager
 import java.time.Duration
 import java.util.Locale
 import java.util.function.BiConsumer
+import kotlin.jvm.Throws
 
 private const val GO_NOT_CONFIGURED_MESSAGE = "notifications.tinygoSDK.goSDKNotConfigured"
 private const val TINYGO_TARGET_PLATFORM_NOT_SET = "notifications.tinygoSDK.tinyGoTargetNotSet"
@@ -36,27 +37,27 @@ private const val DETECTION_INDICATOR_TEXT = "notifications.tinygoSDK.detection.
 private const val DETECTION_ERROR_MESSAGE = "notifications.tinygoSDK.detection.errorMessage"
 
 fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
-    val tagPattern = Regex("""build tags:\s+(.+)\n""")
+    val tagPattern = Regex("""build tags:\s+((.|\n)+?(?=\n, garbage collector))""")
     val goArchPattern = Regex("""GOARCH:\s+(.+)\n""")
     val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
     val gcPattern = Regex("""garbage collector:\s+(.+)\n""")
     val schedulerPattern = Regex("""scheduler:\s+(.+)\n""")
-    val cachedGoRootPattern = Regex("""cached GOROOT:\s+(.+)\n""")
+    val cachedGoRootPattern = Regex("""cached GOROOT:\s+((.|\n)+?(?=\n]))""")
 
     try {
-        val tags = tagPattern.findAll(msg).first()
-        val goArch = goArchPattern.findAll(msg).first()
-        val goOS = goOSPattern.findAll(msg).first()
-        val gc = gcPattern.findAll(msg).first()
-        val scheduler = schedulerPattern.findAll(msg).first()
-        val cachedGoRoot = cachedGoRootPattern.findAll(msg).first()
+        val tags = tagPattern.findFirst(msg)
+        val goArch = goArchPattern.findFirst(msg)
+        val goOS = goOSPattern.findFirst(msg)
+        val gc = gcPattern.findFirst(msg)
+        val scheduler = schedulerPattern.findFirst(msg)
+        val cachedGoRoot = cachedGoRootPattern.findFirst(msg)
 
-        this.goArch = goArch.groupValues[1]
-        this.goTags = tags.groupValues[1]
-        this.goOS = goOS.groupValues[1]
-        this.gc = GarbageCollector.valueOf(gc.groupValues[1].uppercase(Locale.getDefault()))
-        this.scheduler = Scheduler.valueOf(scheduler.groupValues[1].uppercase(Locale.getDefault()))
-        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.groupValues[1]))
+        this.goArch = goArch.firstGroup()
+        this.goTags = tags.firstGroup().eraseLineBreaks()
+        this.goOS = goOS.firstGroup()
+        this.gc = GarbageCollector.valueOf(gc.firstGroup().uppercase(Locale.getDefault()))
+        this.scheduler = Scheduler.valueOf(scheduler.firstGroup().uppercase(Locale.getDefault()))
+        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup().eraseLineBreaks()))
 
         TinyGoInfoExtractor.logger.info("extraction finished")
     } catch (e: NoSuchElementException) {
@@ -66,6 +67,11 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         )
     }
 }
+
+@Throws(NoSuchElementException::class)
+private fun Regex.findFirst(input: CharSequence): MatchResult = findAll(input).first()
+private fun MatchResult.firstGroup(): String = groupValues[1]
+private fun String.eraseLineBreaks(): String = replace(Regex("\n((,)? )?"), "")
 
 class TinyGoExecutable(private val project: Project) {
     fun execute(
