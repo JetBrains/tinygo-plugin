@@ -217,6 +217,11 @@ jobs:
           gh api repos/{owner}/{repo}/releases \
             --jq '.[] | select(.draft == true) | .id' \
             | xargs -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}
+      # Download plugin artifact provided by the previous job
+      - name: Download Artifact
+        uses: actions/download-artifact@v3.0.1
+        with:
+          name: plugin-artifact
       # Create new release draft - which is not publicly visible and requires manual acceptance
       - name: Create Release Draft
         env:
@@ -229,3 +234,4 @@ jobs:
           ${{ needs.build.outputs.changelog }}
           EOM
           )"
+            ./${{ needs.build.outputs.artifact }}
