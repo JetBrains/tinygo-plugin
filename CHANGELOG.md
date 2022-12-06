@@ -16,6 +16,19 @@
 ### Security
 
 ## [0.5.6]
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.5.6]
 ### Changed
 - Make plugin compatible with 2022.3.
 
