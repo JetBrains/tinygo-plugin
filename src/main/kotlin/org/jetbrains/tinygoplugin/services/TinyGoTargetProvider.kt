@@ -1,12 +1,12 @@
 package org.jetbrains.tinygoplugin.services
 
-import com.intellij.util.io.exists
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.nullSdk
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.TreeSet
 import java.util.stream.Collectors
+import kotlin.io.path.exists
 
 @Suppress("ReturnCount")
 fun tinyGoTargets(sdk: TinyGoSdk): Set<String> {

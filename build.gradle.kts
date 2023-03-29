@@ -41,11 +41,12 @@ version = pluginVersion
 repositories {
     maven("https://cache-redirector.jetbrains.com/maven-central")
     maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
+    maven("https://cache-redirector.jetbrains.com/intellij-repository/snapshots")
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 dependencies {
-    testImplementation("com.jetbrains.intellij.go:go-test-framework:223.7571.176") {
+    testImplementation("com.jetbrains.intellij.go:go-test-framework:GOLAND-231-EAP-SNAPSHOT") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
         exclude("org.jetbrains.kotlin", "kotlin-reflect")
         exclude("com.jetbrains.rd", "rd-core")
@@ -71,6 +72,7 @@ dependencies {
     }
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
+    implementation("org.codehaus.plexus:plexus-utils:3.5.1")
 }
 
 // Configure gradle-intellij-plugin plugin.
@@ -116,7 +118,7 @@ tasks {
     }
 
     withType<Test> {
-        systemProperty("idea.home.path", "~/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/223.7255-EAP-CANDIDATE-SNAPSHOT/e1b29d466e3093b6be616ac08716db2a54ade047/goland-223.7255-EAP-CANDIDATE-SNAPSHOT/")
+        systemProperty("idea.home.path", "~/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/231.8109-EAP-CANDIDATE-SNAPSHOT/51208ab97facf2ef1308c5578078680bec32026e/goland-231.8109-EAP-CANDIDATE-SNAPSHOT/")
     }
 
     patchPluginXml {

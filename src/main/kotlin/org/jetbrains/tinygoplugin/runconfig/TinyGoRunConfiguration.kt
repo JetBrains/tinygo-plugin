@@ -14,7 +14,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.io.exists
 import com.intellij.util.io.isFile
 import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
@@ -26,6 +25,7 @@ import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.notExists
 

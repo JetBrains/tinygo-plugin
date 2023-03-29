@@ -13,7 +13,6 @@ import com.intellij.execution.runners.ProgramRunner
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.util.Key
-import com.intellij.util.io.exists
 import com.intellij.util.io.isDirectory
 import com.intellij.util.io.isFile
 import org.codehaus.plexus.util.cli.CommandLineUtils.translateCommandline
@@ -26,6 +25,7 @@ import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocsVie
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.io.path.exists
 
 open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     GoRunningState<TinyGoRunConfiguration>(env, module, configuration) {

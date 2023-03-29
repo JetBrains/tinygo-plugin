@@ -11,6 +11,7 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.TextFieldWithHistoryWithBrowseButton
 import com.intellij.ui.components.textFieldWithHistoryWithBrowseButton
+import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.COLUMNS_LARGE
 import com.intellij.ui.dsl.builder.COLUMNS_MEDIUM
 import com.intellij.ui.dsl.builder.COLUMNS_SHORT
@@ -22,7 +23,6 @@ import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -75,7 +75,7 @@ fun tinyGoSdkComboChooser(
     parentDisposable: Disposable,
 ): Cell<TinyGoSdkChooserCombo> = with(row) {
     cell(TinyGoSdkChooserCombo())
-        .horizontalAlign(HorizontalAlign.FILL)
+        .align(Align.FILL)
         .applyToComponent {
             var sdk: TinyGoSdk = property.get()
             if (sdk == nullSdk) {
@@ -151,7 +151,7 @@ private fun targetChooser(
                 TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE),
                 jsonChooser,
             )
-        ).horizontalAlign(HorizontalAlign.FILL).bind(
+        ).align(Align.FILL).bind(
             { component: TextFieldWithHistoryWithBrowseButton -> component.text },
             { component: TextFieldWithHistoryWithBrowseButton, value: String -> component.text = value },
             UIPropertyAdapter(wrapper.target)

@@ -7,13 +7,13 @@ import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.rd.doIfAlive
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
+import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.COLUMNS_MEDIUM
 import com.intellij.ui.dsl.builder.Panel
 import com.intellij.ui.dsl.builder.Row
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.ui.dsl.gridLayout.HorizontalAlign
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.services.editTinyGoSettingsLater
@@ -91,18 +91,18 @@ open class TinyGoRunConfigurationEditor<RunConfigurationType : TinyGoRunConfigur
             }
             row(TinyGoBundle.message(CLI_ARGUMENTS_LABEL)) {
                 textField()
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(Align.FILL)
                     .bindText(properties.cmdLineArguments)
                     .columns(COLUMNS_MEDIUM)
             }
             row(TinyGoBundle.message(PATH_TO_SRC_LABEL, pathKind)) {
                 val fileChooserDescriptor = FileChooserDescriptor(true, true, false, false, false, false)
                 textFieldWithBrowseButton(fileChooserDescriptor = fileChooserDescriptor)
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(Align.FILL)
                     .bindText(properties.mainFile)
             }
             row(TinyGoBundle.message(ENVIRONMENT_LABEL)) {
-                cell(environmentEditor).horizontalAlign(HorizontalAlign.FILL)
+                cell(environmentEditor).align(Align.FILL)
             }
             createAdditionalComponent(this)
         }
@@ -120,7 +120,7 @@ class TinyGoBuildRunConfigurationEditor(runConfiguration: TinyGoBuildRunConfigur
             row(TinyGoBundle.message(OUTPUT_PATH_LABEL)) {
                 val fileChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
                 textFieldWithBrowseButton(fileChooserDescriptor = fileChooserDescriptor)
-                    .horizontalAlign(HorizontalAlign.FILL)
+                    .align(Align.FILL)
                     .bindText(properties.outputPath)
             }
         }
@@ -144,6 +144,6 @@ private fun targetPlatformFieldWithLink(
                 }
             }
         }
-        cell(targetFieldWithLink).horizontalAlign(HorizontalAlign.FILL)
+        cell(targetFieldWithLink).align(Align.FILL)
     }
 }
