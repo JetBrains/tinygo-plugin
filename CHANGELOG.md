@@ -15,18 +15,9 @@
 
 ### Security
 
-## [0.5.6]
-### Added
-
+## [0.5.7]
 ### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+- Make plugin compatible with 2023.1.
 
 ## [0.5.6]
 ### Changed
