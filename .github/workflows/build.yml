@@ -238,4 +238,4 @@ jobs:
           ${{ needs.build.outputs.changelog }}
           EOM
           )"
-            ./${{ needs.build.outputs.artifact }}
+            ${{ needs.build.outputs.artifact }}
