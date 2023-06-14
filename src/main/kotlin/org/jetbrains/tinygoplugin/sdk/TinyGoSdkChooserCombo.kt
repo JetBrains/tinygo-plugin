@@ -2,12 +2,13 @@ package org.jetbrains.tinygoplugin.sdk
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.goide.sdk.combobox.GoBasedSdkChooserCombo
+import com.goide.sdk.combobox.GoBasedSdkChooserCombo.Validator
 import com.goide.sdk.combobox.GoSdkActionsProvider
 import com.goide.sdk.combobox.GoSdkListProvider
 import com.goide.sdk.download.GoDownloadSdkAction
 import com.goide.sdk.download.GoSdkDownloaderDialog
+import com.intellij.facet.ui.ValidationResult
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileChooser.FileChooser
@@ -133,6 +134,7 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
 
 class TinyGoSdkChooserCombo :
     GoBasedSdkChooserCombo<TinyGoSdk>(
+        Validator { ValidationResult.OK },
         object : GoSdkListProvider<TinyGoSdk> {
             override fun getAllKnownSdks(): MutableList<TinyGoSdk> {
                 val loadedSdks = service<TinyGoSdkList>().loadedSdks.toList()
@@ -140,7 +142,7 @@ class TinyGoSdkChooserCombo :
                 return (loadedSdks + downloadingSdks).toMutableList()
             }
 
-            override fun discoverSdks(state: ModalityState?): MutableList<TinyGoSdk> = allKnownSdks
+            override fun discoverSdks(): MutableList<TinyGoSdk> = allKnownSdks
         },
         GoSdkActionsProvider {
             listOf(
