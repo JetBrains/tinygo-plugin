@@ -70,6 +70,7 @@ dependencies {
         exclude("ai.grazie.nlp", "nlp-tokenizer-jvm")
         exclude("ai.grazie.spell", "hunspell-en-jvm")
         exclude("ai.grazie.spell", "gec-spell-engine-local-jvm")
+        exclude("ai.grazie.utils", "utils-lucene-lt-compatibility-jvm")
     }
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
@@ -119,7 +120,7 @@ tasks {
     }
 
     withType<Test> {
-        systemProperty("idea.home.path", "~/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/231.8109-EAP-CANDIDATE-SNAPSHOT/51208ab97facf2ef1308c5578078680bec32026e/goland-231.8109-EAP-CANDIDATE-SNAPSHOT/")
+        systemProperty("idea.home.path", "~/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/232.7295-EAP-CANDIDATE-SNAPSHOT/40acfac3037f866cd2f2d1fddaf15f1f90f24c38/goland-232.7295-EAP-CANDIDATE-SNAPSHOT.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/232.7295-EAP-CANDIDATE-SNAPSHOT/40acfac3037f866cd2f2d1fddaf15f1f90f24c38/goland-232.7295-EAP-CANDIDATE-SNAPSHOT/")
     }
 
     patchPluginXml {
