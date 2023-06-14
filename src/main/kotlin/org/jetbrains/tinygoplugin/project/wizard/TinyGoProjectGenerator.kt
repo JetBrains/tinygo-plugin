@@ -6,6 +6,7 @@ import com.goide.vgo.wizard.VgoModuleBuilder
 import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
+import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
@@ -95,7 +96,7 @@ private fun configureModule(
 }
 
 private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
-    TinyGoInfoExtractor(project).extractTinyGoInfo(tinyGoSettings) { _, output ->
+    project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings) { _, output ->
         tinyGoSettings.extractTinyGoInfo(output)
         tinyGoSettings.saveState(project)
         propagateGoFlags(project, tinyGoSettings)

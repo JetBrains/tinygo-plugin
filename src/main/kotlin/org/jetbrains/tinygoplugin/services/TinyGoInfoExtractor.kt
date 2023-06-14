@@ -110,7 +110,7 @@ class TinyGoExecutable(private val project: Project) {
     }
 }
 
-@Service
+@Service(Service.Level.PROJECT)
 class TinyGoInfoExtractor(private val project: Project) {
     companion object {
         val logger: Logger = logger<TinyGoInfoExtractor>()
