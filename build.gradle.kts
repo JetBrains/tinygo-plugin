@@ -47,7 +47,7 @@ repositories {
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 dependencies {
-    testImplementation("com.jetbrains.intellij.go:go-test-framework:GOLAND-232-EAP-SNAPSHOT") {
+    testImplementation("com.jetbrains.intellij.go:go-test-framework:231.8109.199") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
         exclude("org.jetbrains.kotlin", "kotlin-reflect")
         exclude("com.jetbrains.rd", "rd-core")
@@ -120,7 +120,7 @@ tasks {
     }
 
     withType<Test> {
-        systemProperty("idea.home.path", "~/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/232.8296-EAP-CANDIDATE-SNAPSHOT/79bcd1328705f7532303faeb5ae6235adb7cda6/goland-232.8296-EAP-CANDIDATE-SNAPSHOT/")
+        systemProperty("idea.home.path", "~/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/231.8109-EAP-CANDIDATE-SNAPSHOT/51208ab97facf2ef1308c5578078680bec32026e/goland-231.8109-EAP-CANDIDATE-SNAPSHOT/")
     }
 
     patchPluginXml {
