@@ -16,6 +16,11 @@
 
 ### Security
 
+## 0.5.9
+
+### Fixed
+- Fix resolving of the `machine` package for some targets on Windows.
+
 ## 0.5.8
 
 ### Changed
