@@ -120,7 +120,7 @@ tasks {
     }
 
     withType<Test> {
-        systemProperty("idea.home.path", "~/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/232.8296-EAP-CANDIDATE-SNAPSHOT/79bcd1328705f7532303faeb5ae6235adb7cda6/goland-232.8296-EAP-CANDIDATE-SNAPSHOT/")
+        systemProperty("idea.home.path", "$buildDir/idea-sandbox/")
     }
 
     patchPluginXml {
