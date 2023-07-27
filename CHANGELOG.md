@@ -16,6 +16,11 @@
 
 ### Security
 
+## 0.5.10
+
+### Changed
+- Make plugin compatible with 2023.2.
+
 ## 0.5.9
 
 ### Fixed
