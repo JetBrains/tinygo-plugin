@@ -2,7 +2,6 @@ package org.jetbrains.tinygoplugin.runconfig
 
 import com.goide.execution.GoConfigurationFactoryBase
 import com.intellij.execution.configurations.ConfigurationType
-import com.intellij.execution.configurations.ConfigurationType.CONFIGURATION_TYPE_EP
 import com.intellij.execution.configurations.ConfigurationTypeBase
 import com.intellij.execution.configurations.RunConfiguration
 import com.intellij.openapi.project.Project
