@@ -2,7 +2,7 @@ package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoSyntheticLibrary
 import com.intellij.navigation.ItemPresentation
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.AdditionalLibraryRootsProvider
 import com.intellij.openapi.roots.SyntheticLibrary
@@ -34,12 +34,8 @@ class TinyGoRootLibrary(private val moduleName: String, private val sourceRoots:
 }
 
 class TinyGoLibraryProvider : AdditionalLibraryRootsProvider() {
-    companion object {
-        val logger = logger<TinyGoLibraryProvider>()
-    }
-
     override fun getAdditionalProjectLibraries(project: Project): Collection<SyntheticLibrary> {
-        logger.debug("TinyGo SDK additional library (cached GOROOT) requested")
+        thisLogger().debug("TinyGo SDK additional library (cached GOROOT) requested")
         val tinyGoRoots = getRootsToWatch(project)
         return if (tinyGoRoots.isEmpty()) emptyList() else listOf(
             TinyGoRootLibrary(
@@ -53,12 +49,12 @@ class TinyGoLibraryProvider : AdditionalLibraryRootsProvider() {
     override fun getRootsToWatch(project: Project): Collection<VirtualFile> {
         val settings = project.tinyGoConfiguration()
         if (!settings.enabled) {
-            logger.debug("cached GOROOT not presented because TinyGo is disabled")
+            thisLogger().debug("cached GOROOT not presented because TinyGo is disabled")
             return emptyList()
         }
         val tinyGoCachedGoRoot = settings.cachedGoRoot
         val tinyGoCachedGoRootSources = tinyGoCachedGoRoot.srcDir ?: return emptyList()
-        logger.debug("cached GOROOT presented at ${project.tinyGoConfiguration().cachedGoRoot}")
+        thisLogger().debug("cached GOROOT presented at ${project.tinyGoConfiguration().cachedGoRoot}")
         return listOf(tinyGoCachedGoRootSources)
     }
 }

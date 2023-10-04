@@ -4,6 +4,7 @@ import com.goide.project.GoModuleSettings
 import com.intellij.execution.RunManager
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.service
+import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
@@ -24,7 +25,7 @@ fun propagateGoFlags(project: Project, settings: TinyGoConfiguration) {
         it.getService(GoModuleSettings::class.java)
     }
     if (goSettings == null) {
-        TinyGoSettingsService.logger.warn("Could not find go module settings")
+        logger<TinyGoSettingsService>().warn("Could not find go module settings")
         return
     }
     val buildSettings = goSettings.buildTargetSettings

@@ -7,7 +7,7 @@ import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
@@ -30,10 +30,6 @@ private fun getProjectDescription(): String = TinyGoBundle.message("new.project.
 private fun getProjectIcon(): Icon = TinyGoPluginIcons.TinyGoIcon
 
 class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
-    companion object {
-        val logger = logger<TinyGoProjectGenerator>()
-    }
-
     override fun getName(): String = getProjectPresentableName()
 
     override fun getDescription(): String = getProjectDescription()
@@ -48,22 +44,18 @@ class TinyGoProjectGenerator : GoProjectGenerator<TinyGoNewProjectSettings>() {
         newProjectSettings: TinyGoNewProjectSettings,
         module: Module,
     ) {
-        logger.debug("Begin configuring module for a new project")
+        thisLogger().debug("Begin configuring module for a new project")
         configureModule(newProjectSettings, project, module, baseDir.path)
         GoProjectLifecycle.runWhenProjectSetupFinished(project) {
             sendReloadLibrariesSignal(project)
         }
-        logger.debug("Finish configuring module for a new project")
+        thisLogger().debug("Finish configuring module for a new project")
     }
 
     override fun createPeer(): ProjectGeneratorPeer<TinyGoNewProjectSettings> = TinyGoProjectGeneratorPeer()
 }
 
 class TinyGoModuleBuilder : GoModuleBuilderBase<TinyGoNewProjectSettings>(TinyGoProjectGeneratorPeer()) {
-    companion object {
-        val logger = logger<TinyGoModuleBuilder>()
-    }
-
     override fun getPresentableName(): String = getProjectPresentableName()
 
     override fun getDescription(): String = getProjectDescription()
@@ -71,9 +63,9 @@ class TinyGoModuleBuilder : GoModuleBuilderBase<TinyGoNewProjectSettings>(TinyGo
     override fun getNodeIcon(): Icon = getProjectIcon()
 
     override fun moduleCreated(module: Module, isCreatingNewProject: Boolean) {
-        logger.debug("Begin configuring module for module creation")
+        thisLogger().debug("Begin configuring module for module creation")
         configureModule(settings, module.project, module, contentEntryPath)
-        TinyGoProjectGenerator.logger.debug("Finish configuring module for module creation")
+        thisLogger().debug("Finish configuring module for module creation")
     }
 }
 

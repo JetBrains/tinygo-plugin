@@ -2,8 +2,7 @@ package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoModuleSettings
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.diagnostic.logger
+import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
@@ -32,7 +31,7 @@ class TinyGoConfigurationWithTagUpdate(
     init {
         val moduleSettings = goSettings(project)
         if (moduleSettings == null) {
-            TinyGoSettingsService.logger.warn("Could not find go module settings")
+            thisLogger().warn("Could not find go module settings")
         } else {
             val buildSettings = moduleSettings.buildTargetSettings
             settings.goArch = buildSettings.arch
@@ -103,10 +102,6 @@ class TinyGoConfigurationWithTagUpdate(
 
 class TinyGoSettingsService(private val project: Project) :
     BoundConfigurable("TinyGo"), ConfigurationProvider<TinyGoConfiguration> {
-    companion object {
-        val logger: Logger = logger<TinyGoSettingsService>()
-    }
-
     // local copy of the settings
     override var tinyGoSettings: TinyGoConfiguration =
         TinyGoConfigurationWithTagUpdate(project, this::callExtractor)
@@ -116,7 +111,7 @@ class TinyGoSettingsService(private val project: Project) :
     override fun isModified(): Boolean = tinyGoSettings.modified(project)
 
     override fun apply() {
-        logger.warn("Apply called")
+        thisLogger().warn("Apply called")
         val oldConfiguration = project.tinyGoConfiguration()
         val oldSdk = oldConfiguration.sdk
         val oldTarget = oldConfiguration.targetPlatform
@@ -133,7 +128,7 @@ class TinyGoSettingsService(private val project: Project) :
     private fun callExtractor() {
         project.service<TinyGoInfoExtractor>()
             .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
-                logger.trace(output)
+                thisLogger().trace(output)
                 tinyGoSettings.extractTinyGoInfo(output)
                 // update all ui fields
                 propertiesWrapper.reset()

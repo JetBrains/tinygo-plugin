@@ -5,5 +5,5 @@ import com.intellij.openapi.fileTypes.FileType
 import com.intellij.psi.FileViewProvider
 
 class AvrAsmFile(viewProvider: FileViewProvider) : PsiFileBase(viewProvider, AvrAsmLanguage.INSTANCE) {
-    override fun getFileType(): FileType = AvrAsmFileType.INSTANCE
+    override fun getFileType(): FileType = AvrAsmFileType
 }

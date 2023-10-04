@@ -9,39 +9,38 @@ import com.intellij.patterns.PlatformPatterns
 import com.intellij.patterns.PsiElementPattern
 import com.intellij.util.ProcessingContext
 
-class TinyGoInjectionPatterns : PlatformPatterns() {
-    companion object {
-        @JvmStatic
-        fun tinyGoInlineAssembly(device: String): PsiElementPattern.Capture<GoStringLiteral> =
-            psiElement(GoStringLiteral::class.java)
-                .withAncestor(1, psiElement(GoArgumentList::class.java))
-                .withAncestor(2, asmInjectionFunctionCall(device))
+@Suppress("unused")
+object TinyGoInjectionPatterns : PlatformPatterns() {
+    @JvmStatic
+    fun tinyGoInlineAssembly(device: String): PsiElementPattern.Capture<GoStringLiteral> =
+        psiElement(GoStringLiteral::class.java)
+            .withAncestor(1, psiElement(GoArgumentList::class.java))
+            .withAncestor(2, asmInjectionFunctionCall(device))
 
-        @JvmStatic
-        private fun asmInjectionFunctionCall(device: String) =
-            psiElement(GoCallExpr::class.java)
-                .withChild(asmInjectionFunctionReference(device))
+    @JvmStatic
+    private fun asmInjectionFunctionCall(device: String) =
+        psiElement(GoCallExpr::class.java)
+            .withChild(asmInjectionFunctionReference(device))
 
-        @JvmStatic
-        private fun asmInjectionFunctionReference(device: String) =
-            psiElement(GoReferenceExpression::class.java)
-                .with(
-                    GoCompletionUtil.condition("string value is assembly injection function name") {
-                        val identifier = it.identifier.text
-                        (identifier == "Asm") || (identifier == "AsmFull")
-                    }
-                ).withChild(
-                    supportedDeviceLibraryReference(device)
-                )
-
-        @JvmStatic
-        private fun supportedDeviceLibraryReference(device: String) =
-            object : PsiElementPattern.Capture<GoReferenceExpression>(GoReferenceExpression::class.java) {
-                override fun accepts(o: Any?, context: ProcessingContext): Boolean {
-                    if (o == null) return false
-                    val packageName = (o as GoReferenceExpression).text
-                    return packageName == device
+    @JvmStatic
+    private fun asmInjectionFunctionReference(device: String) =
+        psiElement(GoReferenceExpression::class.java)
+            .with(
+                GoCompletionUtil.condition("string value is assembly injection function name") {
+                    val identifier = it.identifier.text
+                    (identifier == "Asm") || (identifier == "AsmFull")
                 }
+            ).withChild(
+                supportedDeviceLibraryReference(device)
+            )
+
+    @JvmStatic
+    private fun supportedDeviceLibraryReference(device: String) =
+        object : PsiElementPattern.Capture<GoReferenceExpression>(GoReferenceExpression::class.java) {
+            override fun accepts(o: Any?, context: ProcessingContext): Boolean {
+                if (o == null) return false
+                val packageName = (o as GoReferenceExpression).text
+                return packageName == device
             }
-    }
+        }
 }

@@ -64,9 +64,4 @@ class TinyGoRunConfigurationType :
         addFactory(buildFactory)
         addFactory(heapAllocFactory)
     }
-
-    companion object {
-        fun getInstance(): TinyGoRunConfigurationType =
-            CONFIGURATION_TYPE_EP.findExtensionOrFail(TinyGoRunConfigurationType::class.java)
-    }
 }

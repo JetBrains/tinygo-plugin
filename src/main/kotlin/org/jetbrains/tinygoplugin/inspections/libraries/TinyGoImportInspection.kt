@@ -31,29 +31,6 @@ private fun tinyGoLink(packageName: String): String =
     "https://tinygo.org/lang-support/stdlib/#${packageName.replace("/", "")}"
 
 open class TinyGoImportInspection : GoInspectionBase() {
-    companion object {
-        private const val IMPORT_INSPECTION_MESSAGE = "inspection.import.unsupported.message"
-        private const val IMPORT_QUICK_FIX_FAMILY = "inspection.import.unsupported.fix"
-        protected const val IMPORT_DEPENDENCY_INSPECTION_MESSAGE = "inspection.import.reference.message"
-        protected const val IMPORT_DEPENDENCY_TYPE_INSPECTION_MESSAGE = "inspection.import.type.message"
-
-        val UNSUPPORTED_LIBRARY_QUICK_FIX = object : LocalQuickFix {
-            override fun getFamilyName(): String = TinyGoBundle.message(IMPORT_QUICK_FIX_FAMILY)
-
-            override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-                val element = descriptor.psiElement
-                val importDeclaration = element.parent
-                val importCount = importDeclaration.children.filterIsInstance<GoImportSpec>().size
-                // check if it is declared with
-                // import "encoding/json"
-                element.delete()
-                if (importCount == 1) {
-                    importDeclaration.delete()
-                }
-            }
-        }
-    }
-
     protected open val produceLink: Boolean = true
     protected open val defaultInspectionMessage = IMPORT_INSPECTION_MESSAGE
 
@@ -238,6 +215,27 @@ open class TinyGoImportInspection : GoInspectionBase() {
                     element.presentation?.presentableText ?: element.text
                 else -> element.text
             }
+        }
+    }
+}
+
+private const val IMPORT_INSPECTION_MESSAGE = "inspection.import.unsupported.message"
+private const val IMPORT_QUICK_FIX_FAMILY = "inspection.import.unsupported.fix"
+private const val IMPORT_DEPENDENCY_INSPECTION_MESSAGE = "inspection.import.reference.message"
+private const val IMPORT_DEPENDENCY_TYPE_INSPECTION_MESSAGE = "inspection.import.type.message"
+
+val UNSUPPORTED_LIBRARY_QUICK_FIX = object : LocalQuickFix {
+    override fun getFamilyName(): String = TinyGoBundle.message(IMPORT_QUICK_FIX_FAMILY)
+
+    override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
+        val element = descriptor.psiElement
+        val importDeclaration = element.parent
+        val importCount = importDeclaration.children.filterIsInstance<GoImportSpec>().size
+        // check if it is declared with
+        // import "encoding/json"
+        element.delete()
+        if (importCount == 1) {
+            importDeclaration.delete()
         }
     }
 }

@@ -4,11 +4,7 @@ import com.intellij.openapi.fileTypes.LanguageFileType
 import icons.GOPlan9Icons
 import javax.swing.Icon
 
-class AvrAsmFileType : LanguageFileType(AvrAsmLanguage.INSTANCE) {
-    companion object {
-        val INSTANCE = AvrAsmFileType()
-    }
-
+object AvrAsmFileType : LanguageFileType(AvrAsmLanguage.INSTANCE) {
     override fun getName(): String = "AVR assembly"
 
     override fun getDescription(): String = "AVR assembly language"

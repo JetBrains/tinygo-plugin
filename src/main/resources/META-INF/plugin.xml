@@ -90,7 +90,4 @@
         <languageSupport implementation="org.jetbrains.tinygoplugin.injection.TinyGoInjectionSupport"/>
         <injectionConfig config="injections/tinygoInjections.xml"/>
     </extensions>
-    <extensions defaultExtensionNs="com.intellij">
-        <patterns.patternClass className="org.jetbrains.tinygoplugin.injection.TinyGoInjectionPatterns" alias="tinygo"/>
-    </extensions>
 </idea-plugin>

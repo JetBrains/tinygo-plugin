@@ -6,6 +6,7 @@ import com.goide.execution.application.GoApplicationConfiguration
 import com.intellij.execution.actions.ConfigurationContext
 import com.intellij.execution.actions.ConfigurationFromContext
 import com.intellij.execution.configurations.ConfigurationFactory
+import com.intellij.execution.configurations.runConfigurationType
 import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -77,17 +78,17 @@ abstract class TinyGoHardwareRunConfigurationProducer(configurationName: String)
 
 class TinyGoFlashRunConfigurationProducer : TinyGoHardwareRunConfigurationProducer("Flash") {
     override fun getConfigurationFactory(): ConfigurationFactory =
-        TinyGoRunConfigurationType.getInstance().flashFactory
+        runConfigurationType<TinyGoRunConfigurationType>().flashFactory
 }
 
 class TinyGoEmulateRunConfigurationProducer : TinyGoRunConfigurationProducer("Emulate") {
     override fun getConfigurationFactory(): ConfigurationFactory =
-        TinyGoRunConfigurationType.getInstance().runFactory
+        runConfigurationType<TinyGoRunConfigurationType>().runFactory
 }
 
 class TinyGoTestRunConfigurationProducer : TinyGoRunConfigurationProducer("Test") {
     override fun getConfigurationFactory(): ConfigurationFactory =
-        TinyGoRunConfigurationType.getInstance().testFactory
+        runConfigurationType<TinyGoRunConfigurationType>().testFactory
 
     override fun contextPredicate(contextFile: PsiFile): Boolean = isTestGoFile(contextFile)
 
@@ -101,10 +102,10 @@ class TinyGoTestRunConfigurationProducer : TinyGoRunConfigurationProducer("Test"
 
 class TinyGoBuildRunConfigurationProducer : TinyGoRunConfigurationProducer("Build") {
     override fun getConfigurationFactory(): ConfigurationFactory =
-        TinyGoRunConfigurationType.getInstance().buildFactory
+        runConfigurationType<TinyGoRunConfigurationType>().buildFactory
 }
 
 class TinyGoHeapAllocRunConfigurationProducer : TinyGoRunConfigurationProducer("Heap Allocations") {
     override fun getConfigurationFactory(): ConfigurationFactory =
-        TinyGoRunConfigurationType.getInstance().heapAllocFactory
+        runConfigurationType<TinyGoRunConfigurationType>().heapAllocFactory
 }

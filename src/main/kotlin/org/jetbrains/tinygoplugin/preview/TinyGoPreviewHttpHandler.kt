@@ -77,19 +77,17 @@ class TinyGoPreviewHttpHandler : HttpRequestHandler() {
         val hypertext = hypertextResource.readBytes()
         return sendData(hypertext, truePath, request, context.channel(), EmptyHttpHeaders.INSTANCE)
     }
-
-    companion object {
-        enum class RespType {
-            MainPage, WASM, Hypertext
-        }
-
-        fun getResponseType(path: String): RespType =
-            when (path) {
-                "/tinygo-preview" -> RespType.MainPage
-                "/tinygo-preview/wasm" -> RespType.WASM
-                else -> RespType.Hypertext
-            }
-
-        fun getResource(resourcePath: String): URL? = this::class.java.getResource(resourcePath)
-    }
 }
+
+private enum class RespType {
+    MainPage, WASM, Hypertext
+}
+
+private fun getResponseType(path: String): RespType =
+    when (path) {
+        "/tinygo-preview" -> RespType.MainPage
+        "/tinygo-preview/wasm" -> RespType.WASM
+        else -> RespType.Hypertext
+    }
+
+private fun getResource(resourcePath: String): URL? = TinyGoPreviewHttpHandler::class.java.getResource(resourcePath)

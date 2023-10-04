@@ -15,18 +15,6 @@ import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.services.editTinyGoSettingsLater
 
 class TinyGoStatementInspection : GoInspectionBase() {
-    companion object {
-
-        private val QUICK_FIX = object : LocalQuickFix {
-
-            override fun getFamilyName(): String = TinyGoBundle.message("inspection.go.statement.edit.settings.fix")
-
-            override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
-                editTinyGoSettingsLater(project)
-            }
-        }
-    }
-
     override fun buildGoVisitor(
         problemsHolder: GoProblemsHolder,
         locationInspection: LocalInspectionToolSession,
@@ -41,9 +29,17 @@ class TinyGoStatementInspection : GoInspectionBase() {
                         goStatement,
                         inspectionMessage("inspection.go.statement.message"),
                         ProblemHighlightType.GENERIC_ERROR,
-                        QUICK_FIX
+                        EDIT_SETTINGS_QUICK_FIX
                     )
                 }
             }
         }
+}
+
+private val EDIT_SETTINGS_QUICK_FIX = object : LocalQuickFix {
+    override fun getFamilyName(): String = TinyGoBundle.message("inspection.go.statement.edit.settings.fix")
+
+    override fun applyFix(project: Project, descriptor: ProblemDescriptor) {
+        editTinyGoSettingsLater(project)
+    }
 }

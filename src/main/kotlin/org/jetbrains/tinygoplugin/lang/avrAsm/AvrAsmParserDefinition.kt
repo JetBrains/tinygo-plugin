@@ -14,14 +14,12 @@ import com.intellij.psi.tree.TokenSet
 import org.jetbrains.tinygoplugin.lang.avrAsm.parser.AvrAsmParser
 import org.jetbrains.tinygoplugin.lang.avrAsm.psi.AvrAsmTypes
 
-class AvrAsmParserDefinition : ParserDefinition {
-    companion object {
-        val FILE = IFileElementType(AvrAsmLanguage.INSTANCE)
-        val WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE)
-        val COMMENTS = TokenSet.create(AvrAsmTypes.LINE_COMMENT, AvrAsmTypes.BLOCK_COMMENT)
-        val STRINGS = TokenSet.create(AvrAsmTypes.STRING)
-    }
+private val FILE = IFileElementType(AvrAsmLanguage.INSTANCE)
+private val WHITE_SPACES = TokenSet.create(TokenType.WHITE_SPACE)
+private val COMMENTS = TokenSet.create(AvrAsmTypes.LINE_COMMENT, AvrAsmTypes.BLOCK_COMMENT)
+private val STRINGS = TokenSet.create(AvrAsmTypes.STRING)
 
+class AvrAsmParserDefinition : ParserDefinition {
     override fun createLexer(project: Project?): Lexer = AvrAsmLexerAdapter()
 
     override fun createParser(project: Project?): PsiParser = AvrAsmParser()
