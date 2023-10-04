@@ -12,7 +12,7 @@ import org.yaml.snakeyaml.Yaml
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-@Service
+@Service(Service.Level.PROJECT)
 class UnsupportedPackageProvider(private val project: Project) {
     private fun loadUnsupportedLibraries(version: TinyGoSdkVersion): Set<String> {
         val stream = this.javaClass.classLoader.getResourceAsStream("libraries/$version.yaml")

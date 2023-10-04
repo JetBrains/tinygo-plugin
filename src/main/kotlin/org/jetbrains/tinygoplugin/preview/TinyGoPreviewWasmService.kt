@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.atomic.AtomicReference
 
-@Service
+@Service(Service.Level.PROJECT)
 internal class TinyGoPreviewWasmService(val project: Project) {
     private val compilationStatus: ConcurrentMap<String, AtomicReference<CompilationStatus>> = ConcurrentHashMap()
 

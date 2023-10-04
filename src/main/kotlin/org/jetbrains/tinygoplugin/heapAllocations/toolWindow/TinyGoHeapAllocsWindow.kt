@@ -36,7 +36,7 @@ class TinyGoHeapAllocsToolWindowFactory : ToolWindowFactory {
     override fun shouldBeAvailable(project: Project): Boolean = false
 }
 
-@Service
+@Service(Service.Level.PROJECT)
 class TinyGoHeapAllocsViewManager(val project: Project) {
     fun updateHeapAllocsList(update: Map<String, Set<TinyGoHeapAlloc>>) {
         val heapAllocsView = TinyGoHeapAllocsWindow(project)
