@@ -41,12 +41,12 @@ version = pluginVersion
 // Configure project's dependencies
 repositories {
     maven("https://cache-redirector.jetbrains.com/maven-central")
-    maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
+    maven("https://cache-redirector.jetbrains.com/intellij-repository/snapshots")
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 dependencies {
-    testImplementation("com.jetbrains.intellij.go:go-test-framework:232.8660.185") {
+    testImplementation("com.jetbrains.intellij.go:go-test-framework:GOLAND-233-EAP-SNAPSHOT") {
         exclude("org.jetbrains.kotlin", "kotlin-stdlib-jdk8")
         exclude("org.jetbrains.kotlin", "kotlin-reflect")
         exclude("com.jetbrains.rd", "rd-core")

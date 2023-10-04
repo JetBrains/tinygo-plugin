@@ -14,7 +14,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.io.isFile
 import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
@@ -27,6 +26,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.io.path.exists
 import kotlin.io.path.extension
+import kotlin.io.path.isRegularFile
 import kotlin.io.path.notExists
 
 private const val ERROR_SDK_NOT_SET = "run.configuration.errors.sdk"
@@ -151,7 +151,7 @@ open class TinyGoBuildRunConfiguration(project: Project, factory: ConfigurationF
         val outputPath = runConfig.outputPath
         if (outputPath.isNotEmpty()) {
             val candidate = Paths.get(outputPath)
-            val existingFile = candidate.exists() && candidate.isFile()
+            val existingFile = candidate.exists() && candidate.isRegularFile()
             val newFile = candidate.notExists()
             if ((existingFile || newFile) && candidate.extension != "wasm")
                 throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_BUILD_WASM_WRONG_EXTENSION))

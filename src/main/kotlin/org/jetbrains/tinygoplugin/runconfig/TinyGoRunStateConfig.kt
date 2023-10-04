@@ -13,8 +13,6 @@ import com.intellij.execution.runners.ProgramRunner
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.util.Key
-import com.intellij.util.io.isDirectory
-import com.intellij.util.io.isFile
 import org.codehaus.plexus.util.cli.CommandLineUtils.translateCommandline
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -26,6 +24,8 @@ import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.isRegularFile
 
 open class TinyGoRunningState(env: ExecutionEnvironment, module: Module, configuration: TinyGoRunConfiguration) :
     GoRunningState<TinyGoRunConfiguration>(env, module, configuration) {
@@ -74,7 +74,7 @@ open class TinyGoBuildRunningState(
             val candidate = Paths.get(outputPathFromEditor)
             if (candidate.isDirectory())
                 return Paths.get(outputPathFromEditor, module!!.name + fileExtension).toString()
-            if (candidate.isFile() || !candidate.exists() && candidate.parent.isDirectory())
+            if (candidate.isRegularFile() || !candidate.exists() && candidate.parent.isDirectory())
                 return outputPathFromEditor
         }
 
