@@ -117,13 +117,13 @@ private fun tinyGoSettings(
                     targetChooser(this, wrapper, tinyGoSdkComboChooser)
                 }
                 row(TinyGoBundle.message(GC_LABEL)) {
-                    comboBox(GarbageCollector.values().toSet())
+                    comboBox(GarbageCollector.entries.toSet())
                         .bindItem(wrapper.gc)
                         .columns(COLUMNS_SHORT)
                     autoHelpLabel(this)
                 }
                 row(TinyGoBundle.message(SCHEDULER_LABEL)) {
-                    comboBox(Scheduler.values().toSet())
+                    comboBox(Scheduler.entries.toSet())
                         .bindItem(wrapper.scheduler)
                         .columns(COLUMNS_SHORT)
                     autoHelpLabel(this)
