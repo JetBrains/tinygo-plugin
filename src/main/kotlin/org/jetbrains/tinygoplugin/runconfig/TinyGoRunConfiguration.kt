@@ -7,6 +7,7 @@ import com.intellij.conversion.impl.ConversionContextImpl
 import com.intellij.execution.configurations.ConfigurationFactory
 import com.intellij.execution.configurations.RuntimeConfigurationException
 import com.intellij.execution.runners.ExecutionEnvironment
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.options.SettingsEditorGroup
@@ -14,12 +15,15 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationEditor.PathKind
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
+import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
+import org.jetbrains.tinygoplugin.services.blockingIO
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 import java.nio.file.Path
@@ -69,7 +73,8 @@ abstract class TinyGoRunConfiguration(
             RunSettings(tinyGoSettings, "", mainPath, "")
     }
 
-    private fun mainFile(): VirtualFile? {
+    @RequiresBackgroundThread
+    private suspend fun mainFile(): VirtualFile? {
         if (runConfig.mainFile.isEmpty()) {
             return null
         }
@@ -77,7 +82,7 @@ abstract class TinyGoRunConfiguration(
         if (!file.exists()) {
             return null
         }
-        return VfsUtil.findFile(file.toPath(), false)
+        return readAction { VfsUtil.findFile(file.toPath(), false) }
     }
 
     @Throws(RuntimeConfigurationException::class)
@@ -85,7 +90,8 @@ abstract class TinyGoRunConfiguration(
         if (executable == null) {
             throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_SDK_NOT_SET))
         }
-        val main = mainFile() ?: throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_MAIN_FILE_NOT_FOUND))
+        val main = TinyGoServiceScope.getScope(project).blockingIO { mainFile() }
+            ?: throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_MAIN_FILE_NOT_FOUND))
         if (!main.isValid) {
             throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_MAIN_FILE_NOT_FOUND))
         }

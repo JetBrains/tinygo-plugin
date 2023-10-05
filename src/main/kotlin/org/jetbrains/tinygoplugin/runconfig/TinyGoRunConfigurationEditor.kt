@@ -2,9 +2,11 @@ package org.jetbrains.tinygoplugin.runconfig
 
 import com.intellij.execution.configuration.EnvironmentVariablesTextFieldWithBrowseButton
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.options.SettingsEditor
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.rd.doIfAlive
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.dsl.builder.Align
@@ -16,7 +18,7 @@ import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
-import org.jetbrains.tinygoplugin.services.editTinyGoSettingsLater
+import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.MappedGraphProperty
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -138,7 +140,8 @@ private fun targetPlatformFieldWithLink(
         targetTextField.isEnabled = false
         val targetFieldWithLink = TextFieldWithBrowseButton(targetTextField) {
             val project = runConfiguration.project
-            editTinyGoSettingsLater(project) {
+            val edited = service<ShowSettingsUtil>().editConfigurable(project, TinyGoSettingsService(project))
+            if (edited) {
                 parentDisposable.doIfAlive {
                     targetTextField.text = project.tinyGoConfiguration().targetPlatform
                 }

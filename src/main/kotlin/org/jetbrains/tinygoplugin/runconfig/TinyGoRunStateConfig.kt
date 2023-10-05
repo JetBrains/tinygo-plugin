@@ -10,9 +10,13 @@ import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.util.Key
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.codehaus.plexus.util.cli.CommandLineUtils.translateCommandline
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -21,6 +25,7 @@ import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.heapAllocations.supplyHeapAllocsFromOutput
 import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.TinyGoHeapAllocsViewManager
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
+import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.io.path.exists
@@ -108,8 +113,12 @@ class TinyGoHeapAllocRunningState(
             }
 
             override fun processTerminated(event: ProcessEvent) {
-                val heapAllocs = supplyHeapAllocsFromOutput(module!!, processOutput)
-                module?.project?.service<TinyGoHeapAllocsViewManager>()?.updateHeapAllocsList(heapAllocs)
+                TinyGoServiceScope.getScope(module!!.project).launch(Dispatchers.EDT) {
+                    val heapAllocs = withContext(Dispatchers.IO) {
+                        supplyHeapAllocsFromOutput(module!!, processOutput)
+                    }
+                    module?.project?.service<TinyGoHeapAllocsViewManager>()?.updateHeapAllocsList(heapAllocs)
+                }
             }
         })
 

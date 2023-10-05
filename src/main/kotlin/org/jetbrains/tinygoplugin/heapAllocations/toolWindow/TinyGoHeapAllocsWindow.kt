@@ -1,7 +1,6 @@
 package org.jetbrains.tinygoplugin.heapAllocations.toolWindow
 
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
@@ -13,6 +12,7 @@ import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentManagerEvent
 import com.intellij.ui.content.ContentManagerListener
 import com.intellij.ui.treeStructure.Tree
+import com.intellij.util.concurrency.annotations.RequiresEdt
 import org.jetbrains.tinygoplugin.heapAllocations.TinyGoHeapAlloc
 import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.model.RootNode
 import org.jetbrains.tinygoplugin.heapAllocations.toolWindow.model.TinyGoHeapAllocsTreeModel
@@ -38,26 +38,26 @@ class TinyGoHeapAllocsToolWindowFactory : ToolWindowFactory {
 
 @Service(Service.Level.PROJECT)
 class TinyGoHeapAllocsViewManager(val project: Project) {
+    @RequiresEdt
     fun updateHeapAllocsList(update: Map<String, Set<TinyGoHeapAlloc>>) {
         val heapAllocsView = TinyGoHeapAllocsWindow(project)
         heapAllocsView.refreshHeapAllocsList(update)
         activateToolWindow(heapAllocsView)
     }
 
+    @RequiresEdt
     private fun activateToolWindow(heapAllocsView: TinyGoHeapAllocsWindow) {
-        invokeLater {
-            val toolWindow: ToolWindow = project.service<ToolWindowManager>()
-                .getToolWindow(TINYGO_HEAP_ALLOC_TOOLWINDOW_ID)
-                ?: return@invokeLater
-            val contentManager = toolWindow.contentManager
+        val toolWindow: ToolWindow = project.service<ToolWindowManager>()
+            .getToolWindow(TINYGO_HEAP_ALLOC_TOOLWINDOW_ID)
+            ?: return
+        val contentManager = toolWindow.contentManager
 
-            contentManager.removeAllContents(true)
-            val contentTab: Content = contentManager.factory.createContent(heapAllocsView, project.name, false)
-            contentManager.addContent(contentTab)
+        contentManager.removeAllContents(true)
+        val contentTab: Content = contentManager.factory.createContent(heapAllocsView, project.name, false)
+        contentManager.addContent(contentTab)
 
-            toolWindow.isAvailable = true
-            toolWindow.activate(null, true)
-        }
+        toolWindow.isAvailable = true
+        toolWindow.activate(null, true)
     }
 }
 

@@ -2,6 +2,8 @@ package org.jetbrains.tinygoplugin.configuration
 
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
+import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
+import org.jetbrains.tinygoplugin.services.blockingIO
 import org.jetbrains.tinygoplugin.services.tinyGoTargets
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
@@ -36,7 +38,7 @@ class ConfigurationWithHistory(
         set(value) {
             if (value != settings.sdk) {
                 settings.sdk = value
-                predefinedTargets = tinyGoTargets(value)
+                predefinedTargets = TinyGoServiceScope.getScope().blockingIO { tinyGoTargets(value) }
             }
         }
 
@@ -63,6 +65,6 @@ class ConfigurationWithHistory(
     }
 
     var predefinedTargets: Set<String> by lazyVar {
-        tinyGoTargets(settings.sdk)
+        TinyGoServiceScope.getScope().blockingIO { tinyGoTargets(settings.sdk) }
     }
 }

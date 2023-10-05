@@ -1,5 +1,6 @@
 package org.jetbrains.tinygoplugin.services
 
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.nullSdk
 import java.nio.file.Files
@@ -9,6 +10,7 @@ import java.util.stream.Collectors
 import kotlin.io.path.exists
 
 @Suppress("ReturnCount")
+@RequiresBackgroundThread
 fun tinyGoTargets(sdk: TinyGoSdk): Set<String> {
     if (sdk == nullSdk) {
         return emptySet()

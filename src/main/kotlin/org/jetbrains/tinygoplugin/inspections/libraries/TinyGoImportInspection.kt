@@ -21,6 +21,8 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.psi.PsiElement
 import com.intellij.psi.ResolveState
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
+import com.intellij.util.concurrency.annotations.RequiresReadLock
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.inspections.inspectionMessage
@@ -151,6 +153,8 @@ open class TinyGoImportInspection : GoInspectionBase() {
                 } else true
             }
 
+            @RequiresReadLock
+            @RequiresBackgroundThread
             private fun checkFileLocation(
                 file: GoFile,
                 element: PsiElement,
@@ -194,9 +198,13 @@ open class TinyGoImportInspection : GoInspectionBase() {
                 }
             }
 
+            @RequiresReadLock
+            @RequiresBackgroundThread
             private fun getImportPath(file: GoFile): String? = file.getImportPath(false)
                 ?: tryToFindImportPathAlt(file)
 
+            @RequiresReadLock
+            @RequiresBackgroundThread
             private fun tryToFindImportPathAlt(file: GoFile): String? {
                 val pkg = GoPackage.of(file)
                 val dir = pkg?.directories?.first() ?: return null

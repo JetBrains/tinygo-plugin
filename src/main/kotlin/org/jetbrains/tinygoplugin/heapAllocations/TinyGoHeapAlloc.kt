@@ -1,8 +1,10 @@
 package org.jetbrains.tinygoplugin.heapAllocations
 
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import java.io.File
 
@@ -15,7 +17,8 @@ data class TinyGoHeapAlloc(
     override fun toString(): String = "${file.canonicalPath}:$line:$column"
 }
 
-fun supplyHeapAllocsFromOutput(module: Module, processOutput: String): Map<String, Set<TinyGoHeapAlloc>> {
+@RequiresBackgroundThread
+suspend fun supplyHeapAllocsFromOutput(module: Module, processOutput: String): Map<String, Set<TinyGoHeapAlloc>> {
     val result = mutableMapOf<String, MutableSet<TinyGoHeapAlloc>>()
 
     val heapAllocRegex = Regex("(/.+/+.+.go):([0-9]+):([0-9]+): (.+)")
@@ -23,12 +26,15 @@ fun supplyHeapAllocsFromOutput(module: Module, processOutput: String): Map<Strin
     val tinyGoSettings = module.project.tinyGoConfiguration()
     val tinyGoSdkRoot = tinyGoSettings.sdk.sdkRoot!!
     for (match in matches) {
-        var file = VfsUtil.findFile(File(match.groupValues[1]).toPath(), false)!!
-        if (VfsUtil.isAncestor(tinyGoSdkRoot, file, false)) {
-            val relativePath = VfsUtil.getRelativePath(file, tinyGoSdkRoot)
-            if (relativePath != null) {
-                file = tinyGoSettings.cachedGoRoot.sdkRoot?.findFileByRelativePath(relativePath)!!
+        val file = readAction {
+            var f = VfsUtil.findFile(File(match.groupValues[1]).toPath(), false)!!
+            if (VfsUtil.isAncestor(tinyGoSdkRoot, f, false)) {
+                val relativePath = VfsUtil.getRelativePath(f, tinyGoSdkRoot)
+                if (relativePath != null) {
+                    f = tinyGoSettings.cachedGoRoot.sdkRoot?.findFileByRelativePath(relativePath)!!
+                }
             }
+            f
         }
         val parentDir = file.parent.canonicalPath!!
         result.putIfAbsent(parentDir, mutableSetOf())

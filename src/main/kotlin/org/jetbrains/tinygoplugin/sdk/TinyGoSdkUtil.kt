@@ -5,10 +5,13 @@ import com.intellij.execution.configurations.PathEnvironmentVariableUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
 import com.intellij.notification.NotificationType
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.components.service
+import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.Project
 import org.jetbrains.tinygoplugin.TinyGoBundle
-import org.jetbrains.tinygoplugin.services.editTinyGoSettingsLater
+import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 import java.io.File
 
 const val CONFIGURATION_INCOMPLETE_NOTIFICATION = "notifications.tinygoSDK.configuration.incomplete"
@@ -24,8 +27,11 @@ fun notifyTinyGoNotConfigured(
             NotificationType.WARNING
         )
     notification.addAction(object : NotificationAction("TinyGo settings") {
+        override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
+
         override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-            editTinyGoSettingsLater(project!!)
+            if (project == null) return
+            service<ShowSettingsUtil>().editConfigurable(project, TinyGoSettingsService(project))
         }
     })
     notification.notify(project)

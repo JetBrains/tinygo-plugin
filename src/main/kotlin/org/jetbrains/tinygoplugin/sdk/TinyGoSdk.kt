@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.sdk.GoBasedSdk
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
@@ -10,6 +11,8 @@ import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.warn
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.services.TinyGoExecutable
+import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
+import org.jetbrains.tinygoplugin.services.blockingIO
 import java.net.URL
 import java.util.Objects
 import javax.swing.Icon
@@ -74,7 +77,9 @@ open class TinyGoSdk(
     )
 
     val sdkRoot: VirtualFile? by lazy {
-        tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) }
+        TinyGoServiceScope.getScope().blockingIO {
+            readAction { tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) } }
+        }
     }
 
     override fun getIcon(): Icon = TinyGoPluginIcons.TinyGoIcon
@@ -83,9 +88,13 @@ open class TinyGoSdk(
 
     override fun getHomeUrl(): String = tinyGoHomeUrl ?: ""
 
-    override fun getSrcDir(): VirtualFile? = sdkRoot?.findChild("src")
+    override fun getSrcDir(): VirtualFile? = TinyGoServiceScope.getScope().blockingIO {
+        readAction { sdkRoot?.findChild("src") }
+    }
 
-    override fun getExecutable(): VirtualFile? = osManager.executableVFile(sdkRoot)
+    override fun getExecutable(): VirtualFile? = TinyGoServiceScope.getScope().blockingIO {
+        osManager.executableVFile(sdkRoot)
+    }
 
     override fun isValid(): Boolean {
         val sources = srcDir

@@ -8,12 +8,15 @@ import com.goide.sdk.combobox.GoSdkListProvider
 import com.goide.sdk.download.GoDownloadSdkAction
 import com.goide.sdk.download.GoSdkDownloaderDialog
 import com.intellij.facet.ui.ValidationResult
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.runBlockingCancellable
 import com.intellij.openapi.project.DefaultProjectFactory
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.ui.Messages
@@ -89,14 +92,17 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
         val logger = logger<TinyGoLocalSdkAction>()
     }
 
-    override fun actionPerformed(e: AnActionEvent) {
+    override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
+    @Suppress("UnstableApiUsage")
+    override fun actionPerformed(e: AnActionEvent) = runBlockingCancellable {
         logger.debug("Select local SDK action triggered")
 
         val selectedDir = combo.sdk.sdkRoot
         val suggestedDirectory = suggestSdkDirectory()
         var preselection = selectedDir
         if (preselection == null && suggestedDirectory != null) {
-            preselection = VfsUtil.findFile(suggestedDirectory.toPath(), false)
+            preselection = readAction { VfsUtil.findFile(suggestedDirectory.toPath(), false) }
         }
         val descriptor = object : FileChooserDescriptor(false, true, false, false, false, false) {
             override fun validateSelectedFiles(files: Array<out VirtualFile>) {

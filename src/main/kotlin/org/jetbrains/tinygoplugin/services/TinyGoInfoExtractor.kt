@@ -6,6 +6,7 @@ import com.goide.sdk.GoSdkService
 import com.goide.sdk.download.GoDownloadingSdk
 import com.goide.util.GoExecutor
 import com.goide.util.GoHistoryProcessListener
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -25,15 +26,16 @@ import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.osManager
-import java.time.Duration
 import java.util.Locale
 import java.util.function.BiConsumer
 import kotlin.jvm.Throws
+import kotlin.time.Duration.Companion.seconds
 
 private const val GO_NOT_CONFIGURED_MESSAGE = "notifications.tinygoSDK.goSDKNotConfigured"
 private const val TINYGO_TARGET_PLATFORM_NOT_SET = "notifications.tinygoSDK.tinyGoTargetNotSet"
 private const val DETECTION_TITLE = "notifications.tinygoSDK.detection.title"
-private const val DETECTION_INDICATOR_TEXT = "notifications.tinygoSDK.detection.indicatorText"
+private const val WAIT_GO_TITLE = "notifications.tinygoSDK.detection.wait.go.indicatorText"
+private const val WAIT_TINYGO_TITLE = "notifications.tinygoSDK.detection.wait.tinygo.indicatorText"
 private const val DETECTION_ERROR_MESSAGE = "notifications.tinygoSDK.detection.errorMessage"
 
 fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
@@ -57,7 +59,9 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         this.goOS = goOS.firstGroup()
         this.gc = GarbageCollector.valueOf(gc.firstGroup().uppercase(Locale.getDefault()))
         this.scheduler = Scheduler.valueOf(scheduler.firstGroup().uppercase(Locale.getDefault()))
-        this.cachedGoRoot = GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup().eraseLineBreaks()))
+        this.cachedGoRoot = TinyGoServiceScope.getScope().blockingIO {
+            readAction { GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup().eraseLineBreaks())) }
+        }
 
         TinyGoInfoExtractor.logger.info("extraction finished")
     } catch (e: NoSuchElementException) {
@@ -81,7 +85,9 @@ class TinyGoExecutable(private val project: Project) {
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
         val processHistory = GoHistoryProcessListener()
-        val tinyGoExec = osManager.executablePath(sdkRoot)
+        val tinyGoExec = TinyGoServiceScope.getScope().blockingIO {
+            osManager.executablePath(sdkRoot)
+        }
         val executor = GoExecutor.`in`(project, null)
             .withExePath(tinyGoExec)
             .withParameters(arguments)
@@ -151,9 +157,9 @@ class TinyGoInfoExtractor(private val project: Project) {
                     if (currentGoSdk is GoDownloadingSdk) {
                         logger.debug("Waiting until Go SDK will be downloaded")
                         indicator.isIndeterminate = true
-                        indicator.text2 = TinyGoBundle.message(DETECTION_INDICATOR_TEXT)
+                        indicator.text2 = TinyGoBundle.message(WAIT_GO_TITLE)
                         while (project.service<GoSdkService>().getSdk(null) is GoDownloadingSdk) {
-                            Thread.sleep(Duration.ofSeconds(1).toMillis())
+                            Thread.sleep(1.seconds.inWholeMilliseconds)
                         }
                     }
                     logger.debug("Go SDK present")
@@ -161,9 +167,9 @@ class TinyGoInfoExtractor(private val project: Project) {
                     if (settings.sdk is TinyGoDownloadingSdk) {
                         logger.debug("Waiting until TinyGo SDK will be downloaded. Explicit library reload needed")
                         indicator.isIndeterminate = true
-                        indicator.text2 = TinyGoBundle.message(DETECTION_INDICATOR_TEXT)
+                        indicator.text2 = TinyGoBundle.message(WAIT_TINYGO_TITLE)
                         while (settings.sdk is TinyGoDownloadingSdk) {
-                            Thread.sleep(Duration.ofSeconds(1).toMillis())
+                            Thread.sleep(1.seconds.inWholeMilliseconds)
                         }
                         reloadNeeded = true
                     }
