@@ -1,13 +1,12 @@
 package org.jetbrains.tinygoplugin.services
 
-import com.intellij.execution.process.mediator.util.blockingGet
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 
 object TinyGoServiceScope {
     fun getScope(project: Project) = project.service<TinyGoServiceProjectScope>().scope
@@ -20,8 +19,9 @@ class TinyGoServiceApplicationScope(val scope: CoroutineScope)
 @Service(Service.Level.PROJECT)
 class TinyGoServiceProjectScope(val project: Project, val scope: CoroutineScope)
 
-fun <T> CoroutineScope.blockingIO(block: suspend CoroutineScope.() -> T): T = async {
-    withContext(Dispatchers.IO) {
-        block.invoke(this)
+fun <T> CoroutineScope.blockingIO(block: suspend CoroutineScope.() -> T): T =
+    runBlocking(Dispatchers.IO) {
+        this@blockingIO.async {
+            block.invoke(this)
+        }.await()
     }
-}.blockingGet()
