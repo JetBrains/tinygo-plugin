@@ -9,4 +9,7 @@ object TinyGoPluginIcons {
 
     @JvmField
     val TinyGoLibraryIcon = TinyGoIcon
+
+    @JvmField
+    val TinyGoAsmIcon = IconLoader.getIcon("/icons/fileTypes/asm.svg", javaClass)
 }

@@ -79,6 +79,8 @@
         <lang.syntaxHighlighterFactory
                 language="AVRASM"
                 implementationClass="org.jetbrains.tinygoplugin.lang.avrAsm.AvrAsmSyntaxHighlighterFactory"/>
+
+        <iconMapper mappingFile="TinyGoIconMappings.json"/>
     </extensions>
     <extensions defaultExtensionNs="com.goide">
         <importResolver implementation="org.jetbrains.tinygoplugin.services.TinyGoImportResolver" order="before vgo"/>

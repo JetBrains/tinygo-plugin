@@ -1,7 +1,7 @@
 package org.jetbrains.tinygoplugin.lang.avrAsm
 
 import com.intellij.openapi.fileTypes.LanguageFileType
-import icons.GOPlan9Icons
+import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import javax.swing.Icon
 
 object AvrAsmFileType : LanguageFileType(AvrAsmLanguage.INSTANCE) {
@@ -11,5 +11,5 @@ object AvrAsmFileType : LanguageFileType(AvrAsmLanguage.INSTANCE) {
 
     override fun getDefaultExtension(): String = "s"
 
-    override fun getIcon(): Icon = GOPlan9Icons.CPU
+    override fun getIcon(): Icon = TinyGoPluginIcons.TinyGoAsmIcon
 }
