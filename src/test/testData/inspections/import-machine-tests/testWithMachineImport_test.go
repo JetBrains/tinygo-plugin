@@ -1,7 +1,7 @@
 package main
 
 import (
-    <error descr="Tests that use 'machine' package are yet not supported by TinyGo.">"machine"<caret></error>
+    <error descr="Tests that use machine package are yet not supported by TinyGo.">"machine"</error>
     "time"
 )
 
