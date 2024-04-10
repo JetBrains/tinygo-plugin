@@ -119,7 +119,7 @@ tasks {
     }
 
     withType<Test> {
-        systemProperty("idea.home.path", "${layout.buildDirectory}/idea-sandbox/")
+        systemProperty("idea.home.path", "${layout.buildDirectory.get()}/idea-sandbox/")
     }
 
     patchPluginXml {
