@@ -16,6 +16,13 @@
 
 ### Security
 
+## 0.5.13
+
+### Changed
+
+- Make plugin compatible with 2024.1.
+- Change the icon for the AVR Assembly file type.
+
 ## 0.5.12
 
 ### Changed
