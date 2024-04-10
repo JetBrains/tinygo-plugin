@@ -59,7 +59,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
 
     protected open fun customContextPredicate(o: PsiElement): Boolean = true
 
-    override fun buildGoVisitor(
+    override fun buildVisitor(
         holder: GoProblemsHolder,
         locationInspection: LocalInspectionToolSession,
     ): GoVisitor {
