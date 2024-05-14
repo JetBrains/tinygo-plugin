@@ -1,7 +1,7 @@
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
-import org.jetbrains.intellij.platform.gradle.extensions.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -12,7 +12,7 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "1.9.20"
     // IntelliJ Platform Gradle Plugin
-    id("org.jetbrains.intellij.platform") version "2.0.0-beta1"
+    id("org.jetbrains.intellij.platform") version "2.0.0-beta2"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.2.0"
     // detekt linter - read more: https://detekt.github.io/detekt/gradle.html
