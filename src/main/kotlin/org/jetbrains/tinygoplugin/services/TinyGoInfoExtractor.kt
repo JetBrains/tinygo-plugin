@@ -12,12 +12,14 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.diagnostic.logger
-import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.ProgressManager
-import com.intellij.openapi.progress.Task
-import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VfsUtil
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.platform.ide.progress.withBackgroundProgress
+import com.intellij.platform.util.progress.reportRawProgress
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -39,6 +41,7 @@ private const val WAIT_GO_TITLE = "notifications.tinygoSDK.detection.wait.go.ind
 private const val WAIT_TINYGO_TITLE = "notifications.tinygoSDK.detection.wait.tinygo.indicatorText"
 private const val DETECTION_ERROR_MESSAGE = "notifications.tinygoSDK.detection.errorMessage"
 
+@Suppress("UnstableApiUsage")
 suspend fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val tagPattern = Regex("""build tags:\s+((.|\n)+?(?=\n, garbage collector))""")
     val goArchPattern = Regex("""GOARCH:\s+(.+)\n""")
@@ -120,7 +123,7 @@ class TinyGoExecutable(private val project: Project) {
 }
 
 @Service(Service.Level.PROJECT)
-class TinyGoInfoExtractor(private val project: Project) {
+class TinyGoInfoExtractor(private val project: Project, private val coroutineScope: CoroutineScope) {
     companion object {
         val logger: Logger = logger<TinyGoInfoExtractor>()
     }
@@ -131,11 +134,12 @@ class TinyGoInfoExtractor(private val project: Project) {
         return listOf("info") + tinyGoArguments(settings)
     }
 
+    @Suppress("UnstableApiUsage")
     fun extractTinyGoInfo(
         settings: TinyGoConfiguration,
         failureListener: TinyGoExtractionFailureListener? = null,
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
-    ) {
+    ) = coroutineScope.launch {
         val currentGoSdk = project.service<GoSdkService>().getSdk(null)
         if (currentGoSdk == GoSdk.NULL) {
             notifyTinyGoNotConfigured(
@@ -143,7 +147,7 @@ class TinyGoInfoExtractor(private val project: Project) {
                 TinyGoBundle.message(GO_NOT_CONFIGURED_MESSAGE)
             )
             logger.debug(GO_NOT_CONFIGURED_MESSAGE)
-            return
+            return@launch
         }
         if (settings.targetPlatform.isEmpty()) {
             notifyTinyGoNotConfigured(
@@ -151,47 +155,41 @@ class TinyGoInfoExtractor(private val project: Project) {
                 TinyGoBundle.message(TINYGO_TARGET_PLATFORM_NOT_SET)
             )
             logger.debug(TINYGO_TARGET_PLATFORM_NOT_SET)
-            return
+            return@launch
         }
-        val detectingTask = object : Task.Backgroundable(project, TinyGoBundle.message(DETECTION_TITLE)) {
-            override fun run(indicator: ProgressIndicator) {
-                synchronized(project) {
-                    if (currentGoSdk is GoDownloadingSdk) {
-                        logger.debug("Waiting until Go SDK will be downloaded")
-                        indicator.isIndeterminate = true
-                        indicator.text2 = TinyGoBundle.message(WAIT_GO_TITLE)
-                        while (project.service<GoSdkService>().getSdk(null) is GoDownloadingSdk) {
-                            Thread.sleep(1.seconds.inWholeMilliseconds)
-                        }
+        logger.debug("Waiting for TinyGo parameters extraction task")
+        withBackgroundProgress(project, TinyGoBundle.message(DETECTION_TITLE), cancellable = true) {
+            reportRawProgress { reporter ->
+                if (currentGoSdk is GoDownloadingSdk) {
+                    logger.debug("Waiting until Go SDK will be downloaded")
+                    reporter.text(TinyGoBundle.message(WAIT_GO_TITLE))
+                    while (project.service<GoSdkService>().getSdk(null) is GoDownloadingSdk) {
+                        delay(1.seconds.inWholeMilliseconds)
                     }
-                    logger.debug("Go SDK present")
-                    var reloadNeeded = false
-                    if (settings.sdk is TinyGoDownloadingSdk) {
-                        logger.debug("Waiting until TinyGo SDK will be downloaded. Explicit library reload needed")
-                        indicator.isIndeterminate = true
-                        indicator.text2 = TinyGoBundle.message(WAIT_TINYGO_TITLE)
-                        while (settings.sdk is TinyGoDownloadingSdk) {
-                            Thread.sleep(1.seconds.inWholeMilliseconds)
-                        }
-                        reloadNeeded = true
+                }
+                logger.debug("Go SDK present")
+                var reloadNeeded = false
+                if (settings.sdk is TinyGoDownloadingSdk) {
+                    logger.debug("Waiting until TinyGo SDK will be downloaded. Explicit library reload needed")
+                    reporter.text(TinyGoBundle.message(WAIT_TINYGO_TITLE))
+                    while (settings.sdk is TinyGoDownloadingSdk) {
+                        delay(1.seconds.inWholeMilliseconds)
                     }
-                    logger.debug("TinyGo SDK present")
-                    executor.execute(
-                        settings.sdk.sdkRoot!!.path,
-                        tinyGoExtractionArguments(settings),
-                        failureListener,
-                        onFinish
-                    )
-                    if (reloadNeeded) {
-                        logger.debug("Explicit library reload needed. Sending reload signal")
-                        sendReloadLibrariesSignal(project)
-                    }
+                    reloadNeeded = true
+                }
+                logger.debug("TinyGo SDK present")
+                executor.execute(
+                    settings.sdk.sdkRoot,
+                    tinyGoExtractionArguments(settings),
+                    failureListener,
+                    onFinish
+                )
+                if (reloadNeeded) {
+                    logger.debug("Explicit library reload needed. Sending reload signal")
+                    sendReloadLibrariesSignal(project)
                 }
             }
         }
-        logger.debug("Waiting for TinyGo parameters extraction task")
-        ProgressManager.getInstance()
-            .runProcessWithProgressAsynchronously(detectingTask, BackgroundableProcessIndicator(detectingTask))
         logger.debug("TinyGo parameters extraction task finished")
     }
 }
