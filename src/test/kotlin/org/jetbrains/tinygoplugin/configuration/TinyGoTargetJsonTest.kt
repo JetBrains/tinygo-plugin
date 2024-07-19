@@ -3,6 +3,7 @@ package org.jetbrains.tinygoplugin.configuration
 import com.google.gson.Gson
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import junit.framework.TestCase
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.tinygoplugin.testFramework.setupTinyGo
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -49,25 +50,29 @@ class TinyGoTargetJsonTest : BasePlatformTestCase() {
     }
 
     fun testDependencyResolver() {
-        val target = createTargetWrapper(
-            TinyGoPropertiesWrapper(
-                object : ConfigurationProvider<TinyGoConfiguration> {
-                    override val tinyGoSettings: TinyGoConfiguration = mySetting
-                }
+        val target = runBlocking {
+            createTargetWrapper(
+                TinyGoPropertiesWrapper(
+                    object : ConfigurationProvider<TinyGoConfiguration> {
+                        override val tinyGoSettings: TinyGoConfiguration = mySetting
+                    }
+                )
             )
-        ) ?: return
+        } ?: return
 
         testTargetObj(target)
     }
 
     fun testDeserialized() {
-        val target = createTargetWrapper(
-            TinyGoPropertiesWrapper(
-                object : ConfigurationProvider<TinyGoConfiguration> {
-                    override val tinyGoSettings: TinyGoConfiguration = mySetting
-                }
+        val target = runBlocking {
+            createTargetWrapper(
+                TinyGoPropertiesWrapper(
+                    object : ConfigurationProvider<TinyGoConfiguration> {
+                        override val tinyGoSettings: TinyGoConfiguration = mySetting
+                    }
+                )
             )
-        ) ?: return
+        } ?: return
 
         val testFile = File.createTempFile(
             "target",

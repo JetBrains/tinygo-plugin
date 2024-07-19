@@ -1,12 +1,18 @@
 package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoModuleSettings
+import com.intellij.openapi.application.EDT
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.options.BoundConfigurable
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogPanel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.tinygoplugin.configuration.CachedGoRootInvalidator
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
@@ -123,15 +129,19 @@ class TinyGoSettingsService(private val project: Project) :
         }
     }
 
-    override fun createPanel(): DialogPanel = generateSettingsPanel(propertiesWrapper, disposable!!)
+    override fun createPanel(): DialogPanel = generateSettingsPanel(project, propertiesWrapper, disposable!!)
 
     private fun callExtractor() {
         project.service<TinyGoInfoExtractor>()
             .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
                 thisLogger().trace(output)
-                tinyGoSettings.extractTinyGoInfo(output)
-                // update all ui fields
-                propertiesWrapper.reset()
+                TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
+                    tinyGoSettings.extractTinyGoInfo(output)
+                    withContext(Dispatchers.EDT) {
+                        // update all ui fields
+                        propertiesWrapper.reset()
+                    }
+                }
             }
     }
 

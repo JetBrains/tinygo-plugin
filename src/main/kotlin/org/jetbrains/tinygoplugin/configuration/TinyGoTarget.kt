@@ -6,8 +6,12 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import com.intellij.json.JsonFileType
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import java.io.File
 import java.util.stream.Collectors
@@ -67,20 +71,27 @@ private fun supplyJsonPath(src: String, sdkRoot: VirtualFile): String {
     }
 }
 
-fun createTargetWrapper(wrapper: TinyGoPropertiesWrapper): TinyGoTarget? {
-    val sdkRoot = wrapper.tinyGoSdkPath.get().sdkRoot ?: return null
-    val targetObj = readTargetJson(wrapper.target.get(), sdkRoot) ?: return null
-    targetObj.performInheritance(sdkRoot)
+suspend fun createTargetWrapper(wrapper: TinyGoPropertiesWrapper): TinyGoTarget? {
+    val sdkRoot = readAction { wrapper.tinyGoSdkPath.get().sdkRoot } ?: return null
+    val targetName = readAction { wrapper.target.get() }
+    val targetObj =
+        withContext(Dispatchers.IO) {
+            val target = readTargetJson(targetName, sdkRoot)
+            target?.performInheritance(sdkRoot)
+            target
+        } ?: return null
     targetObj.applyTinyGoFlags(wrapper.obj.tinyGoSettings)
     targetObj.inherits?.clear()
     return targetObj
 }
 
+@RequiresBackgroundThread
 fun TinyGoTarget.serialize(): String {
     val gson = GsonBuilder().setPrettyPrinting().create()
     return gson.toJson(this)
 }
 
+@RequiresBackgroundThread
 fun readTargetJson(pathToTarget: String, sdkRoot: VirtualFile): TinyGoTarget? {
     val jsonFile = File(supplyJsonPath(pathToTarget, sdkRoot))
     if (!jsonFile.exists()) return null

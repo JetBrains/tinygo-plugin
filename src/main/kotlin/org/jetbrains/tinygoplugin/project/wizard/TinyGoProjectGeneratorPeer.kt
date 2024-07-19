@@ -30,7 +30,7 @@ class TinyGoProjectGeneratorPeer :
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
         panel.add(createGridPanel(locationComponent, sdkCombo).resize().createPanel())
-        panel.add(generateTinyGoParametersPanel(propertiesWrapper, parentDisposable))
+        panel.add(generateTinyGoParametersPanel(project, propertiesWrapper, parentDisposable))
         return panel
     }
 

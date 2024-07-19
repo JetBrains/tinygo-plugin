@@ -2,12 +2,19 @@ package org.jetbrains.tinygoplugin.ui
 
 import com.intellij.json.JsonFileType
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.EDT
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserFactory
 import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
+import com.intellij.platform.ide.progress.ModalTaskOwner
+import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.TextFieldWithHistoryWithBrowseButton
 import com.intellij.ui.components.textFieldWithHistoryWithBrowseButton
@@ -23,6 +30,9 @@ import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -31,16 +41,18 @@ import org.jetbrains.tinygoplugin.configuration.serialize
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkChooserCombo
 import org.jetbrains.tinygoplugin.sdk.nullSdk
+import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
 import java.awt.event.ItemEvent
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.JPanel
 
 fun generateTinyGoParametersPanel(
+    project: Project?,
     wrapper: TinyGoPropertiesWrapper,
     parent: Disposable,
 ): JPanel = panel {
-    tinyGoSettings(this, wrapper, parent)
+    tinyGoSettings(project, this, wrapper, parent)
 }
 
 private fun AtomicBoolean.lockOrSkip(action: () -> Unit) {
@@ -77,12 +89,16 @@ fun tinyGoSdkComboChooser(
     cell(TinyGoSdkChooserCombo())
         .align(Align.FILL)
         .applyToComponent {
-            var sdk: TinyGoSdk = property.get()
-            if (sdk == nullSdk) {
-                selectFirstNotNullSdk()
-                sdk = comboBox.model.selectedItem as TinyGoSdk
-                property.set(sdk)
-            } else selectSdkByUrl(sdk.homeUrl)
+            TinyGoServiceScope.getScope().launch(ModalityState.current().asContextElement()) {
+                var sdk: TinyGoSdk = property.get()
+                if (sdk == nullSdk) {
+                    selectFirstNotNullSdk()
+                    sdk = comboBox.model.selectedItem as TinyGoSdk
+                    withContext(Dispatchers.EDT) {
+                        property.set(sdk)
+                    }
+                } else selectSdkByUrl(sdk.homeUrl)
+            }
             Disposer.register(parentDisposable, this)
         }
         .bind(
@@ -102,6 +118,7 @@ private const val SCHEDULER_LABEL = "ui.scheduler"
 private const val TARGET_BROWSE_DIALOG_TITLE = "ui.target.dialogTitle"
 
 private fun tinyGoSettings(
+    project: Project?,
     panel: Panel,
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
@@ -114,7 +131,7 @@ private fun tinyGoSettings(
         panel {
             group(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
                 row(TinyGoBundle.message(TARGET_LABEL)) {
-                    targetChooser(this, wrapper, tinyGoSdkComboChooser)
+                    targetChooser(project, this, wrapper, tinyGoSdkComboChooser)
                 }
                 row(TinyGoBundle.message(GC_LABEL)) {
                     comboBox(GarbageCollector.entries.toSet())
@@ -129,7 +146,7 @@ private fun tinyGoSettings(
                     autoHelpLabel(this)
                 }
                 row {
-                    exportButton(this, wrapper)
+                    exportButton(project, this, wrapper)
                 }
             }
         }
@@ -137,6 +154,7 @@ private fun tinyGoSettings(
 }
 
 private fun targetChooser(
+    project: Project?,
     row: Row,
     wrapper: TinyGoPropertiesWrapper,
     sdk: Cell<TinyGoSdkChooserCombo>
@@ -147,7 +165,7 @@ private fun targetChooser(
         }
         cell(
             textFieldWithHistoryWithBrowseButton(
-                null,
+                project,
                 TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE),
                 jsonChooser,
             )
@@ -169,9 +187,13 @@ private fun targetChooser(
                     wrapper.target.set(text)
                 }
             }
-            childComponent.history = wrapper.userTargets
+            childComponent.history = runWithModalProgressBlocking(ModalTaskOwner.component(this), TinyGoBundle.message("ui.target.loading.title")) {
+                readAction { wrapper.userTargets }
+            }
             sdk.component.addChangedListener {
-                childComponent.history = wrapper.userTargets
+                childComponent.history = runWithModalProgressBlocking(ModalTaskOwner.component(this), TinyGoBundle.message("ui.target.loading.title")) {
+                    readAction { wrapper.userTargets }
+                }
             }
         }
     }
@@ -189,23 +211,29 @@ private const val EXPORT_TARGET_BUTTON = "ui.target.export"
 private const val EXPORT_TARGET_DIALOG_TITLE = "ui.target.export.dialog.title"
 private const val EXPORT_TARGET_DIALOG_DESCRIPTION = "ui.target.export.dialog.description"
 
-fun exportButton(row: Row, wrapper: TinyGoPropertiesWrapper) {
+fun exportButton(project: Project?, row: Row, wrapper: TinyGoPropertiesWrapper) {
     with(row) {
         button(TinyGoBundle.message(EXPORT_TARGET_BUTTON)) {
-            val target = createTargetWrapper(wrapper) ?: return@button
-            val jsonChooser = FileSaverDescriptor(
-                TinyGoBundle.message(EXPORT_TARGET_DIALOG_TITLE),
-                TinyGoBundle.message(EXPORT_TARGET_DIALOG_DESCRIPTION),
-                JsonFileType.DEFAULT_EXTENSION
-            )
-            val chooserDialog = service<FileChooserFactory>()
-                .createSaveFileDialog(jsonChooser, null)
-                .save(null)
-            var file = chooserDialog?.file ?: return@button
-            if (!file.name.endsWith(".json")) {
-                file = File(file.path + ".json")
+            TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
+                val target = createTargetWrapper(wrapper) ?: return@launch
+                val jsonChooser = FileSaverDescriptor(
+                    TinyGoBundle.message(EXPORT_TARGET_DIALOG_TITLE),
+                    TinyGoBundle.message(EXPORT_TARGET_DIALOG_DESCRIPTION),
+                    JsonFileType.DEFAULT_EXTENSION
+                )
+                var file = withContext(Dispatchers.EDT) {
+                    val chooserDialog = service<FileChooserFactory>()
+                        .createSaveFileDialog(jsonChooser, null)
+                        .save(null)
+                    chooserDialog?.file
+                } ?: return@launch
+                if (!file.name.endsWith(".json")) {
+                    file = File(file.path + ".json")
+                }
+                withContext(Dispatchers.IO) {
+                    file.writeText(target.serialize())
+                }
             }
-            file.writeText(target.serialize())
         }
     }
 }
@@ -217,10 +245,11 @@ fun autoHelpLabel(row: Row) {
 }
 
 fun generateSettingsPanel(
+    project: Project,
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
 ) = panel {
-    tinyGoSettings(this, wrapper, parentDisposable)
+    tinyGoSettings(project, this, wrapper, parentDisposable)
     row("GOOS") {
         textField()
             .bindText(wrapper.goOs)
