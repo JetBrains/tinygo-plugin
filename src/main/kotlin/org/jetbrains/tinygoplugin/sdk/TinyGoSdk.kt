@@ -1,18 +1,16 @@
 package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.sdk.GoBasedSdk
-import com.intellij.openapi.application.readAction
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.util.concurrency.annotations.RequiresReadLock
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.warn
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.services.TinyGoExecutable
-import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
-import org.jetbrains.tinygoplugin.services.blockingIO
 import java.net.URL
 import java.util.Objects
 import javax.swing.Icon
@@ -77,9 +75,7 @@ open class TinyGoSdk(
     )
 
     val sdkRoot: VirtualFile? by lazy {
-        TinyGoServiceScope.getScope().blockingIO {
-            readAction { tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) } }
-        }
+        tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) }
     }
 
     override fun getIcon(): Icon = TinyGoPluginIcons.TinyGoIcon
@@ -88,14 +84,17 @@ open class TinyGoSdk(
 
     override fun getHomeUrl(): String = tinyGoHomeUrl ?: ""
 
-    override fun getSrcDir(): VirtualFile? = TinyGoServiceScope.getScope().blockingIO {
-        readAction { sdkRoot?.findChild("src") }
+    private val sdkSrc: VirtualFile? by lazy {
+        sdkRoot?.findChild("src")
     }
 
-    override fun getExecutable(): VirtualFile? = TinyGoServiceScope.getScope().blockingIO {
-        osManager.executableVFile(sdkRoot)
-    }
+    @RequiresReadLock
+    override fun getSrcDir(): VirtualFile? = sdkSrc
 
+    @RequiresReadLock
+    override fun getExecutable(): VirtualFile? = osManager.executableVFile(sdkRoot)
+
+    @RequiresReadLock
     override fun isValid(): Boolean {
         val sources = srcDir
         return sources != null && sources.isDirectory && sources.isValid && sources.isInLocalFileSystem
@@ -116,8 +115,9 @@ open class TinyGoSdk(
 private fun urlToPath(url: String?): String? = url?.let { URL(it).path }
 
 const val TINY_GO_VERSION_REGEX = """tinygo version (\d+.\d+.\d+)"""
-fun TinyGoSdk.computeVersion(project: Project, onFinish: () -> Unit) {
-    val sdkRoot = this.sdkRoot?.canonicalPath ?: return
+
+@RequiresReadLock
+suspend fun TinyGoSdk.computeVersion(project: Project, onFinish: () -> Unit) {
     TinyGoExecutable(project).execute(sdkRoot, listOf("version")) { _, output ->
         val match = TINY_GO_VERSION_REGEX.toRegex().find(output)
         if (match != null) {

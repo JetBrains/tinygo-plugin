@@ -7,6 +7,7 @@ import com.goide.sdk.download.GoDownloadingSdk
 import com.goide.util.GoExecutor
 import com.goide.util.GoHistoryProcessListener
 import com.intellij.openapi.application.readAction
+import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
@@ -38,7 +39,7 @@ private const val WAIT_GO_TITLE = "notifications.tinygoSDK.detection.wait.go.ind
 private const val WAIT_TINYGO_TITLE = "notifications.tinygoSDK.detection.wait.tinygo.indicatorText"
 private const val DETECTION_ERROR_MESSAGE = "notifications.tinygoSDK.detection.errorMessage"
 
-fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
+suspend fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val tagPattern = Regex("""build tags:\s+((.|\n)+?(?=\n, garbage collector))""")
     val goArchPattern = Regex("""GOARCH:\s+(.+)\n""")
     val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
@@ -54,13 +55,16 @@ fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         val scheduler = schedulerPattern.findFirst(msg)
         val cachedGoRoot = cachedGoRootPattern.findFirst(msg)
 
-        this.goArch = goArch.firstGroup()
-        this.goTags = tags.firstGroup().eraseLineBreaks()
-        this.goOS = goOS.firstGroup()
-        this.gc = GarbageCollector.valueOf(gc.firstGroup().uppercase(Locale.getDefault()))
-        this.scheduler = Scheduler.valueOf(scheduler.firstGroup().uppercase(Locale.getDefault()))
-        this.cachedGoRoot = TinyGoServiceScope.getScope().blockingIO {
-            readAction { GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup().eraseLineBreaks())) }
+        val cachedGoRootSdk = readAction {
+            GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup().eraseLineBreaks()))
+        }
+        writeAction {
+            this.goArch = goArch.firstGroup()
+            this.goTags = tags.firstGroup().eraseLineBreaks()
+            this.goOS = goOS.firstGroup()
+            this.gc = GarbageCollector.valueOf(gc.firstGroup().uppercase(Locale.getDefault()))
+            this.scheduler = Scheduler.valueOf(scheduler.firstGroup().uppercase(Locale.getDefault()))
+            this.cachedGoRoot = cachedGoRootSdk
         }
 
         TinyGoInfoExtractor.logger.info("extraction finished")
@@ -78,18 +82,16 @@ private fun MatchResult.firstGroup(): String = groupValues[1]
 private fun String.eraseLineBreaks(): String = replace(Regex("\n((,)? )?"), "")
 
 class TinyGoExecutable(private val project: Project) {
-    fun execute(
-        sdkRoot: String,
+    suspend fun execute(
+        sdkRoot: VirtualFile?,
         arguments: List<String>,
         failureListener: TinyGoExtractionFailureListener? = null,
         onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
     ) {
         val processHistory = GoHistoryProcessListener()
-        val tinyGoExec = TinyGoServiceScope.getScope().blockingIO {
-            osManager.executablePath(sdkRoot)
-        }
+        val tinyGoExec = readAction { osManager.executableVFile(sdkRoot) } ?: return
         val executor = GoExecutor.`in`(project, null)
-            .withExePath(tinyGoExec)
+            .withExePath(tinyGoExec.path)
             .withParameters(arguments)
             .showNotifications(true, false)
             .disablePty()

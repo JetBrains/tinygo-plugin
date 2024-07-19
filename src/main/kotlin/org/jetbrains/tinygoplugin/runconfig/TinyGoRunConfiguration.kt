@@ -15,15 +15,13 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.JDOMExternalizerUtil
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
+import com.intellij.util.concurrency.annotations.RequiresReadLock
 import org.jdom.Element
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfigurationEditor.PathKind
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
-import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
-import org.jetbrains.tinygoplugin.services.blockingIO
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import java.io.File
 import java.nio.file.Path
@@ -73,8 +71,8 @@ abstract class TinyGoRunConfiguration(
             RunSettings(tinyGoSettings, "", mainPath, "")
     }
 
-    @RequiresBackgroundThread
-    private suspend fun mainFile(): VirtualFile? {
+    @RequiresReadLock
+    private fun mainFile(): VirtualFile? {
         if (runConfig.mainFile.isEmpty()) {
             return null
         }
@@ -82,7 +80,7 @@ abstract class TinyGoRunConfiguration(
         if (!file.exists()) {
             return null
         }
-        return readAction { VfsUtil.findFile(file.toPath(), false) }
+        return VfsUtil.findFile(file.toPath(), false)
     }
 
     @Throws(RuntimeConfigurationException::class)
@@ -90,7 +88,7 @@ abstract class TinyGoRunConfiguration(
         if (executable == null) {
             throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_SDK_NOT_SET))
         }
-        val main = TinyGoServiceScope.getScope(project).blockingIO { mainFile() }
+        val main = mainFile()
             ?: throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_MAIN_FILE_NOT_FOUND))
         if (!main.isValid) {
             throw RuntimeConfigurationException(TinyGoBundle.message(ERROR_MAIN_FILE_NOT_FOUND))
