@@ -6,18 +6,23 @@ import com.goide.vgo.wizard.VgoModuleBuilder
 import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
+import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
+import kotlinx.coroutines.launch
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
+import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.services.propagateGoFlags
 import javax.swing.Icon
@@ -89,8 +94,12 @@ private fun configureModule(
 
 private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
     project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings) { _, output ->
-        tinyGoSettings.extractTinyGoInfo(output)
-        tinyGoSettings.saveState(project)
-        propagateGoFlags(project, tinyGoSettings)
+        TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
+            tinyGoSettings.extractTinyGoInfo(output)
+            writeAction {
+                tinyGoSettings.saveState(project)
+                propagateGoFlags(project, tinyGoSettings)
+            }
+        }
     }
 }
