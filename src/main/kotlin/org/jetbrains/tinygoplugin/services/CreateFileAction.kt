@@ -4,7 +4,6 @@ import com.goide.execution.GoRunUtil
 import com.intellij.icons.AllIcons
 import com.intellij.ide.actions.CreateFileFromTemplateAction
 import com.intellij.ide.actions.CreateFileFromTemplateDialog
-import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -118,13 +117,11 @@ class CreateFileAction :
             filename = "$name.go"
         }
         if (dir.findFile(filename) != null) {
-            invokeLater {
-                Messages.showErrorDialog(
-                    project,
-                    message(TINYGO_FILE_EXISTS_MESSAGE, "${dir.virtualFile.path}/$filename"),
-                    message(TINYGO_FILE_EXISTS_TITLE)
-                )
-            }
+            Messages.showErrorDialog(
+                project,
+                message(TINYGO_FILE_EXISTS_MESSAGE, "${dir.virtualFile.path}/$filename"),
+                message(TINYGO_FILE_EXISTS_TITLE)
+            )
             return null
         }
         val result = copyExample(project, exampleFile, dir.virtualFile, filename) ?: return null
@@ -141,13 +138,11 @@ class CreateFileAction :
     ): VirtualFile? {
         return if (example.isDirectory) {
             if (dir.children.any { it.name.substringAfterLast('/') != GO_MOD_FILENAME }) {
-                invokeLater {
-                    Messages.showErrorDialog(
-                        project,
-                        message(TINYGO_DIR_NOT_EMPTY_MESSAGE, dir.path),
-                        message(TINYGO_FILE_EXISTS_TITLE)
-                    )
-                }
+                Messages.showErrorDialog(
+                    project,
+                    message(TINYGO_DIR_NOT_EMPTY_MESSAGE, dir.path),
+                    message(TINYGO_FILE_EXISTS_TITLE)
+                )
                 return null
             }
 
