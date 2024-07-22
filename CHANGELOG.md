@@ -16,6 +16,12 @@
 
 ### Security
 
+## 0.5.14
+
+### Fixed
+
+- Fix various UI freezes.
+
 ## 0.5.13
 
 ### Changed
