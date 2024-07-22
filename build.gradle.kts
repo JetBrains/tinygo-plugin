@@ -76,7 +76,7 @@ dependencies {
 intellijPlatform {
     pluginConfiguration {
         name = properties("pluginName")
-        version = properties("platformVersion")
+        version = properties("pluginVersion")
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
         description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
