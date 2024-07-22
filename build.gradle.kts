@@ -10,11 +10,11 @@ plugins {
     // Java support
     id("java")
     // Kotlin support
-    id("org.jetbrains.kotlin.jvm") version "1.9.20"
+    id("org.jetbrains.kotlin.jvm") version "1.9.23"
     // IntelliJ Platform Gradle Plugin
     id("org.jetbrains.intellij.platform") version "2.0.0-rc1"
     // Gradle Changelog Plugin
-    id("org.jetbrains.changelog") version "2.2.0"
+    id("org.jetbrains.changelog") version "2.2.1"
     // detekt linter - read more: https://detekt.github.io/detekt/gradle.html
     id("io.gitlab.arturbosch.detekt") version "1.23.0"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
