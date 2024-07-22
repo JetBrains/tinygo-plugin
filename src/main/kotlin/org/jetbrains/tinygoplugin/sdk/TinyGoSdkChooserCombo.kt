@@ -10,20 +10,28 @@ import com.goide.sdk.download.GoSdkDownloaderDialog
 import com.intellij.facet.ui.ValidationResult
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.EDT
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.application.readAction
+import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.progress.ProgressIndicator
-import com.intellij.openapi.progress.runBlockingCancellable
-import com.intellij.openapi.project.DefaultProjectFactory
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.currentOrDefaultProject
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.text.VersionComparatorUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.TinyGoSdkList
 import java.io.IOException
@@ -94,47 +102,9 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
 
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
-    @Suppress("UnstableApiUsage")
-    override fun actionPerformed(e: AnActionEvent) = runBlockingCancellable {
-        logger.debug("Select local SDK action triggered")
-
-        val selectedDir = combo.sdk.sdkRoot
-        val suggestedDirectory = suggestSdkDirectory()
-        var preselection = selectedDir
-        if (preselection == null && suggestedDirectory != null) {
-            preselection = readAction { VfsUtil.findFile(suggestedDirectory.toPath(), false) }
-        }
-        val descriptor = object : FileChooserDescriptor(false, true, false, false, false, false) {
-            override fun validateSelectedFiles(files: Array<out VirtualFile>) {
-                if (files.isNotEmpty()) {
-                    val valid = checkDirectoryForTinyGo(files[0])
-                    if (!valid) {
-                        throw IllegalArgumentException(TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR))
-                    }
-                }
-            }
-        }
-        descriptor.title = TinyGoBundle.message(TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE)
-        FileChooser.chooseFile(
-            descriptor, null, combo, preselection
-        ) { selectedFile ->
-            val sdk = TinyGoSdk(selectedFile.url, null)
-            if (sdk.isValid) {
-                val project = e.project ?: service<DefaultProjectFactory>().defaultProject
-                sdk.computeVersion(project) {
-                    combo.addSdk(sdk, true)
-                    service<TinyGoSdkList>().addSdk(sdk)
-                }
-                logger.debug("Selected local TinyGo SDK is valid")
-            } else {
-                Messages.showErrorDialog(
-                    combo,
-                    TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR),
-                    TinyGoBundle.message(TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE)
-                )
-                logger.debug("Selected local TinyGo SDK is invalid")
-            }
-        }
+    override fun actionPerformed(e: AnActionEvent) {
+        val project = currentOrDefaultProject(e.project)
+        service<TinyGoSdkChooseLocalSdkService>().chooseLocalSdk(project, combo)
     }
 }
 
@@ -163,3 +133,55 @@ class TinyGoSdkChooserCombo :
         },
         nullSdk
     )
+
+@Service(Service.Level.APP)
+private class TinyGoSdkChooseLocalSdkService(private val coroutineScope: CoroutineScope) {
+    fun chooseLocalSdk(project: Project, combo: GoBasedSdkChooserCombo<TinyGoSdk>) {
+        coroutineScope.launch(ModalityState.current().asContextElement()) {
+            val selectedDir = combo.sdk.sdkRoot
+            TinyGoLocalSdkAction.logger.debug("Select local SDK action triggered")
+
+            val suggestedDirectory = withContext(Dispatchers.IO) {
+                suggestSdkDirectory()
+            }
+            var preselection = selectedDir
+            if (preselection == null && suggestedDirectory != null) {
+                preselection = readAction { VfsUtil.findFile(suggestedDirectory.toPath(), false) }
+            }
+            val descriptor = object : FileChooserDescriptor(false, true, false, false, false, false) {
+                override fun validateSelectedFiles(files: Array<out VirtualFile>) {
+                    if (files.isNotEmpty()) {
+                        val valid = checkDirectoryForTinyGo(files[0])
+                        if (!valid) {
+                            throw IllegalArgumentException(TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR))
+                        }
+                    }
+                }
+            }
+            descriptor.title = TinyGoBundle.message(TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE)
+            withContext(Dispatchers.EDT) {
+                FileChooser.chooseFile(
+                    descriptor, null, combo, preselection
+                ) { selectedFile ->
+                    launch {
+                        val sdk = TinyGoSdk(selectedFile.url, null)
+                        if (readAction { sdk.isValid }) {
+                            sdk.computeVersion(project) {
+                                combo.addSdk(sdk, true)
+                                service<TinyGoSdkList>().addSdk(sdk)
+                            }
+                            TinyGoLocalSdkAction.logger.debug("Selected local TinyGo SDK is valid")
+                        } else {
+                            Messages.showErrorDialog(
+                                combo,
+                                TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR),
+                                TinyGoBundle.message(TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE)
+                            )
+                            TinyGoLocalSdkAction.logger.debug("Selected local TinyGo SDK is invalid")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
