@@ -187,11 +187,17 @@ private fun targetChooser(
                     wrapper.target.set(text)
                 }
             }
-            childComponent.history = runWithModalProgressBlocking(ModalTaskOwner.component(this), TinyGoBundle.message("ui.target.loading.title")) {
+            childComponent.history = runWithModalProgressBlocking(
+                ModalTaskOwner.component(this),
+                TinyGoBundle.message("ui.target.loading.title")
+            ) {
                 readAction { wrapper.userTargets }
             }
             sdk.component.addChangedListener {
-                childComponent.history = runWithModalProgressBlocking(ModalTaskOwner.component(this), TinyGoBundle.message("ui.target.loading.title")) {
+                childComponent.history = runWithModalProgressBlocking(
+                    ModalTaskOwner.component(this),
+                    TinyGoBundle.message("ui.target.loading.title")
+                ) {
                     readAction { wrapper.userTargets }
                 }
             }
