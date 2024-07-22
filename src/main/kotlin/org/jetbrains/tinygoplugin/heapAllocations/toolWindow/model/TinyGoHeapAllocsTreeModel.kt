@@ -3,6 +3,7 @@ package org.jetbrains.tinygoplugin.heapAllocations.toolWindow.model
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.tree.BaseTreeModel
+import com.intellij.util.asSafely
 import com.intellij.util.concurrency.Invoker
 import com.intellij.util.concurrency.InvokerSupplier
 import java.util.concurrent.atomic.AtomicReference
@@ -39,9 +40,9 @@ class TinyGoHeapAllocsTreeModel(parent: Disposable) : BaseTreeModel<Node?>(), In
     }
 
     override fun getChildren(`object`: Any): List<Node> {
-        val node = if (`object` is Node) `object` else null
-        val children = node?.getChildren()
-        if (children.isNullOrEmpty()) return emptyList()
+        val node = `object`.asSafely<Node>() ?: return emptyList()
+        val children = node.getChildren()
+        if (children.isEmpty()) return emptyList()
         assert(null != comparator.get()) { "set comparator before" }
         node.update()
         children.forEach { it.update() }
