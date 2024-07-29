@@ -17,9 +17,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.platform.util.progress.reportRawProgress
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -30,7 +28,6 @@ import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.osManager
 import java.util.Locale
-import java.util.function.BiConsumer
 import kotlin.jvm.Throws
 import kotlin.time.Duration.Companion.seconds
 
@@ -89,7 +86,7 @@ class TinyGoExecutable(private val project: Project) {
         sdkRoot: VirtualFile?,
         arguments: List<String>,
         failureListener: TinyGoExtractionFailureListener? = null,
-        onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
+        onFinish: (GoExecutor.ExecutionResult?, String) -> Unit,
     ) {
         val processHistory = GoHistoryProcessListener()
         val tinyGoExec = readAction { osManager.executableVFile(sdkRoot) } ?: return
@@ -104,7 +101,7 @@ class TinyGoExecutable(private val project: Project) {
         executor.executeWithProgress(true, true, processHistory, null) {
             val processOutput = processHistory.output.toString()
             if (it.status.ordinal == 0) {
-                onFinish.accept(it, processOutput)
+                onFinish(it, processOutput)
             } else {
                 val incompatibleVersionErrorMessage = generateMessageIfVersionErrorFound(project, processOutput)
                 val errorMessage =
@@ -123,7 +120,7 @@ class TinyGoExecutable(private val project: Project) {
 }
 
 @Service(Service.Level.PROJECT)
-class TinyGoInfoExtractor(private val project: Project, private val coroutineScope: CoroutineScope) {
+class TinyGoInfoExtractor(private val project: Project) {
     companion object {
         val logger: Logger = logger<TinyGoInfoExtractor>()
     }
@@ -135,11 +132,11 @@ class TinyGoInfoExtractor(private val project: Project, private val coroutineSco
     }
 
     @Suppress("UnstableApiUsage")
-    fun extractTinyGoInfo(
+    suspend fun extractTinyGoInfo(
         settings: TinyGoConfiguration,
         failureListener: TinyGoExtractionFailureListener? = null,
-        onFinish: BiConsumer<in GoExecutor.ExecutionResult?, in String>,
-    ) = coroutineScope.launch {
+        onFinish: (GoExecutor.ExecutionResult?, String) -> Unit,
+    ) {
         val currentGoSdk = project.service<GoSdkService>().getSdk(null)
         if (currentGoSdk == GoSdk.NULL) {
             notifyTinyGoNotConfigured(
@@ -147,7 +144,7 @@ class TinyGoInfoExtractor(private val project: Project, private val coroutineSco
                 TinyGoBundle.message(GO_NOT_CONFIGURED_MESSAGE)
             )
             logger.debug(GO_NOT_CONFIGURED_MESSAGE)
-            return@launch
+            return
         }
         if (settings.targetPlatform.isEmpty()) {
             notifyTinyGoNotConfigured(
@@ -155,7 +152,7 @@ class TinyGoInfoExtractor(private val project: Project, private val coroutineSco
                 TinyGoBundle.message(TINYGO_TARGET_PLATFORM_NOT_SET)
             )
             logger.debug(TINYGO_TARGET_PLATFORM_NOT_SET)
-            return@launch
+            return
         }
         logger.debug("Waiting for TinyGo parameters extraction task")
         withBackgroundProgress(project, TinyGoBundle.message(DETECTION_TITLE), cancellable = true) {

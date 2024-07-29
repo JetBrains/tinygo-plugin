@@ -6,8 +6,6 @@ import com.goide.project.GoModuleSettings
 import com.goide.sdk.GoSdk
 import com.goide.sdk.GoSdkService
 import com.goide.util.GoUtil
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
@@ -38,18 +36,20 @@ internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
         if (!settings.enabled) return
 
         val tinyGoSettings: TinyGoConfiguration = ConfigurationWithHistory(project)
-        project.service<TinyGoInfoExtractor>()
-            .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
-                TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
-                    tinyGoSettings.extractTinyGoInfo(output)
-                    writeAction {
-                        tinyGoSettings.saveState(project)
+        TinyGoServiceScope.getScope(project).launch {
+            project.service<TinyGoInfoExtractor>()
+                .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
+                    TinyGoServiceScope.getScope(project).launch {
+                        tinyGoSettings.extractTinyGoInfo(output)
+                        writeAction {
+                            tinyGoSettings.saveState(project)
 
-                        propagateGoFlags(project, tinyGoSettings)
-                        updateExtLibrariesAndCleanCache(project)
+                            propagateGoFlags(project, tinyGoSettings)
+                            updateExtLibrariesAndCleanCache(project)
+                        }
                     }
                 }
-            }
+        }
 
         logger.debug("cached GOROOT update signal processed")
     }

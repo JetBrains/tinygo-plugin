@@ -6,8 +6,6 @@ import com.goide.vgo.wizard.VgoModuleBuilder
 import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -93,12 +91,14 @@ private fun configureModule(
 }
 
 private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
-    project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings) { _, output ->
-        TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
-            tinyGoSettings.extractTinyGoInfo(output)
-            writeAction {
-                tinyGoSettings.saveState(project)
-                propagateGoFlags(project, tinyGoSettings)
+    TinyGoServiceScope.getScope(project).launch {
+        project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings) { _, output ->
+            TinyGoServiceScope.getScope(project).launch {
+                tinyGoSettings.extractTinyGoInfo(output)
+                writeAction {
+                    tinyGoSettings.saveState(project)
+                    propagateGoFlags(project, tinyGoSettings)
+                }
             }
         }
     }

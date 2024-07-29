@@ -132,17 +132,19 @@ class TinyGoSettingsService(private val project: Project) :
     override fun createPanel(): DialogPanel = generateSettingsPanel(project, propertiesWrapper, disposable!!)
 
     private fun callExtractor() {
-        project.service<TinyGoInfoExtractor>()
-            .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
-                thisLogger().trace(output)
-                TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
-                    tinyGoSettings.extractTinyGoInfo(output)
-                    withContext(Dispatchers.EDT) {
-                        // update all ui fields
-                        propertiesWrapper.reset()
+        TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
+            project.service<TinyGoInfoExtractor>()
+                .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
+                    TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
+                        thisLogger().trace(output)
+                        tinyGoSettings.extractTinyGoInfo(output)
+                        withContext(Dispatchers.EDT) {
+                            // update all ui fields
+                            propertiesWrapper.reset()
+                        }
                     }
                 }
-            }
+        }
     }
 
     override fun reset() {
