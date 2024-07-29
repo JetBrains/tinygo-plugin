@@ -63,6 +63,7 @@ class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkD
     override fun discoverVersions(
         os: String,
         arch: String,
+        includeAll: Boolean,
         progressIndicator: ProgressIndicator,
         versionConsumer: Consumer<MutableCollection<String>>,
     ): Boolean {
@@ -108,7 +109,7 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
     }
 }
 
-class TinyGoSdkChooserCombo :
+class TinyGoSdkChooserCombo(private val projectPathSupplier: () -> String) :
     GoBasedSdkChooserCombo<TinyGoSdk>(
         Validator { ValidationResult.OK },
         object : GoSdkListProvider<TinyGoSdk> {
@@ -124,7 +125,7 @@ class TinyGoSdkChooserCombo :
             listOf(
                 TinyGoLocalSdkAction(it),
                 GoDownloadSdkAction(
-                    { null },
+                    projectPathSupplier,
                     it,
                     TinyGoDownloaderDialog { sdk -> it.addSdk(sdk, true) },
                     VersionComparatorUtil.COMPARATOR.reversed()

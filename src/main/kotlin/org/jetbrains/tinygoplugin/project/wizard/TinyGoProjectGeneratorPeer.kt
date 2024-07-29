@@ -10,7 +10,7 @@ import org.jetbrains.tinygoplugin.configuration.ConfigurationWithHistory
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
-import org.jetbrains.tinygoplugin.ui.generateTinyGoParametersPanel
+import org.jetbrains.tinygoplugin.ui.generateTinyGoNewProjectSettingsPanel
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 
@@ -30,7 +30,14 @@ class TinyGoProjectGeneratorPeer :
         val panel = JPanel()
         panel.layout = BoxLayout(panel, BoxLayout.Y_AXIS)
         panel.add(createGridPanel(locationComponent, sdkCombo).resize().createPanel())
-        panel.add(generateTinyGoParametersPanel(project, propertiesWrapper, parentDisposable))
+        panel.add(
+            generateTinyGoNewProjectSettingsPanel(
+                project,
+                { locationComponent?.text.orEmpty() },
+                propertiesWrapper,
+                parentDisposable
+            )
+        )
         return panel
     }
 
