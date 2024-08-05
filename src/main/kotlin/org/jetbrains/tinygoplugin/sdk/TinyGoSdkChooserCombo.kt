@@ -2,7 +2,6 @@ package org.jetbrains.tinygoplugin.sdk
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.goide.sdk.combobox.GoBasedSdkChooserCombo
-import com.goide.sdk.combobox.GoBasedSdkChooserCombo.Validator
 import com.goide.sdk.combobox.GoSdkActionsProvider
 import com.goide.sdk.combobox.GoSdkListProvider
 import com.goide.sdk.download.GoDownloadSdkAction
@@ -14,21 +13,19 @@ import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.application.readAction
-import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.fileChooser.FileChooser
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.currentThreadCoroutineScope
 import com.intellij.openapi.project.DumbAwareAction
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.currentOrDefaultProject
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.text.VersionComparatorUtil
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -103,44 +100,12 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
 
     override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
+    @Suppress("UnstableApiUsage")
     override fun actionPerformed(e: AnActionEvent) {
-        val project = currentOrDefaultProject(e.project)
-        service<TinyGoSdkChooseLocalSdkService>().chooseLocalSdk(project, combo)
-    }
-}
-
-class TinyGoSdkChooserCombo(private val projectPathSupplier: () -> String) :
-    GoBasedSdkChooserCombo<TinyGoSdk>(
-        Validator { ValidationResult.OK },
-        object : GoSdkListProvider<TinyGoSdk> {
-            override fun getAllKnownSdks(): MutableList<TinyGoSdk> {
-                val loadedSdks = service<TinyGoSdkList>().loadedSdks.toList()
-                val downloadingSdks = service<TinyGoDownloadSdkService>().downloadingTinyGoSdks.toList()
-                return (loadedSdks + downloadingSdks).toMutableList()
-            }
-
-            override fun discoverSdks(): MutableList<TinyGoSdk> = allKnownSdks
-        },
-        GoSdkActionsProvider {
-            listOf(
-                TinyGoLocalSdkAction(it),
-                GoDownloadSdkAction(
-                    projectPathSupplier,
-                    it,
-                    TinyGoDownloaderDialog { sdk -> it.addSdk(sdk, true) },
-                    VersionComparatorUtil.COMPARATOR.reversed()
-                )
-            )
-        },
-        nullSdk
-    )
-
-@Service(Service.Level.APP)
-private class TinyGoSdkChooseLocalSdkService(private val coroutineScope: CoroutineScope) {
-    fun chooseLocalSdk(project: Project, combo: GoBasedSdkChooserCombo<TinyGoSdk>) {
-        coroutineScope.launch(ModalityState.current().asContextElement()) {
+        currentThreadCoroutineScope().launch(ModalityState.current().asContextElement()) {
+            val project = currentOrDefaultProject(e.project)
             val selectedDir = combo.sdk.sdkRoot
-            TinyGoLocalSdkAction.logger.debug("Select local SDK action triggered")
+            logger.debug("Select local SDK action triggered")
 
             val suggestedDirectory = withContext(Dispatchers.IO) {
                 suggestSdkDirectory()
@@ -171,14 +136,14 @@ private class TinyGoSdkChooseLocalSdkService(private val coroutineScope: Corouti
                                 combo.addSdk(sdk, true)
                                 service<TinyGoSdkList>().addSdk(sdk)
                             }
-                            TinyGoLocalSdkAction.logger.debug("Selected local TinyGo SDK is valid")
+                            logger.debug("Selected local TinyGo SDK is valid")
                         } else {
                             Messages.showErrorDialog(
                                 combo,
                                 TinyGoBundle.message(TINYGO_LOCAL_ERROR_INVALID_DIR),
                                 TinyGoBundle.message(TINYGO_LOCAL_FILE_DESCRIPTOR_TITLE)
                             )
-                            TinyGoLocalSdkAction.logger.debug("Selected local TinyGo SDK is invalid")
+                            logger.debug("Selected local TinyGo SDK is invalid")
                         }
                     }
                 }
@@ -186,3 +151,29 @@ private class TinyGoSdkChooseLocalSdkService(private val coroutineScope: Corouti
         }
     }
 }
+
+class TinyGoSdkChooserCombo(private val projectPathSupplier: () -> String) :
+    GoBasedSdkChooserCombo<TinyGoSdk>(
+        Validator { ValidationResult.OK },
+        object : GoSdkListProvider<TinyGoSdk> {
+            override fun getAllKnownSdks(): MutableList<TinyGoSdk> {
+                val loadedSdks = service<TinyGoSdkList>().loadedSdks.toList()
+                val downloadingSdks = service<TinyGoDownloadSdkService>().downloadingTinyGoSdks.toList()
+                return (loadedSdks + downloadingSdks).toMutableList()
+            }
+
+            override fun discoverSdks(): MutableList<TinyGoSdk> = allKnownSdks
+        },
+        GoSdkActionsProvider {
+            listOf(
+                TinyGoLocalSdkAction(it),
+                GoDownloadSdkAction(
+                    projectPathSupplier,
+                    it,
+                    TinyGoDownloaderDialog { sdk -> it.addSdk(sdk, true) },
+                    VersionComparatorUtil.COMPARATOR.reversed()
+                )
+            )
+        },
+        nullSdk
+    )
