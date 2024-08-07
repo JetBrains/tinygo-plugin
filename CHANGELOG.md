@@ -16,6 +16,13 @@
 
 ### Security
 
+## 0.5.15
+
+### Changed
+
+- Fix various UI freezes.
+- Make plugin compatible with 2024.2.
+
 ## 0.5.14
 
 ### Fixed
