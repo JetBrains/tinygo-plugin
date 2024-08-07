@@ -68,6 +68,7 @@ dependencies {
     }
 
     testImplementation(kotlin("test"))
+    testImplementation("org.opentest4j:opentest4j:1.3.0")
 
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
     implementation("org.codehaus.plexus:plexus-utils:3.5.1")
