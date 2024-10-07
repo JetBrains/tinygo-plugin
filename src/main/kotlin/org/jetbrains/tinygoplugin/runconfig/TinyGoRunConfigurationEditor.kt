@@ -89,7 +89,7 @@ open class TinyGoRunConfigurationEditor<RunConfigurationType : TinyGoRunConfigur
     override fun createEditor(): JComponent {
         return panel {
             row(TinyGoBundle.message(TARGET_LABEL)) {
-                targetPlatformFieldWithLink(this, properties, runConfiguration, this@TinyGoRunConfigurationEditor)
+                targetPlatformFieldWithLink(properties, runConfiguration, this@TinyGoRunConfigurationEditor)
             }
             row(TinyGoBundle.message(CLI_ARGUMENTS_LABEL)) {
                 textField()
@@ -106,47 +106,42 @@ open class TinyGoRunConfigurationEditor<RunConfigurationType : TinyGoRunConfigur
             row(TinyGoBundle.message(ENVIRONMENT_LABEL)) {
                 cell(environmentEditor).align(Align.FILL)
             }
-            createAdditionalComponent(this)
+            createAdditionalComponent()
         }
     }
 
-    protected open fun createAdditionalComponent(panel: Panel) = Unit
+    protected open fun Panel.createAdditionalComponent() = Unit
 }
 
 private const val OUTPUT_PATH_LABEL = "ui.output.path"
 
 class TinyGoBuildRunConfigurationEditor(runConfiguration: TinyGoBuildRunConfiguration) :
     TinyGoRunConfigurationEditor<TinyGoBuildRunConfiguration>(runConfiguration, PathKind.MAIN) {
-    override fun createAdditionalComponent(panel: Panel) {
-        with(panel) {
-            row(TinyGoBundle.message(OUTPUT_PATH_LABEL)) {
-                val fileChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
-                textFieldWithBrowseButton(fileChooserDescriptor = fileChooserDescriptor)
-                    .align(Align.FILL)
-                    .bindText(properties.outputPath)
-            }
+    override fun Panel.createAdditionalComponent() {
+        row(TinyGoBundle.message(OUTPUT_PATH_LABEL)) {
+            val fileChooserDescriptor = FileChooserDescriptor(false, true, false, false, false, false)
+            textFieldWithBrowseButton(fileChooserDescriptor = fileChooserDescriptor)
+                .align(Align.FILL)
+                .bindText(properties.outputPath)
         }
     }
 }
 
-private fun targetPlatformFieldWithLink(
-    row: Row,
+private fun Row.targetPlatformFieldWithLink(
     properties: RunConfigurationWrapper,
     runConfiguration: TinyGoRunConfiguration,
     parentDisposable: Disposable
 ) {
-    with(row) {
-        val targetTextField = JTextField(properties.target.get())
-        targetTextField.isEnabled = false
-        val targetFieldWithLink = TextFieldWithBrowseButton(targetTextField) {
-            val project = runConfiguration.project
-            val edited = service<ShowSettingsUtil>().editConfigurable(project, TinyGoSettingsService(project))
-            if (edited) {
-                parentDisposable.doIfAlive {
-                    targetTextField.text = project.tinyGoConfiguration().targetPlatform
-                }
+    val targetTextField = JTextField(properties.target.get())
+    targetTextField.isEnabled = false
+    val targetFieldWithLink = TextFieldWithBrowseButton(targetTextField) {
+        val project = runConfiguration.project
+        val edited = service<ShowSettingsUtil>().editConfigurable(project, TinyGoSettingsService(project))
+        if (edited) {
+            parentDisposable.doIfAlive {
+                targetTextField.text = project.tinyGoConfiguration().targetPlatform
             }
         }
-        cell(targetFieldWithLink).align(Align.FILL)
     }
+    cell(targetFieldWithLink).align(Align.FILL)
 }

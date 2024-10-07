@@ -53,7 +53,7 @@ fun generateTinyGoNewProjectSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
     parent: Disposable,
 ): JPanel = panel {
-    tinyGoSettings(project, projectPathSupplier, this, wrapper, parent)
+    tinyGoSettings(project, projectPathSupplier, wrapper, parent)
 }
 
 private fun AtomicBoolean.lockOrSkip(action: () -> Unit) {
@@ -82,13 +82,12 @@ fun TinyGoSdkChooserCombo.bind(property: GraphProperty<TinyGoSdk>) {
     }
 }
 
-fun tinyGoSdkComboChooser(
+fun Row.tinyGoSdkComboChooser(
     projectPathSupplier: () -> String,
-    row: Row,
     property: GraphProperty<TinyGoSdk>,
     parentDisposable: Disposable,
-): Cell<TinyGoSdkChooserCombo> = with(row) {
-    cell(TinyGoSdkChooserCombo(projectPathSupplier))
+): Cell<TinyGoSdkChooserCombo> {
+    return cell(TinyGoSdkChooserCombo(projectPathSupplier))
         .align(Align.FILL)
         .applyToComponent {
             TinyGoServiceScope.getScope().launch(ModalityState.current().asContextElement()) {
@@ -119,94 +118,87 @@ private const val GC_LABEL = "ui.gc"
 private const val SCHEDULER_LABEL = "ui.scheduler"
 private const val TARGET_BROWSE_DIALOG_TITLE = "ui.target.dialogTitle"
 
-private fun tinyGoSettings(
+private fun Panel.tinyGoSettings(
     project: Project?,
     projectPathSupplier: () -> String,
-    panel: Panel,
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
 ) {
-    with(panel) {
-        lateinit var tinyGoSdkComboChooser: Cell<TinyGoSdkChooserCombo>
-        row(TinyGoBundle.message(SDK_LABEL)) {
-            tinyGoSdkComboChooser = tinyGoSdkComboChooser(
-                projectPathSupplier,
-                this,
-                wrapper.tinyGoSdkPath,
-                parentDisposable
-            )
-        }
-        panel {
-            group(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
-                row(TinyGoBundle.message(TARGET_LABEL)) {
-                    targetChooser(project, this, wrapper, tinyGoSdkComboChooser)
-                }
-                row(TinyGoBundle.message(GC_LABEL)) {
-                    comboBox(GarbageCollector.entries.toSet())
-                        .bindItem(wrapper.gc)
-                        .columns(COLUMNS_SHORT)
-                    autoHelpLabel(this)
-                }
-                row(TinyGoBundle.message(SCHEDULER_LABEL)) {
-                    comboBox(Scheduler.entries.toSet())
-                        .bindItem(wrapper.scheduler)
-                        .columns(COLUMNS_SHORT)
-                    autoHelpLabel(this)
-                }
-                row {
-                    exportButton(project, this, wrapper)
-                }
+    lateinit var tinyGoSdkComboChooser: Cell<TinyGoSdkChooserCombo>
+    row(TinyGoBundle.message(SDK_LABEL)) {
+        tinyGoSdkComboChooser = tinyGoSdkComboChooser(
+            projectPathSupplier,
+            wrapper.tinyGoSdkPath,
+            parentDisposable
+        )
+    }
+    panel {
+        group(TinyGoBundle.message(COMPILER_PARAMETERS_LABEL)) {
+            row(TinyGoBundle.message(TARGET_LABEL)) {
+                targetChooser(project, wrapper, tinyGoSdkComboChooser)
+            }
+            row(TinyGoBundle.message(GC_LABEL)) {
+                comboBox(GarbageCollector.entries.toSet())
+                    .bindItem(wrapper.gc)
+                    .columns(COLUMNS_SHORT)
+                autoHelpLabel()
+            }
+            row(TinyGoBundle.message(SCHEDULER_LABEL)) {
+                comboBox(Scheduler.entries.toSet())
+                    .bindItem(wrapper.scheduler)
+                    .columns(COLUMNS_SHORT)
+                autoHelpLabel()
+            }
+            row {
+                exportButton(project, wrapper)
             }
         }
     }
 }
 
-private fun targetChooser(
+private fun Row.targetChooser(
     project: Project?,
-    row: Row,
     wrapper: TinyGoPropertiesWrapper,
     sdk: Cell<TinyGoSdkChooserCombo>
 ) {
-    with(row) {
-        val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false)
-            .withFileFilter { it.fileType == JsonFileType.INSTANCE }
-            .withTitle(TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE))
-        cell(
-            textFieldWithHistoryWithBrowseButton(
-                project,
-                jsonChooser,
-            )
-        ).align(Align.FILL).bind(
-            { component: TextFieldWithHistoryWithBrowseButton -> component.text },
-            { component: TextFieldWithHistoryWithBrowseButton, value: String -> component.text = value },
-            UIPropertyAdapter(wrapper.target)
-        ).applyToComponent {
-            text = wrapper.target.get()
-            wrapper.target.afterChange {
-                text = it
-                val historyIndex = childComponent.history.indexOf(it)
-                if (historyIndex >= 0) {
-                    childComponent.selectedIndex = historyIndex
-                }
+    val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false)
+        .withFileFilter { it.fileType == JsonFileType.INSTANCE }
+        .withTitle(TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE))
+    cell(
+        textFieldWithHistoryWithBrowseButton(
+            project,
+            jsonChooser,
+        )
+    ).align(Align.FILL).bind(
+        { component: TextFieldWithHistoryWithBrowseButton -> component.text },
+        { component: TextFieldWithHistoryWithBrowseButton, value: String -> component.text = value },
+        UIPropertyAdapter(wrapper.target)
+    ).applyToComponent {
+        text = wrapper.target.get()
+        wrapper.target.afterChange {
+            text = it
+            val historyIndex = childComponent.history.indexOf(it)
+            if (historyIndex >= 0) {
+                childComponent.selectedIndex = historyIndex
             }
-            childComponent.addActionListener {
-                if (childComponent.isShowing) {
-                    wrapper.target.set(text)
-                }
+        }
+        childComponent.addActionListener {
+            if (childComponent.isShowing) {
+                wrapper.target.set(text)
             }
+        }
+        childComponent.history = runWithModalProgressBlocking(
+            ModalTaskOwner.component(this),
+            TinyGoBundle.message("ui.target.loading.title")
+        ) {
+            readAction { wrapper.userTargets }
+        }
+        sdk.component.addChangedListener {
             childComponent.history = runWithModalProgressBlocking(
                 ModalTaskOwner.component(this),
                 TinyGoBundle.message("ui.target.loading.title")
             ) {
                 readAction { wrapper.userTargets }
-            }
-            sdk.component.addChangedListener {
-                childComponent.history = runWithModalProgressBlocking(
-                    ModalTaskOwner.component(this),
-                    TinyGoBundle.message("ui.target.loading.title")
-                ) {
-                    readAction { wrapper.userTargets }
-                }
             }
         }
     }
@@ -224,37 +216,33 @@ private const val EXPORT_TARGET_BUTTON = "ui.target.export"
 private const val EXPORT_TARGET_DIALOG_TITLE = "ui.target.export.dialog.title"
 private const val EXPORT_TARGET_DIALOG_DESCRIPTION = "ui.target.export.dialog.description"
 
-fun exportButton(project: Project?, row: Row, wrapper: TinyGoPropertiesWrapper) {
-    with(row) {
-        button(TinyGoBundle.message(EXPORT_TARGET_BUTTON)) {
-            TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
-                val target = createTargetWrapper(wrapper) ?: return@launch
-                val jsonChooser = FileSaverDescriptor(
-                    TinyGoBundle.message(EXPORT_TARGET_DIALOG_TITLE),
-                    TinyGoBundle.message(EXPORT_TARGET_DIALOG_DESCRIPTION),
-                    JsonFileType.DEFAULT_EXTENSION
-                )
-                var file = withContext(Dispatchers.EDT) {
-                    val chooserDialog = service<FileChooserFactory>()
-                        .createSaveFileDialog(jsonChooser, null)
-                        .save(null)
-                    chooserDialog?.file
-                } ?: return@launch
-                if (!file.name.endsWith(".json")) {
-                    file = File(file.path + ".json")
-                }
-                withContext(Dispatchers.IO) {
-                    file.writeText(target.serialize())
-                }
+fun Row.exportButton(project: Project?, wrapper: TinyGoPropertiesWrapper) {
+    button(TinyGoBundle.message(EXPORT_TARGET_BUTTON)) {
+        TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
+            val target = createTargetWrapper(wrapper) ?: return@launch
+            val jsonChooser = FileSaverDescriptor(
+                TinyGoBundle.message(EXPORT_TARGET_DIALOG_TITLE),
+                TinyGoBundle.message(EXPORT_TARGET_DIALOG_DESCRIPTION),
+                JsonFileType.DEFAULT_EXTENSION
+            )
+            var file = withContext(Dispatchers.EDT) {
+                val chooserDialog = service<FileChooserFactory>()
+                    .createSaveFileDialog(jsonChooser, null)
+                    .save(null)
+                chooserDialog?.file
+            } ?: return@launch
+            if (!file.name.endsWith(".json")) {
+                file = File(file.path + ".json")
+            }
+            withContext(Dispatchers.IO) {
+                file.writeText(target.serialize())
             }
         }
     }
 }
 
-fun autoHelpLabel(row: Row) {
-    with(row) {
-        cell(ContextHelpLabel.create(TinyGoBundle.message(HELP_AUTO)))
-    }
+fun Row.autoHelpLabel() {
+    cell(ContextHelpLabel.create(TinyGoBundle.message(HELP_AUTO)))
 }
 
 fun generateSettingsPanel(
@@ -262,7 +250,7 @@ fun generateSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
 ) = panel {
-    tinyGoSettings(project, { project.basePath.orEmpty() }, this, wrapper, parentDisposable)
+    tinyGoSettings(project, { project.basePath.orEmpty() }, wrapper, parentDisposable)
     row("GOOS") {
         textField()
             .bindText(wrapper.goOs)
