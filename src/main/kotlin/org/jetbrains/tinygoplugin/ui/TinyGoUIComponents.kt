@@ -168,13 +168,12 @@ private fun targetChooser(
     sdk: Cell<TinyGoSdkChooserCombo>
 ) {
     with(row) {
-        val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false).withFileFilter {
-            it.fileType == JsonFileType.INSTANCE
-        }
+        val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false)
+            .withFileFilter { it.fileType == JsonFileType.INSTANCE }
+            .withTitle(TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE))
         cell(
             textFieldWithHistoryWithBrowseButton(
                 project,
-                TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE),
                 jsonChooser,
             )
         ).align(Align.FILL).bind(
