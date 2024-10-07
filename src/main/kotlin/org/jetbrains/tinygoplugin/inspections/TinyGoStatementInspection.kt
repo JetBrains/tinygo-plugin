@@ -19,7 +19,7 @@ import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
 import org.jetbrains.tinygoplugin.services.TinyGoSettingsService
 
 class TinyGoStatementInspection : GoInspectionBase() {
-    override fun buildGoVisitor(
+    override fun buildVisitor(
         problemsHolder: GoProblemsHolder,
         locationInspection: LocalInspectionToolSession,
     ): GoVisitor =

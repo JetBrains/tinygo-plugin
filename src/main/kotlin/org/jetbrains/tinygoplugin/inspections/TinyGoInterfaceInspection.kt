@@ -16,7 +16,7 @@ class TinyGoInterfaceInspection : GoInspectionBase() {
         const val INTERFACE_INSPECTION_MESSAGE_KEY = "inspection.interface.message"
     }
 
-    override fun buildGoVisitor(holder: GoProblemsHolder, session: LocalInspectionToolSession): GoVisitor =
+    override fun buildVisitor(holder: GoProblemsHolder, session: LocalInspectionToolSession): GoVisitor =
         object : GoVisitor() {
             override fun visitConditionalExpr(conditionalExpr: GoConditionalExpr) {
                 val tinyGoConfiguration = conditionalExpr.project.tinyGoConfiguration()

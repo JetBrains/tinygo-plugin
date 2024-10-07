@@ -23,10 +23,6 @@ class TinyGoInjectionSupport : AbstractLanguageInjectionSupport() {
 
     override fun getPatternClasses(): Array<Class<*>> = arrayOf(TinyGoInjectionPatterns::class.java)
 
-    // Seems like the only way to disable default comment injector.
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun useDefaultCommentInjector(): Boolean = false
-
     companion object {
         private const val ID = "tinygo"
     }

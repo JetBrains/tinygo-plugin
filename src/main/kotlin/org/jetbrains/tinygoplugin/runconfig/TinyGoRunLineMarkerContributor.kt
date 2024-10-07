@@ -26,16 +26,16 @@ interface TinyGoFunctionRunLineMarkerContributor {
             }
             val settings = e.project.tinyGoConfiguration()
             if (!settings.enabled) return null
-            if (GoUtil.isInProject(file) && filePredicate(file) && parent is GoFunctionDeclaration) {
-                if (functionPredicate(parent)) {
-                    val actions = ExecutorAction.getActions(1)
-                    return Info(
-                        TinyGoPluginIcons.TinyGoIcon,
-                        this::tooltipProvider,
-                        actions[0], actions[actions.size - 1]
-                    )
-                }
+            if (!GoUtil.isInProject(file) || !filePredicate(file) || parent !is GoFunctionDeclaration) return null
+            if (!functionPredicate(parent)) return null
+            val actions = ExecutorAction.getActions(1).let {
+                arrayOf(it.first(), it.last())
             }
+            return Info(
+                TinyGoPluginIcons.TinyGoIcon,
+                actions,
+                this::tooltipProvider,
+            )
         }
         return null
     }
