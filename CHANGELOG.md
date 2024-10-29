@@ -16,6 +16,13 @@
 
 ### Security
 
+## 0.5.17
+
+### Fixed
+
+- Fix the empty target platform list
+- Fix the empty target platform value
+
 ## 0.5.16
 
 ### Changed
