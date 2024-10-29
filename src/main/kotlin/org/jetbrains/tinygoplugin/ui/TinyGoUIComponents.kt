@@ -181,7 +181,6 @@ private fun Row.targetChooser(
         },
         UIPropertyAdapter(wrapper.target)
     ).applyToComponent {
-        text = wrapper.target.get()
         childComponent.addActionListener {
             if (childComponent.isShowing) {
                 wrapper.target.set(text)
