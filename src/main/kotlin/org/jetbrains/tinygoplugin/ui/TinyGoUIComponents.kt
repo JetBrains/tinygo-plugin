@@ -5,7 +5,6 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.ModalityState
 import com.intellij.openapi.application.asContextElement
-import com.intellij.openapi.application.readAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.fileChooser.FileChooserFactory
@@ -13,8 +12,6 @@ import com.intellij.openapi.fileChooser.FileSaverDescriptor
 import com.intellij.openapi.observable.properties.GraphProperty
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
-import com.intellij.platform.ide.progress.ModalTaskOwner
-import com.intellij.platform.ide.progress.runWithModalProgressBlocking
 import com.intellij.ui.ContextHelpLabel
 import com.intellij.ui.TextFieldWithHistoryWithBrowseButton
 import com.intellij.ui.components.textFieldWithHistoryWithBrowseButton
@@ -165,42 +162,30 @@ private fun Row.targetChooser(
     val jsonChooser = FileChooserDescriptor(true, false, false, false, false, false)
         .withFileFilter { it.fileType == JsonFileType.INSTANCE }
         .withTitle(TinyGoBundle.message(TARGET_BROWSE_DIALOG_TITLE))
-    cell(
-        textFieldWithHistoryWithBrowseButton(
-            project,
-            jsonChooser,
+    cell(textFieldWithHistoryWithBrowseButton(project, jsonChooser, { wrapper.userTargets }))
+        .align(Align.FILL)
+        .bind(
+            { component: TextFieldWithHistoryWithBrowseButton -> component.text },
+            { component: TextFieldWithHistoryWithBrowseButton, value: String ->
+                component.text = value
+                val historyIndex = component.childComponent.history.indexOf(value)
+                if (historyIndex >= 0) {
+                    component.childComponent.selectedIndex = historyIndex
+                }
+            },
+            UIPropertyAdapter(wrapper.target)
         )
-    ).align(Align.FILL).bind(
-        { component: TextFieldWithHistoryWithBrowseButton -> component.text },
-        { component: TextFieldWithHistoryWithBrowseButton, value: String ->
-            component.text = value
-            val historyIndex = component.childComponent.history.indexOf(value)
-            if (historyIndex >= 0) {
-                component.childComponent.selectedIndex = historyIndex
+        .applyToComponent {
+            childComponent.addItemListener {
+                if (childComponent.isShowing) {
+                    val newItem = it.item as String
+                    wrapper.target.set(newItem)
+                }
             }
-        },
-        UIPropertyAdapter(wrapper.target)
-    ).applyToComponent {
-        childComponent.addActionListener {
-            if (childComponent.isShowing) {
-                wrapper.target.set(text)
+            sdk.component.addChangedListener {
+                childComponent.history = wrapper.userTargets
             }
         }
-        childComponent.history = runWithModalProgressBlocking(
-            ModalTaskOwner.component(this),
-            TinyGoBundle.message("ui.target.loading.title")
-        ) {
-            readAction { wrapper.userTargets }
-        }
-        sdk.component.addChangedListener {
-            childComponent.history = runWithModalProgressBlocking(
-                ModalTaskOwner.component(this),
-                TinyGoBundle.message("ui.target.loading.title")
-            ) {
-                readAction { wrapper.userTargets }
-            }
-        }
-    }
 }
 
 private class UIPropertyAdapter<T>(private val property: GraphProperty<T>) : MutableProperty<T> {
