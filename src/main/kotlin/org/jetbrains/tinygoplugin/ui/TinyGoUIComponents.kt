@@ -172,17 +172,16 @@ private fun Row.targetChooser(
         )
     ).align(Align.FILL).bind(
         { component: TextFieldWithHistoryWithBrowseButton -> component.text },
-        { component: TextFieldWithHistoryWithBrowseButton, value: String -> component.text = value },
+        { component: TextFieldWithHistoryWithBrowseButton, value: String ->
+            component.text = value
+            val historyIndex = component.childComponent.history.indexOf(value)
+            if (historyIndex >= 0) {
+                component.childComponent.selectedIndex = historyIndex
+            }
+        },
         UIPropertyAdapter(wrapper.target)
     ).applyToComponent {
         text = wrapper.target.get()
-        wrapper.target.afterChange {
-            text = it
-            val historyIndex = childComponent.history.indexOf(it)
-            if (historyIndex >= 0) {
-                childComponent.selectedIndex = historyIndex
-            }
-        }
         childComponent.addActionListener {
             if (childComponent.isShowing) {
                 wrapper.target.set(text)
