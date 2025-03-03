@@ -27,7 +27,7 @@ import com.intellij.ui.dsl.builder.bindItem
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.columns
 import com.intellij.ui.dsl.builder.panel
-import com.intellij.util.ui.showingScope
+import com.intellij.util.ui.launchOnShow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -88,7 +88,7 @@ fun Row.tinyGoSdkComboChooser(
     return cell(TinyGoSdkChooserCombo(projectPathSupplier))
         .align(Align.FILL)
         .applyToComponent {
-            this.showingScope("tinyGoSdkComboChooser", Dispatchers.Default) {
+            this.launchOnShow("tinyGoSdkComboChooser", Dispatchers.Default) {
                 var sdk: TinyGoSdk = property.get()
                 if (sdk == nullSdk) {
                     selectFirstNotNullSdk()

@@ -7,11 +7,11 @@ import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
 import com.intellij.util.concurrency.annotations.RequiresReadLock
+import com.intellij.util.io.URLUtil
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.warn
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.services.TinyGoExecutable
-import java.net.URL
 import java.util.Objects
 import javax.swing.Icon
 
@@ -112,7 +112,7 @@ open class TinyGoSdk(
     override fun hashCode(): Int = Objects.hash(tinyGoHomeUrl)
 }
 
-private fun urlToPath(url: String?): String? = url?.let { URL(it).path }
+private fun urlToPath(url: String?): String? = url?.let { URLUtil.urlToPath(it) }
 
 const val TINY_GO_VERSION_REGEX = """tinygo version (\d+.\d+.\d+)"""
 

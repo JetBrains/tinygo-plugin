@@ -6,7 +6,7 @@ import com.goide.project.GoModuleSettings
 import com.goide.sdk.GoSdk
 import com.goide.sdk.GoSdkService
 import com.goide.util.GoUtil
-import com.intellij.openapi.application.writeAction
+import com.intellij.openapi.application.edtWriteAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.Module
@@ -41,7 +41,7 @@ internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
                 .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
                     TinyGoServiceScope.getScope(project).launch {
                         tinyGoSettings.extractTinyGoInfo(output)
-                        writeAction {
+                        edtWriteAction {
                             tinyGoSettings.saveState(project)
 
                             propagateGoFlags(project, tinyGoSettings)

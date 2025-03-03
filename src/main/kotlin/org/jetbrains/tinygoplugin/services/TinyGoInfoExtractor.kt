@@ -94,7 +94,7 @@ class TinyGoExecutable(private val project: Project) {
             .withExePath(tinyGoExec.path)
             .withParameters(arguments)
             .showNotifications(true, false)
-            .disablePty()
+            .withPtyEnabled(false)
         if (GoOsManager.isWindows()) {
             executor.withConsoleMode()
         }
