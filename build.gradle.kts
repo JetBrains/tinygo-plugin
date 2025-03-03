@@ -12,7 +12,7 @@ plugins {
     // Kotlin support
     id("org.jetbrains.kotlin.jvm") version "2.1.0"
     // IntelliJ Platform Gradle Plugin
-    id("org.jetbrains.intellij.platform") version "2.0.0"
+    id("org.jetbrains.intellij.platform") version "2.3.0"
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.2.1"
     // detekt linter - read more: https://detekt.github.io/detekt/gradle.html
@@ -60,9 +60,6 @@ dependencies {
 
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(properties("platformPlugins").map { it.split(',') })
-
-        instrumentationTools()
-        pluginVerifier()
 
         testFramework(TestFrameworkType.Plugin.Go, "GOLAND-243-EAP-SNAPSHOT")
     }
