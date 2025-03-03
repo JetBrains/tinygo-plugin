@@ -16,6 +16,12 @@
 
 ### Security
 
+## 0.5.18
+
+### Changed
+
+- Make plugin compatible with 2025.1 EAP.
+
 ## 0.5.17
 
 ### Fixed
