@@ -1,7 +1,7 @@
 <templateSet group="TinyGo">
     <template name="asmavr"
               value="avr.Asm(&quot;$ASM$&quot;)"
-              description="Insert inline AVR assembly"
+              key="live.template.asmavr.description" resource-bundle="messages.TinyGo"
               toReformat="false"
               toShortenFQNames="false">
         <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
@@ -11,7 +11,7 @@
     </template>
     <template name="asmarm"
               value="arm.Asm(&quot;$ASM$&quot;)"
-              description="Insert inline ARM assembly"
+              key="live.template.asmarm.description" resource-bundle="messages.TinyGo"
               toReformat="false"
               toShortenFQNames="false">
         <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
@@ -21,7 +21,7 @@
     </template>
     <template name="asmarm64"
               value="arm64.Asm(&quot;$ASM$&quot;)"
-              description="Insert inline ARM64 assembly"
+              key="live.template.asmarm.64.description" resource-bundle="messages.TinyGo"
               toReformat="false"
               toShortenFQNames="false">
         <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
@@ -32,7 +32,7 @@
 
     <template name="asmextavr"
               value="avr.AsmFull(`&#10;$ASM$&#10;`, map[string]interface{}{&#10;&quot;$PARAM$&quot;: $VAL$,&#10;})"
-              description="Insert inline AVR assembly with parameters"
+              key="live.template.asmextavr.description" resource-bundle="messages.TinyGo"
               toReformat="true"
               toShortenFQNames="false">
         <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
@@ -44,7 +44,7 @@
     </template>
     <template name="asmextarm"
               value="arm.AsmFull(`&#10;$ASM$&#10;`, map[string]interface{}{&#10;&quot;$PARAM$&quot;: $VAL$,&#10;})"
-              description="Insert inline ARM assembly with parameters"
+              key="live.template.asmextarm.description" resource-bundle="messages.TinyGo"
               toReformat="true"
               toShortenFQNames="false">
         <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
@@ -56,7 +56,7 @@
     </template>
     <template name="asmextarm64"
               value="arm64.AsmFull(`&#10;$ASM$&#10;`, map[string]interface{}{&#10;&quot;$PARAM$&quot;: $VAL$,&#10;})"
-              description="Insert inline ARM64 assembly with parameters"
+              key="live.template.asmextarm.64.description" resource-bundle="messages.TinyGo"
               toReformat="true"
               toShortenFQNames="false">
         <variable name="ASM" expression="" defaultValue="" alwaysStopAt="true" />
