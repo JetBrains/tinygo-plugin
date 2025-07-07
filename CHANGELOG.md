@@ -275,7 +275,8 @@
 - Ability to flash and run a TinyGo application.
 - Support for code completion and autoimport.
 
-[Unreleased]: https://github.com/JetBrains/tinygo-plugin/compare/v0.5.18...HEAD
+[Unreleased]: https://github.com/JetBrains/tinygo-plugin/compare/v0.5.19...HEAD
+[0.5.19]: https://github.com/JetBrains/tinygo-plugin/compare/v0.5.18...v0.5.19
 [0.5.18]: https://github.com/JetBrains/tinygo-plugin/compare/v0.5.17...v0.5.18
 [0.5.17]: https://github.com/JetBrains/tinygo-plugin/compare/v0.5.16...v0.5.17
 [0.5.16]: https://github.com/JetBrains/tinygo-plugin/compare/v0.5.15...v0.5.16
