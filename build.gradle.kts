@@ -61,7 +61,7 @@ dependencies {
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(properties("platformPlugins").map { it.split(',') })
 
-        testFramework(TestFrameworkType.Plugin.Go, "GOLAND-251-EAP-SNAPSHOT")
+        testFramework(TestFrameworkType.Plugin.Go, "GOLAND-252-EAP-SNAPSHOT")
     }
 
     testImplementation(kotlin("test"))

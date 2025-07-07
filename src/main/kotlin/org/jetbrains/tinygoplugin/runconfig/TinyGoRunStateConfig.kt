@@ -5,9 +5,9 @@ import com.goide.util.GoExecutor
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.ExecutionResult
 import com.intellij.execution.Executor
-import com.intellij.execution.process.ProcessAdapter
 import com.intellij.execution.process.ProcessEvent
 import com.intellij.execution.process.ProcessHandler
+import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.openapi.application.EDT
@@ -107,7 +107,7 @@ class TinyGoHeapAllocRunningState(
         runner: ProgramRunner<*>,
         processHandler: ProcessHandler
     ): ExecutionResult {
-        processHandler.addProcessListener(object : ProcessAdapter() {
+        processHandler.addProcessListener(object : ProcessListener {
             private var processOutput: String = ""
 
             override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
