@@ -16,9 +16,9 @@ plugins {
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.2.1"
     // detekt linter - read more: https://detekt.github.io/detekt/gradle.html
-    id("io.gitlab.arturbosch.detekt") version "1.23.8"
+    id("io.gitlab.arturbosch.detekt") version "1.23.6"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
-    id("org.jlleitschuh.gradle.ktlint") version "11.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
 }
 
 sourceSets["main"].java.srcDirs("src/main/gen")
