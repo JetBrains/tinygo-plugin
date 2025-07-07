@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.5.19]
+
+### Changed
+
+- Make plugin compatible with 2025.2 EAP.
+
 ## [0.5.18]
 
 ### Changed
