@@ -14,6 +14,7 @@ enum class Scheduler(val cmd: String) {
     AUTO_DETECT("auto"),
     NONE("none"),
     ASYNCIFY("asyncify"),
+    CORES("cores"),
     TASKS("tasks");
 
     override fun toString(): String = cmd
