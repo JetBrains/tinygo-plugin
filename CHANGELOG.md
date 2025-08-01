@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.5.20]
+
+### Changed
+
+- Add `cores` and `threads` scheduler options.
+- Fix some UI freezes.
+
 ## [0.5.19]
 
 ### Changed
