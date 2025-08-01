@@ -74,9 +74,7 @@ open class TinyGoSdk(
         tinyGoSdkVersion(tinyGoVersion)
     )
 
-    val sdkRoot: VirtualFile? by lazy {
-        tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) }
-    }
+    val sdkRoot: VirtualFile? = tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) }
 
     override fun getIcon(): Icon = TinyGoPluginIcons.TinyGoIcon
 
@@ -84,9 +82,7 @@ open class TinyGoSdk(
 
     override fun getHomeUrl(): String = tinyGoHomeUrl ?: ""
 
-    private val sdkSrc: VirtualFile? by lazy {
-        sdkRoot?.findChild("src")
-    }
+    private val sdkSrc: VirtualFile? = sdkRoot?.findChild("src")
 
     @RequiresReadLock
     override fun getSrcDir(): VirtualFile? = sdkSrc
