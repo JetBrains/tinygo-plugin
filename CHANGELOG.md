@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.5.21]
+
+### Changed
+
+- Make plugin compatible with 2025.3.
+
 ## [0.5.20]
 
 ### Changed
