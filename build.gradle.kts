@@ -61,8 +61,11 @@ dependencies {
         // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
         plugins(properties("platformPlugins").map { it.split(',') })
 
+        // Module Dependencies. Uses `platformBundledModules` property from the gradle.properties file for bundled IntelliJ Platform modules.
+        bundledModules(properties("platformBundledModules").map { it.split(',') })
+
         testFramework(TestFrameworkType.Platform)
-        testFramework(TestFrameworkType.Plugin.Go, "GOLAND-252-EAP-SNAPSHOT")
+        testFramework(TestFrameworkType.Plugin.Go)
     }
 
     testImplementation(kotlin("test"))
