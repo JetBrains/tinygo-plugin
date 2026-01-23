@@ -65,7 +65,7 @@ dependencies {
         bundledModules(properties("platformBundledModules").map { it.split(',') })
 
         testFramework(TestFrameworkType.Platform)
-        testFramework(TestFrameworkType.Plugin.Go)
+        testFramework(TestFrameworkType.Plugin.Go, "GOLAND-261-EAP-SNAPSHOT")
     }
 
     testImplementation(kotlin("test"))
