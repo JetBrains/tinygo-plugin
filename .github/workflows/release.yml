@@ -24,12 +24,27 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
 
-      # Setup Java environment for the next steps
-      - name: Setup Java
+      # Setup Java 25 for the IntelliJ Platform toolchain
+      - name: Setup Java 25
+        uses: actions/setup-java@v4.2.2
+        with:
+          distribution: zulu
+          java-version: 25
+
+      - name: Save Java 25 path
+        shell: bash
+        run: echo "JAVA_25_HOME=$JAVA_HOME" >> "$GITHUB_ENV"
+
+      # Keep Gradle and legacy analysis tools on Java 21
+      - name: Setup Java 21
         uses: actions/setup-java@v4.2.2
         with:
           distribution: zulu
           java-version: 21
+
+      - name: Configure Java toolchain
+        shell: bash
+        run: echo "GRADLE_OPTS=-Dorg.gradle.java.installations.paths=$JAVA_25_HOME" >> "$GITHUB_ENV"
 
       # Setup Gradle
       - name: Setup Gradle
