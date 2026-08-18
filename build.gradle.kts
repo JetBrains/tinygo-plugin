@@ -30,12 +30,12 @@ version = properties("pluginVersion").get()
 
 // Set the JVM language level used to build the project.
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -151,7 +151,11 @@ tasks {
     }
 
     withType<Detekt> {
-        jvmTarget = "21"
+        jvmTarget = "25"
+    }
+
+    withType<DetektCreateBaselineTask> {
+        jvmTarget = "25"
     }
 
     publishPlugin {

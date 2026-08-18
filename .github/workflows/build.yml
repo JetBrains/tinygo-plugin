@@ -53,7 +53,7 @@ jobs:
         uses: actions/setup-java@v4.2.2
         with:
           distribution: zulu
-          java-version: 21
+          java-version: 25
 
       # Setup Gradle
       - name: Setup Gradle
@@ -115,7 +115,7 @@ jobs:
         uses: actions/setup-java@v4.2.2
         with:
           distribution: zulu
-          java-version: 21
+          java-version: 25
 
       # Setup Gradle
       - name: Setup Gradle
@@ -149,7 +149,7 @@ jobs:
         uses: actions/setup-java@v4.2.2
         with:
           distribution: zulu
-          java-version: 21
+          java-version: 25
 
       # Setup Gradle
       - name: Setup Gradle
@@ -194,7 +194,7 @@ jobs:
         uses: actions/setup-java@v4.2.2
         with:
           distribution: zulu
-          java-version: 21
+          java-version: 25
 
       # Remove old release drafts by using the curl request for the available releases with a draft flag
       - name: Remove Old Release Drafts
