@@ -148,6 +148,14 @@ changelog {
 }
 
 tasks {
+    test {
+        include(
+            "**/*Test.class",
+            "**/*Tests.class",
+            "**/*TestCase.class",
+        )
+    }
+
     wrapper {
         gradleVersion = properties("gradleVersion").get()
     }
