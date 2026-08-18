@@ -18,13 +18,12 @@
         <error line="19" column="96" source="standard:function-signature" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/configuration/CachedGoRootUpdater.kt">
-        <error line="31" column="26" source="standard:function-signature" />
-        <error line="31" column="42" source="standard:function-signature" />
-        <error line="31" column="62" source="standard:function-signature" />
-        <error line="40" column="20" source="standard:chain-method-continuation" />
-        <error line="62" column="31" source="standard:class-signature" />
-        <error line="62" column="59" source="standard:class-signature" />
-        <error line="85" column="16" source="standard:chain-method-continuation" />
+        <error line="30" column="26" source="standard:function-signature" />
+        <error line="30" column="42" source="standard:function-signature" />
+        <error line="30" column="62" source="standard:function-signature" />
+        <error line="39" column="20" source="standard:chain-method-continuation" />
+        <error line="61" column="31" source="standard:class-signature" />
+        <error line="61" column="59" source="standard:class-signature" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/configuration/ConfigurationWithHistory.kt">
         <error line="14" column="24" source="standard:class-signature" />

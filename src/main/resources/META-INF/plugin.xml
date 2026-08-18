@@ -5,6 +5,7 @@
     <category>Languages</category>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.jcef</depends>
     <depends>org.jetbrains.plugins.go</depends>
     <depends>org.intellij.intelliLang</depends>
     <depends>com.intellij.modules.json</depends>

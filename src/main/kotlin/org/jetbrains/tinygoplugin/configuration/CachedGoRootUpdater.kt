@@ -1,7 +1,6 @@
 package org.jetbrains.tinygoplugin.configuration
 
 import com.goide.GoLibrariesUtil
-import com.goide.project.GoBuildTargetSettings
 import com.goide.project.GoModuleSettings
 import com.goide.sdk.GoSdk
 import com.goide.sdk.GoSdkService
@@ -82,8 +81,6 @@ fun sendReloadLibrariesSignal(project: Project) {
     if (!project.isDisposed) {
         val messageBus: MessageBus = project.messageBus
         val modules = ModuleManager.getInstance(project).modules
-        modules.filter {
-            GoBuildTargetSettings.DEFAULT == GoModuleSettings.getInstance(it).buildTargetSettings.goVersion
-        }.forEach { messageBus.syncPublisher(GoModuleSettings.BUILD_TARGET_TOPIC).changed(it, true) }
+        modules.forEach { messageBus.syncPublisher(GoModuleSettings.BUILD_TARGET_TOPIC).changed(it, true) }
     }
 }
