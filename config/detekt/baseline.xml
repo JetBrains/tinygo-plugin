@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ThrowsCount:TinyGoRunConfiguration.kt:TinyGoRunConfiguration$@Throws(RuntimeConfigurationException::class) override fun checkConfiguration</ID>
+  </CurrentIssues>
+</SmellBaseline>

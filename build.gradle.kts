@@ -1,9 +1,11 @@
-import io.gitlab.arturbosch.detekt.Detekt
+import dev.detekt.gradle.Detekt
+import dev.detekt.gradle.DetektCreateBaselineTask
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 fun properties(key: String) = providers.gradleProperty(key)
+
 fun environment(key: String) = providers.environmentVariable(key)
 
 plugins {
@@ -16,9 +18,9 @@ plugins {
     // Gradle Changelog Plugin
     id("org.jetbrains.changelog") version "2.2.1"
     // detekt linter - read more: https://detekt.github.io/detekt/gradle.html
-    id("io.gitlab.arturbosch.detekt") version "1.23.6"
+    id("dev.detekt") version "2.0.0-alpha.6"
     // ktlint linter - read more: https://github.com/JLLeitschuh/ktlint-gradle
-    id("org.jlleitschuh.gradle.ktlint") version "10.3.0"
+    id("org.jlleitschuh.gradle.ktlint") version "14.0.1"
 }
 
 sourceSets["main"].java.srcDirs("src/main/gen")
@@ -71,7 +73,6 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("org.opentest4j:opentest4j:1.3.0")
 
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.21.0")
     implementation("org.codehaus.plexus:plexus-utils:3.5.1")
 }
 
@@ -82,30 +83,32 @@ intellijPlatform {
         version = properties("pluginVersion")
 
         // Extract the <!-- Plugin description --> section from README.md and provide for the plugin's manifest
-        description = providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
-            val start = "<!-- Plugin description -->"
-            val end = "<!-- Plugin description end -->"
+        description =
+            providers.fileContents(layout.projectDirectory.file("README.md")).asText.map {
+                val start = "<!-- Plugin description -->"
+                val end = "<!-- Plugin description end -->"
 
-            with(it.lines()) {
-                if (!containsAll(listOf(start, end))) {
-                    throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                with(it.lines()) {
+                    if (!containsAll(listOf(start, end))) {
+                        throw GradleException("Plugin description section not found in README.md:\n$start ... $end")
+                    }
+                    subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
                 }
-                subList(indexOf(start) + 1, indexOf(end)).joinToString("\n").let(::markdownToHTML)
             }
-        }
 
         val changelog = project.changelog // local variable for configuration cache compatibility
         // Get the latest available change notes from the changelog file
-        changeNotes = properties("pluginVersion").map { pluginVersion ->
-            with(changelog) {
-                renderItem(
-                    (getOrNull(pluginVersion) ?: getUnreleased())
-                        .withHeader(false)
-                        .withEmptySections(false),
-                    Changelog.OutputType.HTML,
-                )
+        changeNotes =
+            properties("pluginVersion").map { pluginVersion ->
+                with(changelog) {
+                    renderItem(
+                        (getOrNull(pluginVersion) ?: getUnreleased())
+                            .withHeader(false)
+                            .withEmptySections(false),
+                        Changelog.OutputType.HTML,
+                    )
+                }
             }
-        }
 
         ideaVersion {
             sinceBuild = properties("pluginSinceBuild")
@@ -131,6 +134,7 @@ intellijPlatform {
 // Configure detekt plugin.
 // Read more: https://detekt.github.io/detekt/kotlindsl.html
 detekt {
+    baseline = file("config/detekt/baseline.xml")
     config.setFrom("./detekt-config.yml")
     buildUponDefaultConfig = true
 }
@@ -148,11 +152,6 @@ tasks {
 
     withType<Detekt> {
         jvmTarget = "21"
-        reports {
-            html.required.set(false)
-            xml.required.set(false)
-            txt.required.set(false)
-        }
     }
 
     publishPlugin {
