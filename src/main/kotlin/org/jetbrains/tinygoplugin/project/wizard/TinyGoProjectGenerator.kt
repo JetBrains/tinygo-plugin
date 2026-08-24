@@ -16,9 +16,12 @@ import com.intellij.platform.ProjectGeneratorPeer
 import kotlinx.coroutines.launch
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
+import org.jetbrains.tinygoplugin.configuration.updateExtLibrariesAndCleanCache
 import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
+import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadSdkService
+import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
 import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
@@ -92,12 +95,17 @@ private fun configureModule(
 
 private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
     TinyGoServiceScope.getScope(project).launch {
+        val downloadingSdk = tinyGoSettings.sdk as? TinyGoDownloadingSdk
+        if (downloadingSdk != null) {
+            tinyGoSettings.sdk = service<TinyGoDownloadSdkService>().awaitDownloadedSdk(downloadingSdk)
+        }
         val output = project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings)
             ?: return@launch
         tinyGoSettings.extractTinyGoInfo(output)
         edtWriteAction {
             tinyGoSettings.saveState(project)
             propagateGoFlags(project, tinyGoSettings)
+            updateExtLibrariesAndCleanCache(project)
         }
     }
 }

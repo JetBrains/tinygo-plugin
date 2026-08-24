@@ -26,6 +26,7 @@ import com.intellij.refactoring.RefactoringBundle
 import com.intellij.util.PathUtil
 import com.intellij.util.io.Decompressor
 import com.intellij.util.io.HttpRequests
+import kotlinx.coroutines.CompletableDeferred
 import org.jetbrains.tinygoplugin.configuration.TinyGoSdkList
 import java.io.IOException
 import java.io.UncheckedIOException
@@ -44,6 +45,14 @@ class TinyGoDownloadSdkService private constructor() {
     }
 
     val downloadingTinyGoSdks: MutableSet<TinyGoDownloadingSdk> = mutableSetOf()
+    private val downloadResults: MutableMap<TinyGoDownloadingSdk, CompletableDeferred<TinyGoSdk>> = mutableMapOf()
+
+    private fun downloadResult(sdk: TinyGoDownloadingSdk): CompletableDeferred<TinyGoSdk> =
+        synchronized(downloadResults) {
+            downloadResults.getOrPut(sdk) { CompletableDeferred() }
+        }
+
+    suspend fun awaitDownloadedSdk(sdk: TinyGoDownloadingSdk): TinyGoSdk = downloadResult(sdk).await()
 
     fun downloadTinyGoSdk(sdk: TinyGoDownloadingSdk, onFinish: Consumer<TinyGoSdk>) {
         logger.debug("Download of TinyGo SDK started")
@@ -51,6 +60,7 @@ class TinyGoDownloadSdkService private constructor() {
             logger.debug("TinyGo SDK has been already downloaded, exit")
             return
         }
+        downloadResult(sdk)
         logger.debug("Waiting for TinyGo SDK to be registered")
         val registered = synchronized(downloadingTinyGoSdks) {
             downloadingTinyGoSdks.add(sdk)
@@ -83,6 +93,7 @@ class TinyGoDownloadSdkService private constructor() {
                 service<TinyGoSdkList>().addSdk(localSdk)
                 logger.debug("Added downloaded TinyGo SDK to the list of local SDKs")
                 sdk.isDownloaded = true
+                downloadResult(sdk).complete(localSdk)
                 GoNotifications.getGeneralGroup()
                     .createNotification("Downloaded SDK", NotificationType.INFORMATION)
                     .notify(null)
