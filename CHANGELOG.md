@@ -9,6 +9,9 @@
 ### Changed
 
 - Make plugin compatible with 2026.2.
+
+### Fixed
+
 - Fix severe freeze and OOM during SDK indexing.
 - Fix SDK refresh after Go version changes.
 - Fix endless TinyGo SDK downloading.
