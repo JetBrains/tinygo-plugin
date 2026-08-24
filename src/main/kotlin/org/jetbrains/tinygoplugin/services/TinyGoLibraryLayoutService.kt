@@ -136,20 +136,21 @@ internal class TinyGoLibraryLayoutService(private val project: Project) {
         val key = layoutKey(settings, cachedGoRoot)
         if (snapshot.key == key) return false
         val previousExclusions = getExcludedRoots(cachedGoRoot, settings)
-        val excludedRoots = if (sdkRoot == null || target.isEmpty()) {
-            readAction { conservativeExclusions(cachedGoRoot) }
+        val (excludedRoots, cacheable) = if (sdkRoot == null || target.isEmpty()) {
+            readAction { conservativeExclusions(cachedGoRoot) } to true
         } else {
             val packages = listPackages(settings, sdkRoot)
             if (packages == null) {
                 logger<TinyGoLibraryLayoutService>().warn(
                     "Cannot calculate library exclusions for TinyGo target '$target'"
                 )
-                readAction { conservativeExclusions(cachedGoRoot) }
+                readAction { conservativeExclusions(cachedGoRoot) } to false
             } else {
-                readAction { calculateExcludedRoots(cachedGoRoot, packages) }
+                readAction { calculateExcludedRoots(cachedGoRoot, packages) } to true
             }
         }
-        val published = publishIfCurrent(currentGeneration, Snapshot(key, excludedRoots))
+        val publishedKey = key.takeIf { cacheable }
+        val published = publishIfCurrent(currentGeneration, Snapshot(publishedKey, excludedRoots))
         return published && previousExclusions != excludedRoots
     }
 
