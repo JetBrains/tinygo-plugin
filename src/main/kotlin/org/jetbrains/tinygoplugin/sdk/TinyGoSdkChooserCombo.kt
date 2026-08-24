@@ -20,6 +20,7 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.currentThreadCoroutineScope
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.currentOrDefaultProject
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
@@ -39,7 +40,11 @@ private const val TINYGO_SDK_TITLE = "tinygoSDK.download.title"
 private const val TINYGO_SDK_PROGRESS_ICON_NAME = "tinygoSDK.download.progress"
 const val TINYGO_GITHUB = "tinygo-org/tinygo"
 
-class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkDownloaderDialog<TinyGoSdk> {
+class TinyGoDownloaderDialog(
+    private val project: Project?,
+    private val deferDownload: Boolean,
+    private val onFinish: Consumer<TinyGoSdk>,
+) : GoSdkDownloaderDialog<TinyGoSdk> {
     companion object {
         val logger = logger<TinyGoDownloaderDialog>()
     }
@@ -49,8 +54,12 @@ class TinyGoDownloaderDialog(private val onFinish: Consumer<TinyGoSdk>) : GoSdkD
             return TinyGoDownloadingSdk(version, null)
         }
         val result = TinyGoDownloadingSdk(version, path)
-        logger.debug("Download of TinyGo SDK requested")
-        service<TinyGoDownloadSdkService>().downloadTinyGoSdk(result, onFinish)
+        if (!deferDownload) {
+            logger.debug("Download of TinyGo SDK requested")
+            service<TinyGoDownloadSdkService>().downloadTinyGoSdk(result, project, onFinish)
+        } else {
+            logger.debug("TinyGo SDK download deferred until project creation")
+        }
         return result
     }
 
@@ -155,7 +164,11 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
     }
 }
 
-class TinyGoSdkChooserCombo(private val projectPathSupplier: () -> String) :
+class TinyGoSdkChooserCombo(
+    private val projectPathSupplier: () -> String,
+    private val project: Project?,
+    private val deferSdkDownload: Boolean,
+) :
     GoBasedSdkChooserCombo<TinyGoSdk>(
         Validator { ValidationResult.OK },
         object : GoSdkListProvider<TinyGoSdk> {
@@ -176,7 +189,7 @@ class TinyGoSdkChooserCombo(private val projectPathSupplier: () -> String) :
                 GoDownloadSdkAction(
                     projectPathSupplier,
                     it,
-                    TinyGoDownloaderDialog { sdk -> it.addSdk(sdk, true) },
+                    TinyGoDownloaderDialog(project, deferSdkDownload) { sdk -> it.addSdk(sdk, true) },
                     VersionComparatorUtil.COMPARATOR.reversed()
                 )
             )

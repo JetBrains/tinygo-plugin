@@ -51,7 +51,7 @@ fun generateTinyGoNewProjectSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
     parent: Disposable,
 ): JPanel = panel {
-    tinyGoSettings(project, projectPathSupplier, wrapper, parent)
+    tinyGoSettings(project, projectPathSupplier, wrapper, parent, deferSdkDownload = true)
 }
 
 private fun AtomicBoolean.lockOrSkip(action: () -> Unit) {
@@ -81,11 +81,13 @@ fun TinyGoSdkChooserCombo.bind(property: GraphProperty<TinyGoSdk>) {
 }
 
 fun Row.tinyGoSdkComboChooser(
+    project: Project?,
     projectPathSupplier: () -> String,
     property: GraphProperty<TinyGoSdk>,
     parentDisposable: Disposable,
+    deferSdkDownload: Boolean,
 ): Cell<TinyGoSdkChooserCombo> {
-    return cell(TinyGoSdkChooserCombo(projectPathSupplier))
+    return cell(TinyGoSdkChooserCombo(projectPathSupplier, project, deferSdkDownload))
         .align(Align.FILL)
         .applyToComponent {
             this.launchOnShow("tinyGoSdkComboChooser", Dispatchers.Default) {
@@ -121,13 +123,16 @@ private fun Panel.tinyGoSettings(
     projectPathSupplier: () -> String,
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
+    deferSdkDownload: Boolean = false,
 ) {
     lateinit var tinyGoSdkComboChooser: Cell<TinyGoSdkChooserCombo>
     row(TinyGoBundle.message(SDK_LABEL)) {
         tinyGoSdkComboChooser = tinyGoSdkComboChooser(
+            project,
             projectPathSupplier,
             wrapper.tinyGoSdkPath,
-            parentDisposable
+            parentDisposable,
+            deferSdkDownload,
         )
     }
     panel {

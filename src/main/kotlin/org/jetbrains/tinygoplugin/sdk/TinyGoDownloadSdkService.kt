@@ -15,6 +15,7 @@ import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.progress.Task
 import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.util.io.NioFiles
 import com.intellij.openapi.util.text.StringUtil
@@ -54,7 +55,11 @@ class TinyGoDownloadSdkService private constructor() {
 
     suspend fun awaitDownloadedSdk(sdk: TinyGoDownloadingSdk): TinyGoSdk = downloadResult(sdk).await()
 
-    fun downloadTinyGoSdk(sdk: TinyGoDownloadingSdk, onFinish: Consumer<TinyGoSdk>) {
+    fun downloadTinyGoSdk(
+        sdk: TinyGoDownloadingSdk,
+        project: Project?,
+        onFinish: Consumer<TinyGoSdk>,
+    ) {
         logger.debug("Download of TinyGo SDK started")
         if (sdk.isDownloaded) {
             logger.debug("TinyGo SDK has been already downloaded, exit")
@@ -67,13 +72,17 @@ class TinyGoDownloadSdkService private constructor() {
         }
         if (registered) {
             logger.debug("TinyGo SDK registered")
-            startDownloading(sdk, onFinish)
+            startDownloading(sdk, project, onFinish)
         }
     }
 
-    private fun startDownloading(sdk: TinyGoDownloadingSdk, onFinish: Consumer<TinyGoSdk>) {
-
-        val downloadTask: Task.Backgroundable = object : Task.Backgroundable(null, "Downloading TinyGo SDK", true) {
+    private fun startDownloading(
+        sdk: TinyGoDownloadingSdk,
+        project: Project?,
+        onFinish: Consumer<TinyGoSdk>,
+    ) {
+        val downloadTask: Task.Backgroundable = object :
+            Task.Backgroundable(project, "Downloading TinyGo SDK", true) {
             private var downloadedSdk: TinyGoSdk? = null
             private val lock = object {}
 
@@ -214,7 +223,7 @@ class TinyGoDownloadSdkService private constructor() {
                     override fun actionPerformed(e: AnActionEvent, notification: Notification) {
                         notification.expire()
                         if (!sdk.isDownloaded) {
-                            this@TinyGoDownloadSdkService.downloadTinyGoSdk(sdk, onFinish)
+                            this@TinyGoDownloadSdkService.downloadTinyGoSdk(sdk, project, onFinish)
                         }
                     }
                 }).notify(null)

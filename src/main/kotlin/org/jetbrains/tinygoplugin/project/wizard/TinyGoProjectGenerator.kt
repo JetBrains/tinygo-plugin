@@ -97,7 +97,9 @@ private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfig
     TinyGoServiceScope.getScope(project).launch {
         val downloadingSdk = tinyGoSettings.sdk as? TinyGoDownloadingSdk
         if (downloadingSdk != null) {
-            tinyGoSettings.sdk = service<TinyGoDownloadSdkService>().awaitDownloadedSdk(downloadingSdk)
+            val downloadService = service<TinyGoDownloadSdkService>()
+            downloadService.downloadTinyGoSdk(downloadingSdk, project) { }
+            tinyGoSettings.sdk = downloadService.awaitDownloadedSdk(downloadingSdk)
         }
         val output = project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings)
             ?: return@launch
