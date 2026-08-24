@@ -19,6 +19,7 @@ import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.messages.MessageBus
 import kotlinx.coroutines.launch
 import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
+import org.jetbrains.tinygoplugin.services.TinyGoLibraryLayoutService
 import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.services.propagateGoFlags
@@ -60,6 +61,7 @@ internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
                 .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project))
                 ?: return@launch
             tinyGoSettings.extractTinyGoInfo(output)
+            project.service<TinyGoLibraryLayoutService>().refresh(tinyGoSettings)
             edtWriteAction {
                 tinyGoSettings.saveState(project)
 
@@ -78,6 +80,7 @@ interface TinyGoExtractionFailureListener : EventListener {
 
 class CachedGoRootInvalidator(private val project: Project) : TinyGoExtractionFailureListener {
     override fun onExtractionFailure() {
+        project.service<TinyGoLibraryLayoutService>().clear()
         val tinyGoSettings = project.tinyGoConfiguration()
         tinyGoSettings.cachedGoRoot = GoSdk.NULL
         tinyGoSettings.saveState(project)
@@ -86,7 +89,7 @@ class CachedGoRootInvalidator(private val project: Project) : TinyGoExtractionFa
 }
 
 @RequiresEdt
-private fun updateExtLibrariesAndCleanCache(project: Project) {
+internal fun updateExtLibrariesAndCleanCache(project: Project) {
     if (!project.isDisposed) {
         application.assertIsDispatchThread()
         project.service<GoSdkService>().incModificationCount()
