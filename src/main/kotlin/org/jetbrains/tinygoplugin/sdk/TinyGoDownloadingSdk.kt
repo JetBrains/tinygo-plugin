@@ -1,6 +1,5 @@
 package org.jetbrains.tinygoplugin.sdk
 
-import com.goide.sdk.download.GoDownloadingSdk
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
@@ -12,6 +11,7 @@ class TinyGoDownloadingSdk(tinyGoVersion: String?, targetPath: String?) :
         tinyGoVersion = tinyGoVersion,
     ) {
 
+    @Volatile
     var isDownloaded: Boolean = false
 
     override fun getSrcDir(): VirtualFile? = null
@@ -23,8 +23,8 @@ class TinyGoDownloadingSdk(tinyGoVersion: String?, targetPath: String?) :
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
-        val sdk = other as GoDownloadingSdk
-        return sdkVersion.equals(sdk.version) && tinyGoHomeUrl == sdk.homeUrl
+        val sdk = other as TinyGoDownloadingSdk
+        return sdkVersion == sdk.sdkVersion && tinyGoHomeUrl == sdk.tinyGoHomeUrl
     }
 
     override fun hashCode(): Int = Objects.hash(sdkVersion, tinyGoHomeUrl)

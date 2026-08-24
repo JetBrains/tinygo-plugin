@@ -2,7 +2,6 @@ package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.GoNotifications
 import com.goide.GoOsManager
-import com.goide.sdk.GoSdk
 import com.goide.util.GoUtil
 import com.intellij.notification.Notification
 import com.intellij.notification.NotificationAction
@@ -65,7 +64,7 @@ class TinyGoDownloadSdkService private constructor() {
     private fun startDownloading(sdk: TinyGoDownloadingSdk, onFinish: Consumer<TinyGoSdk>) {
 
         val downloadTask: Task.Backgroundable = object : Task.Backgroundable(null, "Downloading TinyGo SDK", true) {
-            private var success = false
+            private var downloadedSdk: TinyGoSdk? = null
             private val lock = object {}
 
             override fun onFinished() {
@@ -75,22 +74,18 @@ class TinyGoDownloadSdkService private constructor() {
                     logger.debug("Removed TinyGo SDK from the list of downloading SDKs")
                 }
 
-                val localSdk = sdk.toLocalTinyGoSdk()
-                if (localSdk == GoSdk::NULL) {
-                    logger.debug("Converting of downloading SDK to local failed")
+                val localSdk = synchronized(lock) { downloadedSdk }
+                if (localSdk == null) {
+                    logger.debug("TinyGo SDK download did not complete successfully")
                     return
                 }
+
                 service<TinyGoSdkList>().addSdk(localSdk)
                 logger.debug("Added downloaded TinyGo SDK to the list of local SDKs")
                 sdk.isDownloaded = true
-                synchronized(lock) {
-                    if (success) {
-                        sdk.isDownloaded = true
-                        GoNotifications.getGeneralGroup()
-                            .createNotification("Downloaded SDK", NotificationType.INFORMATION)
-                            .notify(null)
-                    }
-                }
+                GoNotifications.getGeneralGroup()
+                    .createNotification("Downloaded SDK", NotificationType.INFORMATION)
+                    .notify(null)
                 onFinish.accept(localSdk)
             }
 
@@ -120,10 +115,12 @@ class TinyGoDownloadSdkService private constructor() {
                     logger.debug("Downloaded TinyGo SDK into temp")
                     indicator.text2 = ""
                     // checksum verifying??
-                    unpackSdk(indicator, downloadedArchive, VfsUtilCore.urlToPath(sdk.homeUrl))
-                    synchronized(lock) {
-                        success = true
-                        logger.debug("TinyGo SDK download and unpacking succeeded")
+                    if (unpackSdk(indicator, downloadedArchive, VfsUtilCore.urlToPath(sdk.homeUrl))) {
+                        val localSdk = sdk.toLocalTinyGoSdk()
+                        synchronized(lock) {
+                            downloadedSdk = localSdk
+                            logger.debug("TinyGo SDK download and unpacking succeeded")
+                        }
                     }
                 } catch (e: IOException) {
                     error("Unable to download TinyGo SDK from GitHub", e, null, onFinish)
@@ -137,10 +134,11 @@ class TinyGoDownloadSdkService private constructor() {
                 }
             }
 
-            private fun unpackSdk(indicator: ProgressIndicator, archive: Path, targetPath: String) {
+            private fun unpackSdk(indicator: ProgressIndicator, archive: Path, targetPath: String): Boolean {
                 logger.debug("Start unpacking TinyGo SDK into $targetPath")
                 indicator.isIndeterminate = false
                 indicator.text = "Unpacking"
+                var unpacked = false
                 try {
                     val tempDirectory = Files.createTempDirectory("downloaded-sdk-")
                     if (PathUtil.getFileExtension(archive.fileName.toString()).equals("zip")) {
@@ -155,18 +153,22 @@ class TinyGoDownloadSdkService private constructor() {
                     val tinyGo = tempDirectory.resolve("tinygo")
                     if (!Files.exists(tinyGo) || !Files.isDirectory(tinyGo)) {
                         error("Could not find tinygo directory in downloaded directory", null, null, onFinish)
+                    } else {
+                        val targetDir = NioFiles.createDirectories(Paths.get(targetPath))
+                        if (copyDir(tinyGo, targetDir, indicator)) {
+                            LocalFileSystem.getInstance().refreshNioFiles(Collections.singleton(targetDir))
+                            FileUtil.asyncDelete(tinyGo.toFile())
+                            logger.debug("Unpacked TinyGo SDK into $targetPath")
+                            unpacked = true
+                        }
                     }
-                    val targetDir = NioFiles.createDirectories(Paths.get(targetPath))
-                    copyDir(tinyGo, targetDir, indicator)
-                    LocalFileSystem.getInstance().refreshNioFiles(Collections.singleton(targetDir))
-                    FileUtil.asyncDelete(tinyGo.toFile())
-                    logger.debug("Unpacked TinyGo SDK into $targetPath")
                 } catch (e: IOException) {
                     error("Error unpacking TinyGoSDK", e, null, onFinish)
                 }
+                return unpacked
             }
 
-            private fun copyDir(from: Path, to: Path, indicator: ProgressIndicator) {
+            private fun copyDir(from: Path, to: Path, indicator: ProgressIndicator): Boolean {
                 try {
                     Files.walk(from).use { filesStream ->
                         filesStream.forEach { f ->
@@ -184,8 +186,10 @@ class TinyGoDownloadSdkService private constructor() {
                             }
                         }
                     }
+                    return true
                 } catch (e: UncheckedIOException) {
                     error("Error unpacking TinyGoSdk", e, null, onFinish)
+                    return false
                 }
             }
 

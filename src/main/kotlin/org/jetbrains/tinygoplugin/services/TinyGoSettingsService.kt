@@ -20,6 +20,7 @@ import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
+import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
@@ -27,7 +28,7 @@ import org.jetbrains.tinygoplugin.ui.generateSettingsPanel
 
 class TinyGoConfigurationWithTagUpdate(
     private val settings: TinyGoConfiguration,
-    project: Project,
+    private val project: Project,
     private val callback: () -> Unit,
 ) :
     TinyGoConfiguration by settings {
@@ -50,7 +51,11 @@ class TinyGoConfigurationWithTagUpdate(
         get() = settings.sdk
         set(value) {
             if (settings.sdk != value) {
+                val downloaded = settings.sdk is TinyGoDownloadingSdk && value !is TinyGoDownloadingSdk
                 settings.sdk = value
+                if (downloaded) {
+                    sendReloadLibrariesSignal(project)
+                }
                 callback()
             }
         }
