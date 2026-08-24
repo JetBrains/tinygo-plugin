@@ -12,6 +12,8 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.RootsChangeRescanningInfo
+import com.intellij.openapi.roots.ModuleRootEvent
+import com.intellij.openapi.roots.ModuleRootListener
 import com.intellij.util.application
 import com.intellij.util.concurrency.annotations.RequiresEdt
 import com.intellij.util.messages.MessageBus
@@ -21,6 +23,24 @@ import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
 import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
 import org.jetbrains.tinygoplugin.services.propagateGoFlags
 import java.util.EventListener
+import java.util.concurrent.atomic.AtomicReference
+
+internal class GoSdkChangeListener(private val project: Project) : ModuleRootListener {
+    private val lastGoSdkUrl = AtomicReference<String?>()
+
+    override fun rootsChanged(event: ModuleRootEvent) {
+        TinyGoServiceScope.getScope(project).launch {
+            val currentGoSdkUrl = project.service<GoSdkService>().getSdk(null).homeUrl
+            val previousGoSdkUrl = lastGoSdkUrl.getAndSet(currentGoSdkUrl)
+            if (previousGoSdkUrl != currentGoSdkUrl && project.tinyGoConfiguration().enabled) {
+                logger<GoSdkChangeListener>().debug(
+                    "Go SDK changed from '$previousGoSdkUrl' to '$currentGoSdkUrl'; updating cached GOROOT"
+                )
+                sendReloadLibrariesSignal(project)
+            }
+        }
+    }
+}
 
 internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
     companion object {
