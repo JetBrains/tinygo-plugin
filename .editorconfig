@@ -1,2 +1,3 @@
 [TinyGoRunStateConfig.kt]
-disabled_rules=indent
+ktlint_standard_indent = disabled
+ktlint_standard_string-template-indent = disabled
