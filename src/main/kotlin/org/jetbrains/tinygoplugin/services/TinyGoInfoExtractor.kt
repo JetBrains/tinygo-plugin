@@ -50,7 +50,7 @@ suspend fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
     val goOSPattern = Regex("""GOOS:\s+([^\r\n]+)""")
     val gcPattern = Regex("""garbage collector:\s+([^\r\n]+)""")
     val schedulerPattern = Regex("""scheduler:\s+([^\r\n]+)""")
-    val cachedGoRootPattern = Regex("""cached GOROOT:\s+([^\r\n\]]+)""")
+    val cachedGoRootPattern = Regex("""cached GOROOT:\s+([^\r\n]+)""")
 
     try {
         val tags = tagPattern.findFirst(msg)
