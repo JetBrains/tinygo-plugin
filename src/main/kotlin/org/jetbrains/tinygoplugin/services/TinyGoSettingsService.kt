@@ -2,6 +2,8 @@ package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoModuleSettings
 import com.intellij.openapi.application.EDT
+import com.intellij.openapi.application.ModalityState
+import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.ModuleManager
@@ -141,7 +143,7 @@ class TinyGoSettingsService(private val project: Project) :
 
     private fun callExtractor() {
         val extractionSettings = tinyGoSettings as TinyGoConfigurationWithTagUpdate
-        TinyGoServiceScope.getScope(project).launch {
+        TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
             val output = project.service<TinyGoInfoExtractor>()
                 .extractTinyGoInfo(extractionSettings, CachedGoRootInvalidator(project))
                 ?: return@launch
