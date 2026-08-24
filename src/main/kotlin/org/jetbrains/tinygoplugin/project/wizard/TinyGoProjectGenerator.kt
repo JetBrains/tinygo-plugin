@@ -92,14 +92,12 @@ private fun configureModule(
 
 private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
     TinyGoServiceScope.getScope(project).launch {
-        project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings) { _, output ->
-            TinyGoServiceScope.getScope(project).launch {
-                tinyGoSettings.extractTinyGoInfo(output)
-                edtWriteAction {
-                    tinyGoSettings.saveState(project)
-                    propagateGoFlags(project, tinyGoSettings)
-                }
-            }
+        val output = project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings)
+            ?: return@launch
+        tinyGoSettings.extractTinyGoInfo(output)
+        edtWriteAction {
+            tinyGoSettings.saveState(project)
+            propagateGoFlags(project, tinyGoSettings)
         }
     }
 }

@@ -132,11 +132,13 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
                     launch {
                         val sdk = TinyGoSdk(selectedFile.url, null)
                         if (readAction { sdk.isValid }) {
-                            sdk.computeVersion(project) {
-                                combo.addSdk(sdk, true)
-                                service<TinyGoSdkList>().addSdk(sdk)
+                            if (sdk.computeVersion(project)) {
+                                withContext(Dispatchers.EDT) {
+                                    combo.addSdk(sdk, true)
+                                    service<TinyGoSdkList>().addSdk(sdk)
+                                }
+                                logger.debug("Selected local TinyGo SDK is valid")
                             }
-                            logger.debug("Selected local TinyGo SDK is valid")
                         } else {
                             Messages.showErrorDialog(
                                 combo,

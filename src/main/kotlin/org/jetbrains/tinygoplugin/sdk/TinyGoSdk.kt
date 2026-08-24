@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.sdk
 
 import com.goide.sdk.GoBasedSdk
+import com.intellij.openapi.application.readAction
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
@@ -112,17 +113,17 @@ private fun urlToPath(url: String?): String? = url?.let { URLUtil.urlToPath(it) 
 
 const val TINY_GO_VERSION_REGEX = """tinygo version (\d+.\d+.\d+)"""
 
-@RequiresReadLock
-suspend fun TinyGoSdk.computeVersion(project: Project, onFinish: () -> Unit) {
-    TinyGoExecutable(project).execute(sdkRoot, listOf("version")) { _, output ->
-        val match = TINY_GO_VERSION_REGEX.toRegex().find(output)
-        if (match != null) {
-            sdkVersion = tinyGoSdkVersion(match.groupValues[1])
-        } else {
-            thisLogger().warn("Cannot determine TinyGoSdk version")
-        }
-        onFinish()
+suspend fun TinyGoSdk.computeVersion(project: Project): Boolean {
+    val root = readAction { sdkRoot }
+    val result = TinyGoExecutable(project).execute(root, listOf("version"), showErrors = true)
+        ?: return false
+    val match = TINY_GO_VERSION_REGEX.toRegex().find(result.stdout)
+    if (!result.isSuccessful || match == null) {
+        thisLogger().warn("Cannot determine TinyGoSdk version")
+        return false
     }
+    sdkVersion = tinyGoSdkVersion(match.groupValues[1])
+    return true
 }
 
 val nullSdk = TinyGoSdk(null, unknownVersion)

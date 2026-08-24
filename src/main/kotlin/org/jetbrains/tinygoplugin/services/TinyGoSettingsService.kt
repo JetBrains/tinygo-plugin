@@ -2,8 +2,6 @@ package org.jetbrains.tinygoplugin.services
 
 import com.goide.project.GoModuleSettings
 import com.intellij.openapi.application.EDT
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.ModuleManager
@@ -91,6 +89,10 @@ class TinyGoConfigurationWithTagUpdate(
             }
         }
 
+    suspend fun updateFromTinyGoInfo(output: String) {
+        settings.extractTinyGoInfo(output)
+    }
+
     private fun goSettings(project: Project): GoModuleSettings? =
         ModuleManager.getInstance(project).modules.firstNotNullOfOrNull {
             it.getService(GoModuleSettings::class.java)
@@ -137,18 +139,18 @@ class TinyGoSettingsService(private val project: Project) :
     override fun createPanel(): DialogPanel = generateSettingsPanel(project, propertiesWrapper, disposable!!)
 
     private fun callExtractor() {
-        TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
-            project.service<TinyGoInfoExtractor>()
-                .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
-                    TinyGoServiceScope.getScope(project).launch(ModalityState.current().asContextElement()) {
-                        thisLogger().trace(output)
-                        tinyGoSettings.extractTinyGoInfo(output)
-                        withContext(Dispatchers.EDT) {
-                            // update all ui fields
-                            propertiesWrapper.reset()
-                        }
-                    }
+        val extractionSettings = tinyGoSettings as TinyGoConfigurationWithTagUpdate
+        TinyGoServiceScope.getScope(project).launch {
+            val output = project.service<TinyGoInfoExtractor>()
+                .extractTinyGoInfo(extractionSettings, CachedGoRootInvalidator(project))
+                ?: return@launch
+            thisLogger().trace(output)
+            extractionSettings.updateFromTinyGoInfo(output)
+            withContext(Dispatchers.EDT) {
+                if (tinyGoSettings === extractionSettings) {
+                    propertiesWrapper.reset()
                 }
+            }
         }
     }
 

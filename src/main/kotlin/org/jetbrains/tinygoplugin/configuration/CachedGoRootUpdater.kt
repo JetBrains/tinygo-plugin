@@ -56,18 +56,16 @@ internal class CachedGoRootUpdater : GoModuleSettings.BuildTargetListener {
 
         val tinyGoSettings: TinyGoConfiguration = ConfigurationWithHistory(project)
         TinyGoServiceScope.getScope(project).launch {
-            project.service<TinyGoInfoExtractor>()
-                .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project)) { _, output ->
-                    TinyGoServiceScope.getScope(project).launch {
-                        tinyGoSettings.extractTinyGoInfo(output)
-                        edtWriteAction {
-                            tinyGoSettings.saveState(project)
+            val output = project.service<TinyGoInfoExtractor>()
+                .extractTinyGoInfo(tinyGoSettings, CachedGoRootInvalidator(project))
+                ?: return@launch
+            tinyGoSettings.extractTinyGoInfo(output)
+            edtWriteAction {
+                tinyGoSettings.saveState(project)
 
-                            propagateGoFlags(project, tinyGoSettings)
-                            updateExtLibrariesAndCleanCache(project)
-                        }
-                    }
-                }
+                propagateGoFlags(project, tinyGoSettings)
+                updateExtLibrariesAndCleanCache(project)
+            }
         }
 
         logger.debug("cached GOROOT update signal processed")

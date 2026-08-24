@@ -6,6 +6,7 @@ import com.goide.sdk.GoSdkService
 import com.goide.sdk.download.GoDownloadingSdk
 import com.goide.util.GoExecutor
 import com.goide.util.GoHistoryProcessListener
+import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.components.Service
@@ -17,7 +18,11 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.platform.util.progress.withProgressText
+import com.intellij.util.EnvironmentUtil
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import org.jetbrains.tinygoplugin.TinyGoBundle
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
@@ -26,7 +31,9 @@ import org.jetbrains.tinygoplugin.configuration.TinyGoExtractionFailureListener
 import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
 import org.jetbrains.tinygoplugin.sdk.notifyTinyGoNotConfigured
 import org.jetbrains.tinygoplugin.sdk.osManager
+import java.io.File
 import java.util.Locale
+import kotlin.coroutines.resume
 import kotlin.jvm.Throws
 import kotlin.time.Duration.Companion.seconds
 
@@ -38,12 +45,12 @@ private const val DETECTION_ERROR_MESSAGE = "notifications.tinygoSDK.detection.e
 
 @Suppress("UnstableApiUsage")
 suspend fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
-    val tagPattern = Regex("""build tags:\s+((.|\n)+?(?=\n, garbage collector))""")
-    val goArchPattern = Regex("""GOARCH:\s+(.+)\n""")
-    val goOSPattern = Regex("""GOOS:\s+(.+)\n""")
-    val gcPattern = Regex("""garbage collector:\s+(.+)\n""")
-    val schedulerPattern = Regex("""scheduler:\s+(.+)\n""")
-    val cachedGoRootPattern = Regex("""cached GOROOT:\s+((.|\n)+?(?=\n]))""")
+    val tagPattern = Regex("""build tags:\s+([^\r\n]+)""")
+    val goArchPattern = Regex("""GOARCH:\s+([^\r\n]+)""")
+    val goOSPattern = Regex("""GOOS:\s+([^\r\n]+)""")
+    val gcPattern = Regex("""garbage collector:\s+([^\r\n]+)""")
+    val schedulerPattern = Regex("""scheduler:\s+([^\r\n]+)""")
+    val cachedGoRootPattern = Regex("""cached GOROOT:\s+([^\r\n\]]+)""")
 
     try {
         val tags = tagPattern.findFirst(msg)
@@ -54,11 +61,11 @@ suspend fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         val cachedGoRoot = cachedGoRootPattern.findFirst(msg)
 
         val cachedGoRootSdk = readAction {
-            GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup().eraseLineBreaks()))
+            GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup()))
         }
         writeAction {
             this.goArch = goArch.firstGroup()
-            this.goTags = tags.firstGroup().eraseLineBreaks()
+            this.goTags = tags.firstGroup()
             this.goOS = goOS.firstGroup()
             this.gc = GarbageCollector.valueOf(gc.firstGroup().uppercase(Locale.getDefault()))
             this.scheduler = Scheduler.valueOf(scheduler.firstGroup().uppercase(Locale.getDefault()))
@@ -76,42 +83,77 @@ suspend fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
 
 @Throws(NoSuchElementException::class)
 private fun Regex.findFirst(input: CharSequence): MatchResult = findAll(input).first()
-private fun MatchResult.firstGroup(): String = groupValues[1]
-private fun String.eraseLineBreaks(): String = replace(Regex("\n((,)? )?"), "")
+private fun MatchResult.firstGroup(): String = groupValues[1].trim()
+
+data class TinyGoCommandResult(
+    val execution: GoExecutor.ExecutionResult,
+    val stdout: String,
+    val stderr: String,
+    val output: String,
+) {
+    val isSuccessful: Boolean
+        get() = execution.status == GoExecutor.ExecutionResult.Status.SUCCEEDED
+}
 
 class TinyGoExecutable(private val project: Project) {
+    private suspend fun createExecutor(
+        sdkRoot: VirtualFile?,
+        arguments: List<String>,
+        showErrors: Boolean,
+    ): GoExecutor? {
+        val (tinyGoExec, goBinPath) = readAction {
+            val executable = osManager.executableVFile(sdkRoot)
+            val goSdkRoot = project.service<GoSdkService>().getSdk(null).sdkRoot
+            executable to goSdkRoot?.findChild("bin")?.path
+        }
+        if (tinyGoExec == null) return null
+
+        val pathVariable = if (GoOsManager.isWindows()) "Path" else "PATH"
+        val parentPath = EnvironmentUtil.getValue(pathVariable)
+            ?: EnvironmentUtil.getValue("PATH")
+            ?: ""
+        val path = listOfNotNull(goBinPath, parentPath.takeIf(String::isNotEmpty))
+            .joinToString(File.pathSeparator)
+
+        return GoExecutor.`in`(project, null)
+            .withExePath(tinyGoExec.path)
+            .withParameters(arguments)
+            .withExtraEnvironment(
+                mapOf(
+                    pathVariable to path,
+                    "GOTOOLCHAIN" to "local",
+                )
+            )
+            .showNotifications(showErrors, false)
+            .withPtyEnabled(false)
+            .also {
+                if (GoOsManager.isWindows()) {
+                    it.withConsoleMode()
+                }
+            }
+    }
+
     suspend fun execute(
         sdkRoot: VirtualFile?,
         arguments: List<String>,
-        failureListener: TinyGoExtractionFailureListener? = null,
-        onFinish: (GoExecutor.ExecutionResult?, String) -> Unit,
-    ) {
+        showErrors: Boolean = false,
+    ): TinyGoCommandResult? {
         val processHistory = GoHistoryProcessListener()
-        val tinyGoExec = readAction { osManager.executableVFile(sdkRoot) } ?: return
-        val executor = GoExecutor.`in`(project, null)
-            .withExePath(tinyGoExec.path)
-            .withParameters(arguments)
-            .showNotifications(true, false)
-            .withPtyEnabled(false)
-        if (GoOsManager.isWindows()) {
-            executor.withConsoleMode()
-        }
-        executor.executeWithProgress(true, true, processHistory, null) {
-            val processOutput = processHistory.output.toString()
-            if (it.status.ordinal == 0) {
-                onFinish(it, processOutput)
-            } else {
-                val incompatibleVersionErrorMessage = generateMessageIfVersionErrorFound(project, processOutput)
-                val errorMessage =
-                    if (incompatibleVersionErrorMessage != null) {
-                        incompatibleVersionErrorMessage
-                    } else {
-                        val detectionErrorMessage = TinyGoBundle.message(DETECTION_ERROR_MESSAGE)
-                        TinyGoInfoExtractor.logger.error(detectionErrorMessage, processOutput)
-                        detectionErrorMessage
-                    }
-                failureListener?.onExtractionFailure()
-                notifyTinyGoNotConfigured(project, errorMessage)
+        val executor = createExecutor(sdkRoot, arguments, showErrors)
+            ?.withProcessListener(processHistory)
+            ?: return null
+        return suspendCancellableCoroutine { continuation ->
+            executor.executeWithProgress(true, showErrors, null, null) { execution ->
+                if (continuation.isActive) {
+                    continuation.resume(
+                        TinyGoCommandResult(
+                            execution = execution,
+                            stdout = processHistory.stdout.joinToString(""),
+                            stderr = processHistory.stderr.joinToString(""),
+                            output = processHistory.output.joinToString(""),
+                        )
+                    )
+                }
             }
         }
     }
@@ -132,31 +174,28 @@ class TinyGoInfoExtractor(private val project: Project) {
     suspend fun extractTinyGoInfo(
         settings: TinyGoConfiguration,
         failureListener: TinyGoExtractionFailureListener? = null,
-        onFinish: (GoExecutor.ExecutionResult?, String) -> Unit,
-    ) {
+    ): String? {
         val currentGoSdk = project.service<GoSdkService>().getSdk(null)
-        if (currentGoSdk == GoSdk.NULL) {
-            notifyTinyGoNotConfigured(
-                project,
-                TinyGoBundle.message(GO_NOT_CONFIGURED_MESSAGE)
-            )
-            logger.debug(GO_NOT_CONFIGURED_MESSAGE)
-            return
+        val canExtract = when {
+            currentGoSdk == GoSdk.NULL -> {
+                notifyTinyGoNotConfigured(project, TinyGoBundle.message(GO_NOT_CONFIGURED_MESSAGE))
+                logger.debug(GO_NOT_CONFIGURED_MESSAGE)
+                false
+            }
+            settings.targetPlatform.isEmpty() -> {
+                notifyTinyGoNotConfigured(project, TinyGoBundle.message(TINYGO_TARGET_PLATFORM_NOT_SET))
+                logger.debug(TINYGO_TARGET_PLATFORM_NOT_SET)
+                false
+            }
+            settings.sdk is TinyGoDownloadingSdk -> {
+                logger.debug("Waiting for TinyGo SDK download to finish before extracting parameters")
+                false
+            }
+            else -> true
         }
-        if (settings.targetPlatform.isEmpty()) {
-            notifyTinyGoNotConfigured(
-                project,
-                TinyGoBundle.message(TINYGO_TARGET_PLATFORM_NOT_SET)
-            )
-            logger.debug(TINYGO_TARGET_PLATFORM_NOT_SET)
-            return
-        }
-        if (settings.sdk is TinyGoDownloadingSdk) {
-            logger.debug("Waiting for TinyGo SDK download to finish before extracting parameters")
-            return
-        }
+        if (!canExtract) return null
         logger.debug("Waiting for TinyGo parameters extraction task")
-        withBackgroundProgress(project, TinyGoBundle.message(DETECTION_TITLE), cancellable = true) {
+        val output = withBackgroundProgress(project, TinyGoBundle.message(DETECTION_TITLE), cancellable = true) {
             if (currentGoSdk is GoDownloadingSdk) {
                 logger.debug("Waiting until Go SDK will be downloaded")
                 withProgressText(TinyGoBundle.message(WAIT_GO_TITLE)) {
@@ -166,13 +205,33 @@ class TinyGoInfoExtractor(private val project: Project) {
                 }
             }
             logger.debug("Go SDK present")
-            executor.execute(
+            val result = executor.execute(
                 settings.sdk.sdkRoot,
                 tinyGoExtractionArguments(settings),
-                failureListener,
-                onFinish
-            )
+                showErrors = true,
+            ) ?: return@withBackgroundProgress null
+            if (result.isSuccessful) {
+                result.stdout
+            } else {
+                reportFailure(result.output, failureListener)
+                null
+            }
         }
         logger.debug("TinyGo parameters extraction task finished")
+        return output
+    }
+
+    private suspend fun reportFailure(
+        processOutput: String,
+        failureListener: TinyGoExtractionFailureListener?,
+    ) {
+        val incompatibleVersionErrorMessage = generateMessageIfVersionErrorFound(project, processOutput)
+        val errorMessage = incompatibleVersionErrorMessage ?: TinyGoBundle.message(DETECTION_ERROR_MESSAGE).also {
+            logger.error(it, processOutput)
+        }
+        withContext(Dispatchers.EDT) {
+            failureListener?.onExtractionFailure()
+            notifyTinyGoNotConfigured(project, errorMessage)
+        }
     }
 }
