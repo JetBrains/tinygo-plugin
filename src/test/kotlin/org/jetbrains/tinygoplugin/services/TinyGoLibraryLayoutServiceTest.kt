@@ -8,8 +8,9 @@ import java.nio.file.Path
 internal class TinyGoLibraryLayoutServiceTest {
     @Test
     fun testParseConcatenatedTinyGoListOutput() {
-        val packages = parseTinyGoList(
-            """
+        val packages =
+            parseTinyGoList(
+                """
                 {
                   "Dir": "/goroot/src/runtime/volatile",
                   "ImportPath": "runtime/volatile",
@@ -21,8 +22,8 @@ internal class TinyGoLibraryLayoutServiceTest {
                   "GoFiles": ["atmega328p.go", "avr.go"],
                   "IgnoredGoFiles": ["atmega1280.go", "atmega2560.go"]
                 }
-            """.trimIndent()
-        )
+                """.trimIndent(),
+            )
 
         assertEquals(2, packages.size)
         assertEquals("device/avr", packages[1].importPath)
@@ -33,20 +34,21 @@ internal class TinyGoLibraryLayoutServiceTest {
     @Test
     fun testCalculateDeviceLayoutUsesToolchainSelection() {
         val deviceRoot = Path.of("/goroot/src/device")
-        val packages = listOf(
-            TinyGoListPackage(
-                directory = "/different-generated-goroot/src/device/avr",
-                importPath = "device/avr",
-                goFiles = listOf("atmega328p.go", "avr.go"),
-                ignoredGoFiles = listOf("atmega1280.go", "atmega2560.go"),
-            ),
-            TinyGoListPackage(
-                directory = "/goroot/src/runtime/volatile",
-                importPath = "runtime/volatile",
-                goFiles = listOf("volatile.go"),
-                ignoredGoFiles = emptyList(),
-            ),
-        )
+        val packages =
+            listOf(
+                TinyGoListPackage(
+                    directory = "/different-generated-goroot/src/device/avr",
+                    importPath = "device/avr",
+                    goFiles = listOf("atmega328p.go", "avr.go"),
+                    ignoredGoFiles = listOf("atmega1280.go", "atmega2560.go"),
+                ),
+                TinyGoListPackage(
+                    directory = "/goroot/src/runtime/volatile",
+                    importPath = "runtime/volatile",
+                    goFiles = listOf("volatile.go"),
+                    ignoredGoFiles = emptyList(),
+                ),
+            )
 
         val layout = calculateDeviceLayout(deviceRoot, packages)
 
