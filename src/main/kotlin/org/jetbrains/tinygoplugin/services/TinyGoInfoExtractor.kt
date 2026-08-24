@@ -10,6 +10,8 @@ import com.intellij.openapi.application.EDT
 import com.intellij.openapi.application.readAction
 import com.intellij.openapi.application.writeAction
 import com.intellij.openapi.components.Service
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.progress.impl.BackgroundableProcessIndicator
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.diagnostic.logger
@@ -143,7 +145,7 @@ class TinyGoExecutable(private val project: Project) {
             ?.withProcessListener(processHistory)
             ?: return null
         return suspendCancellableCoroutine { continuation ->
-            executor.executeWithProgress(true, showErrors, null, null) { execution ->
+            val task = executor.createTask(true, showErrors, null, null, null) { execution ->
                 if (continuation.isActive) {
                     continuation.resume(
                         TinyGoCommandResult(
@@ -154,7 +156,10 @@ class TinyGoExecutable(private val project: Project) {
                         )
                     )
                 }
-            }
+            } ?: return@suspendCancellableCoroutine
+            val indicator = BackgroundableProcessIndicator(task)
+            continuation.invokeOnCancellation { indicator.cancel() }
+            ProgressManager.getInstance().runProcessWithProgressAsynchronously(task, indicator)
         }
     }
 }
