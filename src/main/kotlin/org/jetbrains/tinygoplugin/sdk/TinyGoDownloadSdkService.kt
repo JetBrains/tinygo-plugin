@@ -117,6 +117,7 @@ class TinyGoDownloadSdkService private constructor() {
                     // checksum verifying??
                     if (unpackSdk(indicator, downloadedArchive, VfsUtilCore.urlToPath(sdk.homeUrl))) {
                         val localSdk = sdk.toLocalTinyGoSdk()
+                        localSdk.refreshValidity()
                         synchronized(lock) {
                             downloadedSdk = localSdk
                             logger.debug("TinyGo SDK download and unpacking succeeded")

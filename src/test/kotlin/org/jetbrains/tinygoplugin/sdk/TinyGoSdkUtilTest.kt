@@ -1,6 +1,7 @@
 package org.jetbrains.tinygoplugin.sdk
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class TinyGoSdkUtilTest {
@@ -9,6 +10,12 @@ class TinyGoSdkUtilTest {
         assertEquals(unknownVersion, tinyGoSdkVersion("0190"))
         assertEquals(unknownVersion, tinyGoSdkVersion("0.19"))
         assertEquals(unknownVersion, tinyGoSdkVersion("0.19.a"))
+    }
+
+    @Test fun testMissingSdkIsNotValid() {
+        val sdk = TinyGoSdk("file:///path/that/does/not/exist", TinyGoSdkVersion(0, 39, 0))
+
+        assertFalse(sdk.isValid)
     }
 
     @Test fun testVersionArithmetic() {

@@ -7,12 +7,14 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.VirtualFileManager
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 import com.intellij.util.concurrency.annotations.RequiresReadLock
 import com.intellij.util.io.URLUtil
 import com.jetbrains.rd.util.getLogger
 import com.jetbrains.rd.util.warn
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.services.TinyGoExecutable
+import java.io.File
 import java.util.Objects
 import javax.swing.Icon
 
@@ -64,6 +66,12 @@ data class TinyGoSdkVersion(
     }
 }
 
+private enum class TinyGoSdkValidity {
+    UNKNOWN,
+    VALID,
+    INVALID,
+}
+
 @Suppress("TooManyFunctions")
 open class TinyGoSdk(
     protected val tinyGoHomeUrl: String?,
@@ -75,7 +83,12 @@ open class TinyGoSdk(
         tinyGoSdkVersion(tinyGoVersion)
     )
 
-    val sdkRoot: VirtualFile? = tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) }
+    @Volatile
+    private var validity = if (tinyGoHomeUrl == null) TinyGoSdkValidity.INVALID else TinyGoSdkValidity.UNKNOWN
+
+    @get:RequiresReadLock
+    val sdkRoot: VirtualFile?
+        get() = tinyGoHomeUrl?.let { VirtualFileManager.getInstance().findFileByUrl(it) }
 
     override fun getIcon(): Icon = TinyGoPluginIcons.TinyGoIcon
 
@@ -83,18 +96,20 @@ open class TinyGoSdk(
 
     override fun getHomeUrl(): String = tinyGoHomeUrl ?: ""
 
-    private val sdkSrc: VirtualFile? = sdkRoot?.findChild("src")
-
     @RequiresReadLock
-    override fun getSrcDir(): VirtualFile? = sdkSrc
+    override fun getSrcDir(): VirtualFile? = sdkRoot?.findChild("src")
 
     @RequiresReadLock
     override fun getExecutable(): VirtualFile? = osManager.executableVFile(sdkRoot)
 
-    @RequiresReadLock
-    override fun isValid(): Boolean {
-        val sources = srcDir
-        return sources != null && sources.isDirectory && sources.isValid && sources.isInLocalFileSystem
+    override fun isValid(): Boolean = validity == TinyGoSdkValidity.VALID
+
+    @RequiresBackgroundThread
+    fun refreshValidity(): Boolean {
+        val homePath = urlToPath(tinyGoHomeUrl)
+        val valid = homePath != null && checkDirectoryForTinyGo(File(homePath))
+        validity = if (valid) TinyGoSdkValidity.VALID else TinyGoSdkValidity.INVALID
+        return valid
     }
 
     override fun getName(): String = "TinyGo $version"

@@ -24,6 +24,7 @@ import com.intellij.openapi.project.currentOrDefaultProject
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.concurrency.annotations.RequiresBackgroundThread
 import com.intellij.util.io.HttpRequests
 import com.intellij.util.text.VersionComparatorUtil
 import kotlinx.coroutines.Dispatchers
@@ -131,7 +132,7 @@ class TinyGoLocalSdkAction(private val combo: GoBasedSdkChooserCombo<TinyGoSdk>)
                 ) { selectedFile ->
                     launch {
                         val sdk = TinyGoSdk(selectedFile.url, null)
-                        if (readAction { sdk.isValid }) {
+                        if (withContext(Dispatchers.IO) { sdk.refreshValidity() }) {
                             if (sdk.computeVersion(project)) {
                                 withContext(Dispatchers.EDT) {
                                     combo.addSdk(sdk, true)
@@ -164,7 +165,10 @@ class TinyGoSdkChooserCombo(private val projectPathSupplier: () -> String) :
                 return (loadedSdks + downloadingSdks).toMutableList()
             }
 
-            override fun discoverSdks(): MutableList<TinyGoSdk> = allKnownSdks
+            @RequiresBackgroundThread
+            override fun discoverSdks(): MutableList<TinyGoSdk> = allKnownSdks.onEach { sdk ->
+                sdk.refreshValidity()
+            }
         },
         GoSdkActionsProvider {
             listOf(

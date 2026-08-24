@@ -6,10 +6,14 @@ import com.intellij.openapi.components.Service
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.StoragePathMacros
+import com.intellij.openapi.project.Project
 import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.sdk.nullSdk
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.tinygoplugin.sdk.unknownVersion
+import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
 
 interface UserConfiguration {
     var sdk: TinyGoSdk
@@ -109,7 +113,8 @@ internal class UserConfigurationStorageWrapper : UserConfigurationStorage, UserC
 }
 @State(name = "TinyGoPluginUserConfig", storages = [Storage(StoragePathMacros.WORKSPACE_FILE)])
 @Service(Service.Level.PROJECT)
-internal class UserConfigurationImpl : PersistentStateComponent<UserConfigurationStorageImpl> {
+internal class UserConfigurationImpl(private val project: Project) :
+    PersistentStateComponent<UserConfigurationStorageImpl> {
     var myState = UserConfigurationStorageWrapper()
 
     override fun getState(): UserConfigurationStorageImpl = myState.state
@@ -117,5 +122,8 @@ internal class UserConfigurationImpl : PersistentStateComponent<UserConfiguratio
     override fun loadState(state: UserConfigurationStorageImpl) {
         XmlSerializerUtil.copyBean(state, this.myState.state)
         this.myState.updateState()
+        TinyGoServiceScope.getScope(project).launch(Dispatchers.IO) {
+            myState.sdk.refreshValidity()
+        }
     }
 }
