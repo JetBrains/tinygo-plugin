@@ -17,7 +17,8 @@ import javax.swing.JPanel
 class TinyGoProjectGeneratorPeer :
     GoProjectGeneratorPeer<TinyGoNewProjectSettings>(),
     ConfigurationProvider<TinyGoConfiguration> {
-    override var tinyGoSettings: TinyGoConfiguration = ConfigurationWithHistory()
+    override var tinyGoSettings: TinyGoConfiguration =
+        ConfigurationWithHistory(maintainPredefinedTargets = true)
 
     private val propertiesWrapper = TinyGoPropertiesWrapper(this)
 

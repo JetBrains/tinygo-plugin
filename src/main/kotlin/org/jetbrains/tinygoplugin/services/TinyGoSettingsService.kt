@@ -31,7 +31,8 @@ class TinyGoConfigurationWithTagUpdate(
 ) :
     TinyGoConfiguration by settings {
 
-    constructor(project: Project, callback: () -> Unit) : this(ConfigurationWithHistory(project), project, callback)
+    constructor(project: Project, callback: () -> Unit) :
+        this(ConfigurationWithHistory(project, maintainPredefinedTargets = true), project, callback)
 
     init {
         val moduleSettings = goSettings(project)
