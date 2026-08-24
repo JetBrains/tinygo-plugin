@@ -94,8 +94,12 @@ internal class UserConfigurationStorageWrapper : UserConfigurationStorage, UserC
 
     fun copy(): UserConfigurationStorageWrapper {
         val result = UserConfigurationStorageWrapper()
-        result.sdkStorage = sdkStorage.copy()
-        result.cachedGoRootStorage = cachedGoRootStorage.copy()
+        result.state = UserConfigurationStorageImpl(
+            sdkStorage = sdkStorage.copy(),
+            cachedGoRootStorage = cachedGoRootStorage.copy(),
+        )
+        result.tinyGoSdk = tinyGoSdk
+        result.tinyGoCachedGoRoot = tinyGoCachedGoRoot
         return result
     }
 
