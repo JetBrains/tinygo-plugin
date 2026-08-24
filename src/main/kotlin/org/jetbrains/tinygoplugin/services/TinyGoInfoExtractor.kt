@@ -225,11 +225,11 @@ class TinyGoInfoExtractor(private val project: Project) {
         processOutput: String,
         failureListener: TinyGoExtractionFailureListener?,
     ) {
-        val incompatibleVersionErrorMessage = generateMessageIfVersionErrorFound(project, processOutput)
-        val errorMessage = incompatibleVersionErrorMessage ?: TinyGoBundle.message(DETECTION_ERROR_MESSAGE).also {
-            logger.error(it, processOutput)
-        }
         withContext(Dispatchers.EDT) {
+            val incompatibleVersionErrorMessage = generateMessageIfVersionErrorFound(project, processOutput)
+            val errorMessage = incompatibleVersionErrorMessage ?: TinyGoBundle.message(DETECTION_ERROR_MESSAGE).also {
+                logger.error(it, processOutput)
+            }
             failureListener?.onExtractionFailure()
             notifyTinyGoNotConfigured(project, errorMessage)
         }

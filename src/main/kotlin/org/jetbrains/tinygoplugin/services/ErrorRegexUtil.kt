@@ -4,6 +4,7 @@ import com.goide.sdk.GoSdkService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
+import com.intellij.util.concurrency.annotations.RequiresEdt
 import org.jetbrains.tinygoplugin.TinyGoBundle
 
 private const val TINYGO_INCOMPATIBLE_GO_VERSION_UNKNOWN = "tinygoSDK.incompatibleGoVersion.unknownVersion"
@@ -13,6 +14,7 @@ private const val TINYGO_INCOMPATIBLE_GO_VERSION_RANGE_SPECIFIED_MESSAGE =
 private const val TINYGO_INCOMPATIBLE_GO_VERSION_RANGE_UNSPECIFIED_MESSAGE =
     "tinygoSDK.incompatibleGoVersion.rangeUnspecified.message"
 
+@RequiresEdt
 fun generateMessageIfVersionErrorFound(project: Project, processOutput: String): String? {
     val incompatibleGoVersionsMatch = extractIncompatibleVersionsError(processOutput)
     val errorMessage =
