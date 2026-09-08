@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Make plugin compatible with 2026.3 EAP.
+
 ## [0.6.0]
 
 ### Changed

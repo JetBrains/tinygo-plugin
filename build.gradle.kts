@@ -69,7 +69,7 @@ dependencies {
         bundledModules(properties("platformBundledModules").map { it.split(',') })
 
         testFramework(TestFrameworkType.Platform)
-        testFramework(TestFrameworkType.Plugin.Go, "GOLAND-261-EAP-SNAPSHOT")
+        testFramework(TestFrameworkType.Plugin.Go, "GOLAND-263-EAP-SNAPSHOT")
     }
 
     testImplementation(kotlin("test"))
@@ -128,7 +128,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
+            create(properties("pluginVerifierIdeVersions").map { it.split(',') })
         }
     }
 }
