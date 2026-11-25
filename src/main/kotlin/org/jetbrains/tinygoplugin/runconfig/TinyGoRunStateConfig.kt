@@ -11,8 +11,6 @@ import com.intellij.execution.process.ProcessListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.execution.runners.ProgramRunner
 import com.intellij.openapi.application.EDT
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.asContextElement
 import com.intellij.openapi.components.service
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.util.Key
@@ -115,7 +113,8 @@ class TinyGoHeapAllocRunningState(
             }
 
             override fun processTerminated(event: ProcessEvent) {
-                TinyGoServiceScope.getScope(module!!.project).launch(ModalityState.current().asContextElement()) {
+                // The listener runs on a background thread, and the update of the tool window needs no modality
+                TinyGoServiceScope.getScope(module!!.project).launch {
                     val heapAllocs = withContext(Dispatchers.IO) {
                         supplyHeapAllocsFromOutput(module!!, processOutput)
                     }
