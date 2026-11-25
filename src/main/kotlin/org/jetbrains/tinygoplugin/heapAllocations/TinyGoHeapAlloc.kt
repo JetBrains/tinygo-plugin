@@ -31,7 +31,10 @@ suspend fun supplyHeapAllocsFromOutput(module: Module, processOutput: String): M
             if (VfsUtil.isAncestor(tinyGoSdkRoot, f, false)) {
                 val relativePath = VfsUtil.getRelativePath(f, tinyGoSdkRoot)
                 if (relativePath != null) {
-                    f = tinyGoSettings.cachedGoRoot.sdkRoot?.findFileByRelativePath(relativePath)!!
+                    // Without a cached GOROOT, the allocation keeps the file of the TinyGo SDK
+                    tinyGoSettings.cachedGoRoot.sdkRoot
+                        ?.findFileByRelativePath(relativePath)
+                        ?.let { f = it }
                 }
             }
             f
