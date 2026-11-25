@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.6.1]
+
 ### Changed
 
 - Make plugin compatible with 2026.3 and 2027.1.
