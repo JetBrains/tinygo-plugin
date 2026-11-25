@@ -11,9 +11,10 @@ import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.runconfig.TinyGoRunConfiguration
 
 fun propagateGoFlags(project: Project, settings: TinyGoConfiguration) {
-    val goSettings = ModuleManager.getInstance(project).modules.firstNotNullOfOrNull {
-        it.getService(GoModuleSettings::class.java)
-    }
+    val goSettings =
+        ModuleManager.getInstance(project).modules.firstOrNull()?.let {
+            GoModuleSettings.getInstance(it)
+        }
     if (goSettings == null) {
         logger<TinyGoSettingsService>().warn("Could not find go module settings")
         return

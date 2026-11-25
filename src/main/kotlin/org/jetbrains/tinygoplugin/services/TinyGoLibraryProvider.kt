@@ -1,6 +1,5 @@
 package org.jetbrains.tinygoplugin.services
 
-import com.goide.project.GoSyntheticLibrary
 import com.intellij.navigation.ItemPresentation
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
@@ -16,7 +15,8 @@ class TinyGoRootLibrary(
     private val moduleName: String,
     private val sourceRoots: Collection<VirtualFile>,
     private val excludedRoots: Set<VirtualFile>,
-) : GoSyntheticLibrary("TinyGoCachedGoRoot", null), ItemPresentation {
+) : SyntheticLibrary("TinyGoCachedGoRoot", null),
+    ItemPresentation {
     override fun equals(other: Any?): Boolean {
         if (other == null || other !is TinyGoRootLibrary) {
             return false

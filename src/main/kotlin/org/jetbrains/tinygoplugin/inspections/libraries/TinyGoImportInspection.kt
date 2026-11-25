@@ -11,6 +11,7 @@ import com.goide.psi.GoType
 import com.goide.psi.GoVarOrConstDefinition
 import com.goide.psi.GoVisitor
 import com.goide.psi.impl.GoPackage
+import com.goide.psi.impl.GoPsiImplUtil
 import com.goide.util.GoUtil
 import com.intellij.codeInspection.LocalInspectionToolSession
 import com.intellij.codeInspection.LocalQuickFix
@@ -109,7 +110,7 @@ open class TinyGoImportInspection : GoInspectionBase() {
                     return
                 }
 
-                val packages = import.resolve(ResolveState.initial())
+                val packages = GoPsiImplUtil.resolve(import, ResolveState.initial())
                 val importedPkgRefersToBadLib = packages.stream().anyMatch { pkg ->
                     pkg.files().stream().anyMatch {
                         if (it is GoFile) {
