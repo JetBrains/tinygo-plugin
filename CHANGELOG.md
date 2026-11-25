@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Make plugin compatible with 2026.3 and 2027.1.
+
+### Fixed
+
+- Fix lost TinyGo build tags after the project opens again.
+- Fix unresolved code when TinyGo creates a new cached GOROOT.
+- Fix the heap allocations run.
+
 ## [0.6.0]
 
 ### Changed
