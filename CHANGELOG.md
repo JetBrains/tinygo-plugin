@@ -8,7 +8,7 @@
 
 ### Changed
 
-- Make plugin compatible with 2026.3 and 2027.1.
+- Target GoLand 2026.3.0.1 and later builds on the 2026.3 release line.
 
 ### Fixed
 

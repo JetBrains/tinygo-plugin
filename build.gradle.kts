@@ -46,7 +46,6 @@ repositories {
     // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
     intellijPlatform {
         defaultRepositories()
-        jetbrainsRuntime()
     }
 }
 
@@ -54,22 +53,16 @@ repositories {
 dependencies {
     // IntelliJ Platform Gradle Plugin Dependencies Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     intellijPlatform {
-        goland(properties("platformVersion")) {
-            useInstaller = false
-        }
-        jetbrainsRuntime()
+        goland(properties("platformVersion"))
 
         // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
         bundledPlugins(properties("platformBundledPlugins").map { it.split(',') })
-
-        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
-        plugins(properties("platformPlugins").map { it.split(',') })
 
         // Module Dependencies. Uses `platformBundledModules` property from the gradle.properties file for bundled IntelliJ Platform modules.
         bundledModules(properties("platformBundledModules").map { it.split(',') })
 
         testFramework(TestFrameworkType.Platform)
-        testFramework(TestFrameworkType.Plugin.Go, "GOLAND-261-EAP-SNAPSHOT")
+        testFramework(TestFrameworkType.Plugin.Go, properties("goTestFrameworkVersion"))
     }
 
     testImplementation(kotlin("test"))
@@ -128,7 +121,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            recommended()
+            current()
         }
     }
 }
