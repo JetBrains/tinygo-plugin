@@ -16,6 +16,7 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
@@ -62,8 +63,11 @@ suspend fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         val scheduler = schedulerPattern.findFirst(msg)
         val cachedGoRoot = cachedGoRootPattern.findFirst(msg)
 
+        val cachedGoRootPath = cachedGoRoot.firstGroup()
+        // tinygo info can create the cached GOROOT just now, and the SDK reads only what the VFS knows
+        withContext(Dispatchers.IO) { LocalFileSystem.getInstance().refreshAndFindFileByPath(cachedGoRootPath) }
         val cachedGoRootSdk = readAction {
-            GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRoot.firstGroup()))
+            GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRootPath))
         }
         writeAction {
             this.goArch = goArch.firstGroup()
