@@ -946,28 +946,27 @@
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/services/TinyGoInfoExtractor.kt">
         <error line="3" column="1" source="standard:import-ordering" />
-        <error line="69" column="31" source="standard:multiline-expression-wrapping" />
-        <error line="84" column="77" source="standard:argument-list-wrapping" />
-        <error line="85" column="41" source="standard:trailing-comma-on-call-site" />
-        <error line="92" column="1" source="standard:blank-line-before-declaration" />
-        <error line="104" column="24" source="standard:class-signature" />
-        <error line="104" column="52" source="standard:class-signature" />
-        <error line="110" column="39" source="standard:multiline-expression-wrapping" />
-        <error line="118" column="26" source="standard:multiline-expression-wrapping" />
-        <error line="121" column="20" source="standard:multiline-expression-wrapping" />
-        <error line="124" column="26" source="standard:chain-method-continuation" />
-        <error line="131" column="18" source="standard:trailing-comma-on-call-site" />
-        <error line="133" column="13" source="standard:chain-method-continuation" />
-        <error line="148" column="24" source="standard:multiline-expression-wrapping" />
-        <error line="152" column="24" source="standard:multiline-expression-wrapping" />
-        <error line="160" column="26" source="standard:trailing-comma-on-call-site" />
-        <error line="172" column="27" source="standard:class-signature" />
-        <error line="172" column="55" source="standard:class-signature" />
-        <error line="179" column="88" source="standard:function-expression-body" />
-        <error line="188" column="26" source="standard:multiline-expression-wrapping" />
-        <error line="207" column="22" source="standard:multiline-expression-wrapping" />
-        <error line="217" column="26" source="standard:multiline-expression-wrapping" />
-        <error line="239" column="32" source="standard:multiline-expression-wrapping" />
+        <error line="82" column="77" source="standard:argument-list-wrapping" />
+        <error line="83" column="41" source="standard:trailing-comma-on-call-site" />
+        <error line="90" column="1" source="standard:blank-line-before-declaration" />
+        <error line="102" column="24" source="standard:class-signature" />
+        <error line="102" column="52" source="standard:class-signature" />
+        <error line="108" column="39" source="standard:multiline-expression-wrapping" />
+        <error line="116" column="26" source="standard:multiline-expression-wrapping" />
+        <error line="119" column="20" source="standard:multiline-expression-wrapping" />
+        <error line="122" column="26" source="standard:chain-method-continuation" />
+        <error line="129" column="18" source="standard:trailing-comma-on-call-site" />
+        <error line="131" column="13" source="standard:chain-method-continuation" />
+        <error line="146" column="24" source="standard:multiline-expression-wrapping" />
+        <error line="150" column="24" source="standard:multiline-expression-wrapping" />
+        <error line="158" column="26" source="standard:trailing-comma-on-call-site" />
+        <error line="170" column="27" source="standard:class-signature" />
+        <error line="170" column="55" source="standard:class-signature" />
+        <error line="177" column="88" source="standard:function-expression-body" />
+        <error line="186" column="26" source="standard:multiline-expression-wrapping" />
+        <error line="205" column="22" source="standard:multiline-expression-wrapping" />
+        <error line="215" column="26" source="standard:multiline-expression-wrapping" />
+        <error line="237" column="32" source="standard:multiline-expression-wrapping" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/services/TinyGoLibraryLayoutService.kt">
         <error line="51" column="26" source="standard:multiline-expression-wrapping" />

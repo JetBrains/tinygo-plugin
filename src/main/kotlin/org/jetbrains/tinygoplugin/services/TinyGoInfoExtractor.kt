@@ -16,8 +16,6 @@ import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ide.progress.withBackgroundProgress
 import com.intellij.platform.util.progress.withProgressText
@@ -63,12 +61,12 @@ suspend fun TinyGoConfiguration.extractTinyGoInfo(msg: String) {
         val scheduler = schedulerPattern.findFirst(msg)
         val cachedGoRoot = cachedGoRootPattern.findFirst(msg)
 
-        val cachedGoRootPath = cachedGoRoot.firstGroup()
-        // tinygo info can create the cached GOROOT just now, and the SDK reads only what the VFS knows
-        withContext(Dispatchers.IO) { LocalFileSystem.getInstance().refreshAndFindFileByPath(cachedGoRootPath) }
-        val cachedGoRootSdk = readAction {
-            GoSdk.fromUrl(VfsUtil.pathToUrl(cachedGoRootPath))
-        }
+        // tinygo info can create the cached GOROOT just now, so the SDK refreshes the directory in the VFS and reads
+        // the refreshed entry. A synchronous refresh is not allowed under a read lock, so the call runs outside of one
+        val cachedGoRootSdk =
+            withContext(Dispatchers.IO) {
+                GoSdk.fromHomePath(cachedGoRoot.firstGroup(), true)
+            }
         writeAction {
             this.goArch = goArch.firstGroup()
             this.goTags = tags.firstGroup()
