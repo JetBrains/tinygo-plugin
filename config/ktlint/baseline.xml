@@ -1024,14 +1024,14 @@
         <error line="147" column="33" source="standard:chain-method-continuation" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/services/TinyGoSettingsUtils.kt">
-        <error line="13" column="22" source="standard:function-signature" />
-        <error line="13" column="40" source="standard:function-signature" />
-        <error line="13" column="69" source="standard:function-signature" />
-        <error line="29" column="35" source="standard:function-signature" />
-        <error line="29" column="53" source="standard:function-signature" />
-        <error line="29" column="82" source="standard:function-signature" />
-        <error line="30" column="26" source="standard:multiline-expression-wrapping" />
-        <error line="30" column="36" source="standard:chain-method-continuation" />
+        <error line="15" column="22" source="standard:function-signature" />
+        <error line="15" column="40" source="standard:function-signature" />
+        <error line="15" column="69" source="standard:function-signature" />
+        <error line="33" column="35" source="standard:function-signature" />
+        <error line="33" column="53" source="standard:function-signature" />
+        <error line="33" column="82" source="standard:function-signature" />
+        <error line="34" column="26" source="standard:multiline-expression-wrapping" />
+        <error line="34" column="36" source="standard:chain-method-continuation" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/services/TinyGoTargetProvider.kt">
         <error line="19" column="21" source="standard:chain-method-continuation" />
