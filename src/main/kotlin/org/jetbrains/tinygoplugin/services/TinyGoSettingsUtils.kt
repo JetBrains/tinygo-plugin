@@ -1,10 +1,12 @@
 package org.jetbrains.tinygoplugin.services
 
+import com.goide.project.GoBuildTargetSettings
 import com.goide.project.GoModuleSettings
 import com.intellij.execution.RunManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.project.Project
+import com.intellij.util.xmlb.XmlSerializerUtil
 import org.jetbrains.tinygoplugin.configuration.GarbageCollector
 import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
@@ -19,7 +21,9 @@ fun propagateGoFlags(project: Project, settings: TinyGoConfiguration) {
         logger<TinyGoSettingsService>().warn("Could not find go module settings")
         return
     }
-    val buildSettings = goSettings.buildTargetSettings
+    // A copy: the getter returns the cached state, and the setter does not save a state that equals itself
+    val buildSettings = GoBuildTargetSettings()
+    XmlSerializerUtil.copyBean(goSettings.buildTargetSettings, buildSettings)
     buildSettings.arch = settings.goArch
     buildSettings.os = settings.goOS
     buildSettings.customFlags = settings.goTags.split(' ').toTypedArray()
