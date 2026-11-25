@@ -97,8 +97,8 @@ class TinyGoConfigurationWithTagUpdate(
     }
 
     private fun goSettings(project: Project): GoModuleSettings? =
-        ModuleManager.getInstance(project).modules.firstNotNullOfOrNull {
-            it.getService(GoModuleSettings::class.java)
+        ModuleManager.getInstance(project).modules.firstOrNull()?.let {
+            GoModuleSettings.getInstance(it)
         }
 
     override fun modified(project: Project): Boolean {

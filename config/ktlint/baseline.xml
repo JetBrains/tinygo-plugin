@@ -338,65 +338,65 @@
         <error line="50" column="74" source="standard:function-signature" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/inspections/libraries/TinyGoImportInspection.kt">
-        <error line="32" column="54" source="standard:function-signature" />
-        <error line="43" column="28" source="standard:trailing-comma-on-declaration-site" />
-        <error line="45" column="35" source="standard:multiline-expression-wrapping" />
-        <error line="45" column="61" source="standard:if-else-wrapping" />
-        <error line="45" column="61" source="standard:multiline-if-else" />
-        <error line="46" column="31" source="standard:if-else-wrapping" />
-        <error line="46" column="31" source="standard:multiline-if-else" />
-        <error line="47" column="14" source="standard:if-else-wrapping" />
-        <error line="47" column="14" source="standard:multiline-if-else" />
-        <error line="53" column="42" source="standard:trailing-comma-on-call-site" />
-        <error line="87" column="52" source="standard:trailing-comma-on-call-site" />
-        <error line="105" column="52" source="standard:trailing-comma-on-call-site" />
-        <error line="113" column="49" source="standard:multiline-expression-wrapping" />
-        <error line="116" column="93" source="standard:if-else-wrapping" />
-        <error line="116" column="93" source="standard:multiline-if-else" />
-        <error line="117" column="34" source="standard:if-else-wrapping" />
-        <error line="117" column="34" source="standard:multiline-if-else" />
-        <error line="120" column="60" source="standard:trailing-comma-on-call-site" />
-        <error line="122" column="27" source="standard:if-else-wrapping" />
-        <error line="122" column="32" source="standard:if-else-bracing" />
-        <error line="122" column="32" source="standard:if-else-wrapping" />
-        <error line="122" column="32" source="standard:multiline-if-else" />
-        <error line="137" column="76" source="standard:function-signature" />
-        <error line="145" column="28" source="standard:trailing-comma-on-declaration-site" />
-        <error line="147" column="31" source="standard:multiline-expression-wrapping" />
-        <error line="147" column="83" source="standard:if-else-wrapping" />
-        <error line="147" column="83" source="standard:multiline-if-else" />
-        <error line="148" column="75" source="standard:if-else-wrapping" />
-        <error line="148" column="75" source="standard:multiline-if-else" />
-        <error line="149" column="22" source="standard:if-else-wrapping" />
-        <error line="149" column="22" source="standard:multiline-if-else" />
-        <error line="153" column="19" source="standard:if-else-wrapping" />
-        <error line="153" column="24" source="standard:if-else-bracing" />
-        <error line="153" column="24" source="standard:if-else-wrapping" />
-        <error line="153" column="24" source="standard:multiline-if-else" />
-        <error line="162" column="28" source="standard:trailing-comma-on-declaration-site" />
-        <error line="169" column="42" source="standard:function-signature" />
-        <error line="169" column="56" source="standard:function-signature" />
-        <error line="169" column="77" source="standard:function-signature" />
-        <error line="169" column="88" source="standard:function-signature" />
-        <error line="181" column="44" source="standard:trailing-comma-on-call-site" />
-        <error line="189" column="35" source="standard:function-signature" />
-        <error line="189" column="49" source="standard:function-signature" />
-        <error line="189" column="75" source="standard:function-signature" />
-        <error line="196" column="50" source="standard:trailing-comma-on-call-site" />
-        <error line="203" column="64" source="standard:multiline-expression-wrapping" />
-        <error line="203" column="64" source="standard:function-signature" />
-        <error line="211" column="52" source="standard:chain-method-continuation" />
-        <error line="211" column="74" source="standard:chain-method-continuation" />
-        <error line="214" column="19" source="standard:if-else-wrapping" />
-        <error line="214" column="24" source="standard:if-else-bracing" />
-        <error line="214" column="24" source="standard:if-else-wrapping" />
-        <error line="214" column="24" source="standard:multiline-if-else" />
-        <error line="217" column="68" source="standard:multiline-expression-wrapping" />
-        <error line="217" column="68" source="standard:function-signature" />
-        <error line="235" column="37" source="standard:multiline-expression-wrapping" />
-        <error line="238" column="27" source="standard:function-signature" />
-        <error line="238" column="45" source="standard:function-signature" />
-        <error line="238" column="74" source="standard:function-signature" />
+        <error line="33" column="54" source="standard:function-signature" />
+        <error line="44" column="28" source="standard:trailing-comma-on-declaration-site" />
+        <error line="46" column="35" source="standard:multiline-expression-wrapping" />
+        <error line="46" column="61" source="standard:if-else-wrapping" />
+        <error line="46" column="61" source="standard:multiline-if-else" />
+        <error line="47" column="31" source="standard:if-else-wrapping" />
+        <error line="47" column="31" source="standard:multiline-if-else" />
+        <error line="48" column="14" source="standard:if-else-wrapping" />
+        <error line="48" column="14" source="standard:multiline-if-else" />
+        <error line="54" column="42" source="standard:trailing-comma-on-call-site" />
+        <error line="88" column="52" source="standard:trailing-comma-on-call-site" />
+        <error line="106" column="52" source="standard:trailing-comma-on-call-site" />
+        <error line="114" column="49" source="standard:multiline-expression-wrapping" />
+        <error line="117" column="93" source="standard:if-else-wrapping" />
+        <error line="117" column="93" source="standard:multiline-if-else" />
+        <error line="118" column="34" source="standard:if-else-wrapping" />
+        <error line="118" column="34" source="standard:multiline-if-else" />
+        <error line="121" column="60" source="standard:trailing-comma-on-call-site" />
+        <error line="123" column="27" source="standard:if-else-wrapping" />
+        <error line="123" column="32" source="standard:if-else-bracing" />
+        <error line="123" column="32" source="standard:if-else-wrapping" />
+        <error line="123" column="32" source="standard:multiline-if-else" />
+        <error line="138" column="76" source="standard:function-signature" />
+        <error line="146" column="28" source="standard:trailing-comma-on-declaration-site" />
+        <error line="148" column="31" source="standard:multiline-expression-wrapping" />
+        <error line="148" column="83" source="standard:if-else-wrapping" />
+        <error line="148" column="83" source="standard:multiline-if-else" />
+        <error line="149" column="75" source="standard:if-else-wrapping" />
+        <error line="149" column="75" source="standard:multiline-if-else" />
+        <error line="150" column="22" source="standard:if-else-wrapping" />
+        <error line="150" column="22" source="standard:multiline-if-else" />
+        <error line="154" column="19" source="standard:if-else-wrapping" />
+        <error line="154" column="24" source="standard:if-else-bracing" />
+        <error line="154" column="24" source="standard:if-else-wrapping" />
+        <error line="154" column="24" source="standard:multiline-if-else" />
+        <error line="163" column="28" source="standard:trailing-comma-on-declaration-site" />
+        <error line="170" column="42" source="standard:function-signature" />
+        <error line="170" column="56" source="standard:function-signature" />
+        <error line="170" column="77" source="standard:function-signature" />
+        <error line="170" column="88" source="standard:function-signature" />
+        <error line="182" column="44" source="standard:trailing-comma-on-call-site" />
+        <error line="190" column="35" source="standard:function-signature" />
+        <error line="190" column="49" source="standard:function-signature" />
+        <error line="190" column="75" source="standard:function-signature" />
+        <error line="197" column="50" source="standard:trailing-comma-on-call-site" />
+        <error line="204" column="64" source="standard:multiline-expression-wrapping" />
+        <error line="204" column="64" source="standard:function-signature" />
+        <error line="212" column="52" source="standard:chain-method-continuation" />
+        <error line="212" column="74" source="standard:chain-method-continuation" />
+        <error line="215" column="19" source="standard:if-else-wrapping" />
+        <error line="215" column="24" source="standard:if-else-bracing" />
+        <error line="215" column="24" source="standard:if-else-wrapping" />
+        <error line="215" column="24" source="standard:multiline-if-else" />
+        <error line="218" column="68" source="standard:multiline-expression-wrapping" />
+        <error line="218" column="68" source="standard:function-signature" />
+        <error line="236" column="37" source="standard:multiline-expression-wrapping" />
+        <error line="239" column="27" source="standard:function-signature" />
+        <error line="239" column="45" source="standard:function-signature" />
+        <error line="239" column="74" source="standard:function-signature" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/lang/avrAsm/AvrAsmFile.kt">
         <error line="7" column="18" source="standard:class-signature" />
@@ -557,8 +557,8 @@
         <error line="104" column="22" source="standard:multiline-expression-wrapping" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/project/wizard/TinyGoProjectGeneratorPeer.kt">
-        <error line="39" column="33" source="standard:trailing-comma-on-call-site" />
-        <error line="40" column="14" source="standard:trailing-comma-on-call-site" />
+        <error line="54" column="33" source="standard:trailing-comma-on-call-site" />
+        <error line="55" column="14" source="standard:trailing-comma-on-call-site" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/runconfig/Predicates.kt">
         <error line="15" column="74" source="standard:function-signature" />
@@ -996,7 +996,6 @@
         <error line="217" column="50" source="standard:chain-method-continuation" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/services/TinyGoLibraryProvider.kt">
-        <error line="19" column="53" source="standard:class-signature" />
         <error line="24" column="50" source="standard:condition-wrapping" />
         <error line="63" column="14" source="standard:trailing-comma-on-call-site" />
     </file>
@@ -1028,12 +1027,11 @@
         <error line="13" column="22" source="standard:function-signature" />
         <error line="13" column="40" source="standard:function-signature" />
         <error line="13" column="69" source="standard:function-signature" />
-        <error line="14" column="22" source="standard:multiline-expression-wrapping" />
-        <error line="28" column="35" source="standard:function-signature" />
-        <error line="28" column="53" source="standard:function-signature" />
-        <error line="28" column="82" source="standard:function-signature" />
-        <error line="29" column="26" source="standard:multiline-expression-wrapping" />
-        <error line="29" column="36" source="standard:chain-method-continuation" />
+        <error line="29" column="35" source="standard:function-signature" />
+        <error line="29" column="53" source="standard:function-signature" />
+        <error line="29" column="82" source="standard:function-signature" />
+        <error line="30" column="26" source="standard:multiline-expression-wrapping" />
+        <error line="30" column="36" source="standard:chain-method-continuation" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/services/TinyGoTargetProvider.kt">
         <error line="19" column="21" source="standard:chain-method-continuation" />
