@@ -20,6 +20,7 @@ import org.jetbrains.tinygoplugin.configuration.Scheduler
 import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
 import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.configuration.tinyGoConfiguration
+import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadSdkService
 import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdk
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
@@ -51,15 +52,32 @@ class TinyGoConfigurationWithTagUpdate(
     override var sdk: TinyGoSdk
         get() = settings.sdk
         set(value) {
-            if (settings.sdk != value) {
-                val downloaded = settings.sdk is TinyGoDownloadingSdk && value !is TinyGoDownloadingSdk
-                settings.sdk = value
+            val newSdk = if (value is TinyGoDownloadingSdk && value.isDownloaded) value.toLocalTinyGoSdk() else value
+            if (settings.sdk != newSdk) {
+                val downloaded = settings.sdk is TinyGoDownloadingSdk && newSdk !is TinyGoDownloadingSdk
+                settings.sdk = newSdk
                 if (downloaded) {
                     sendReloadLibrariesSignal(project)
+                }
+                if (newSdk is TinyGoDownloadingSdk) {
+                    replaceWhenDownloaded(newSdk)
                 }
                 callback()
             }
         }
+
+    // The SDK combo box keeps the downloading SDK after the download ends, because both SDKs have the same home URL
+    private fun replaceWhenDownloaded(downloadingSdk: TinyGoDownloadingSdk) {
+        TinyGoServiceScope.getScope(project).launch {
+            val downloadedSdk = service<TinyGoDownloadSdkService>().awaitDownloadedSdk(downloadingSdk)
+            // The Settings dialog is modal, so the default modality waits until the dialog closes
+            withContext(Dispatchers.EDT + ModalityState.any().asContextElement()) {
+                if (settings.sdk === downloadingSdk) {
+                    sdk = downloadedSdk
+                }
+            }
+        }
+    }
 
     override var targetPlatform: String
         get() = settings.targetPlatform
@@ -136,6 +154,11 @@ class TinyGoSettingsService(private val project: Project) :
         updateTinyGoRunConfigurations()
         if (oldSdk != tinyGoSettings.sdk || oldTarget != tinyGoSettings.targetPlatform) {
             sendReloadLibrariesSignal(project)
+        }
+        // OK before the end of the download: the project gets the downloaded SDK and its `tinygo info` later
+        val downloadingSdk = tinyGoSettings.sdk as? TinyGoDownloadingSdk
+        if (downloadingSdk != null) {
+            extractTinyGoSettings(project, project.tinyGoConfiguration().also { it.sdk = downloadingSdk })
         }
     }
 
