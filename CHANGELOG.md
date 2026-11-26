@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix unresolved code after a TinyGo SDK download in Settings until the project opens again.
+
 ## [0.6.1]
 
 ### Changed
