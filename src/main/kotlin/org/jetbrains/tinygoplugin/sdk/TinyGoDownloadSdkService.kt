@@ -55,6 +55,14 @@ class TinyGoDownloadSdkService private constructor() {
 
     suspend fun awaitDownloadedSdk(sdk: TinyGoDownloadingSdk): TinyGoSdk = downloadResult(sdk).await()
 
+    internal fun completeDownload(
+        sdk: TinyGoDownloadingSdk,
+        downloadedSdk: TinyGoSdk,
+    ) {
+        sdk.isDownloaded = true
+        downloadResult(sdk).complete(downloadedSdk)
+    }
+
     fun downloadTinyGoSdk(
         sdk: TinyGoDownloadingSdk,
         project: Project?,
@@ -101,8 +109,7 @@ class TinyGoDownloadSdkService private constructor() {
 
                 service<TinyGoSdkList>().addSdk(localSdk)
                 logger.debug("Added downloaded TinyGo SDK to the list of local SDKs")
-                sdk.isDownloaded = true
-                downloadResult(sdk).complete(localSdk)
+                completeDownload(sdk, localSdk)
                 GoNotifications.getGeneralGroup()
                     .createNotification("Downloaded SDK", NotificationType.INFORMATION)
                     .notify(null)

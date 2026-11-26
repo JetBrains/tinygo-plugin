@@ -6,26 +6,16 @@ import com.goide.vgo.wizard.VgoModuleBuilder
 import com.goide.vgo.wizard.VgoNewProjectSettings
 import com.goide.wizard.GoProjectGenerator
 import com.intellij.facet.ui.ValidationResult
-import com.intellij.openapi.application.edtWriteAction
-import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.module.Module
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.platform.ProjectGeneratorPeer
-import kotlinx.coroutines.launch
 import org.jetbrains.tinygoplugin.TinyGoBundle
-import org.jetbrains.tinygoplugin.configuration.TinyGoConfiguration
-import org.jetbrains.tinygoplugin.configuration.updateExtLibrariesAndCleanCache
 import org.jetbrains.tinygoplugin.configuration.sendReloadLibrariesSignal
 import org.jetbrains.tinygoplugin.icon.TinyGoPluginIcons
 import org.jetbrains.tinygoplugin.sdk.TinyGoSdkVersion
-import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadSdkService
-import org.jetbrains.tinygoplugin.sdk.TinyGoDownloadingSdk
-import org.jetbrains.tinygoplugin.services.TinyGoInfoExtractor
-import org.jetbrains.tinygoplugin.services.TinyGoServiceScope
-import org.jetbrains.tinygoplugin.services.extractTinyGoInfo
-import org.jetbrains.tinygoplugin.services.propagateGoFlags
+import org.jetbrains.tinygoplugin.services.extractTinyGoSettings
 import javax.swing.Icon
 
 @Suppress("MagicNumber")
@@ -90,24 +80,5 @@ private fun configureModule(
             true,
             contentRoot
         )
-    }
-}
-
-private fun extractTinyGoSettings(project: Project, tinyGoSettings: TinyGoConfiguration) {
-    TinyGoServiceScope.getScope(project).launch {
-        val downloadingSdk = tinyGoSettings.sdk as? TinyGoDownloadingSdk
-        if (downloadingSdk != null) {
-            val downloadService = service<TinyGoDownloadSdkService>()
-            downloadService.downloadTinyGoSdk(downloadingSdk, project) { }
-            tinyGoSettings.sdk = downloadService.awaitDownloadedSdk(downloadingSdk)
-        }
-        val output = project.service<TinyGoInfoExtractor>().extractTinyGoInfo(tinyGoSettings)
-            ?: return@launch
-        tinyGoSettings.extractTinyGoInfo(output)
-        edtWriteAction {
-            tinyGoSettings.saveState(project)
-            propagateGoFlags(project, tinyGoSettings)
-            updateExtLibrariesAndCleanCache(project)
-        }
     }
 }
