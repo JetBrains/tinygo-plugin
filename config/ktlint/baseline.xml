@@ -149,57 +149,55 @@
         <error line="49" column="36" source="standard:modifier-list-spacing" />
         <error line="49" column="36" source="standard:parameter-list-spacing" />
         <error line="49" column="37" source="standard:no-multi-spaces" />
-        <error line="50" column="39" source="standard:modifier-list-spacing" />
-        <error line="50" column="39" source="standard:parameter-list-spacing" />
-        <error line="50" column="40" source="standard:no-multi-spaces" />
-        <error line="51" column="41" source="standard:modifier-list-spacing" />
-        <error line="51" column="41" source="standard:parameter-list-spacing" />
-        <error line="51" column="42" source="standard:no-multi-spaces" />
-        <error line="52" column="37" source="standard:modifier-list-spacing" />
-        <error line="52" column="37" source="standard:parameter-list-spacing" />
-        <error line="52" column="38" source="standard:no-multi-spaces" />
+        <error line="51" column="39" source="standard:modifier-list-spacing" />
+        <error line="51" column="39" source="standard:parameter-list-spacing" />
+        <error line="51" column="40" source="standard:no-multi-spaces" />
+        <error line="52" column="41" source="standard:modifier-list-spacing" />
+        <error line="52" column="41" source="standard:parameter-list-spacing" />
+        <error line="52" column="42" source="standard:no-multi-spaces" />
         <error line="53" column="37" source="standard:modifier-list-spacing" />
         <error line="53" column="37" source="standard:parameter-list-spacing" />
         <error line="53" column="38" source="standard:no-multi-spaces" />
-        <error line="54" column="41" source="standard:modifier-list-spacing" />
-        <error line="54" column="41" source="standard:parameter-list-spacing" />
-        <error line="54" column="42" source="standard:no-multi-spaces" />
-        <error line="55" column="38" source="standard:modifier-list-spacing" />
-        <error line="55" column="38" source="standard:parameter-list-spacing" />
-        <error line="55" column="39" source="standard:no-multi-spaces" />
-        <error line="56" column="41" source="standard:modifier-list-spacing" />
-        <error line="56" column="41" source="standard:parameter-list-spacing" />
-        <error line="56" column="42" source="standard:no-multi-spaces" />
-        <error line="57" column="40" source="standard:modifier-list-spacing" />
-        <error line="57" column="40" source="standard:parameter-list-spacing" />
-        <error line="57" column="41" source="standard:no-multi-spaces" />
-        <error line="58" column="36" source="standard:modifier-list-spacing" />
-        <error line="58" column="36" source="standard:parameter-list-spacing" />
-        <error line="58" column="37" source="standard:no-multi-spaces" />
-        <error line="59" column="34" source="standard:modifier-list-spacing" />
-        <error line="59" column="34" source="standard:parameter-list-spacing" />
-        <error line="59" column="35" source="standard:no-multi-spaces" />
-        <error line="60" column="40" source="standard:modifier-list-spacing" />
-        <error line="60" column="40" source="standard:parameter-list-spacing" />
-        <error line="60" column="41" source="standard:no-multi-spaces" />
-        <error line="61" column="32" source="standard:modifier-list-spacing" />
-        <error line="61" column="32" source="standard:parameter-list-spacing" />
-        <error line="61" column="33" source="standard:no-multi-spaces" />
-        <error line="61" column="65" source="standard:trailing-comma-on-declaration-site" />
-        <error line="63" column="1" source="standard:no-single-line-block-comment" />
-        <error line="63" column="4" source="internal:ktlint-suppression" />
-        <error line="65" column="28" source="standard:function-signature" />
-        <error line="65" column="41" source="standard:function-signature" />
-        <error line="65" column="61" source="standard:function-signature" />
-        <error line="95" column="20" source="standard:function-signature" />
-        <error line="95" column="42" source="standard:function-signature" />
-        <error line="95" column="62" source="standard:function-signature" />
-        <error line="111" column="20" source="standard:multiline-expression-wrapping" />
-        <error line="111" column="28" source="standard:chain-method-continuation" />
-        <error line="139" column="22" source="standard:multiline-expression-wrapping" />
-        <error line="142" column="38" source="standard:condition-wrapping" />
-        <error line="143" column="46" source="standard:condition-wrapping" />
-        <error line="145" column="9" source="standard:chain-method-continuation" />
+        <error line="54" column="37" source="standard:modifier-list-spacing" />
+        <error line="54" column="37" source="standard:parameter-list-spacing" />
+        <error line="54" column="38" source="standard:no-multi-spaces" />
+        <error line="55" column="41" source="standard:modifier-list-spacing" />
+        <error line="55" column="41" source="standard:parameter-list-spacing" />
+        <error line="55" column="42" source="standard:no-multi-spaces" />
+        <error line="56" column="38" source="standard:modifier-list-spacing" />
+        <error line="56" column="38" source="standard:parameter-list-spacing" />
+        <error line="56" column="39" source="standard:no-multi-spaces" />
+        <error line="57" column="41" source="standard:modifier-list-spacing" />
+        <error line="57" column="41" source="standard:parameter-list-spacing" />
+        <error line="57" column="42" source="standard:no-multi-spaces" />
+        <error line="58" column="40" source="standard:modifier-list-spacing" />
+        <error line="58" column="40" source="standard:parameter-list-spacing" />
+        <error line="58" column="41" source="standard:no-multi-spaces" />
+        <error line="59" column="36" source="standard:modifier-list-spacing" />
+        <error line="59" column="36" source="standard:parameter-list-spacing" />
+        <error line="59" column="37" source="standard:no-multi-spaces" />
+        <error line="60" column="34" source="standard:modifier-list-spacing" />
+        <error line="60" column="34" source="standard:parameter-list-spacing" />
+        <error line="60" column="35" source="standard:no-multi-spaces" />
+        <error line="61" column="40" source="standard:modifier-list-spacing" />
+        <error line="61" column="40" source="standard:parameter-list-spacing" />
+        <error line="61" column="41" source="standard:no-multi-spaces" />
+        <error line="62" column="32" source="standard:modifier-list-spacing" />
+        <error line="62" column="32" source="standard:parameter-list-spacing" />
+        <error line="62" column="33" source="standard:no-multi-spaces" />
+        <error line="62" column="65" source="standard:trailing-comma-on-declaration-site" />
+        <error line="64" column="1" source="standard:no-single-line-block-comment" />
+        <error line="64" column="4" source="internal:ktlint-suppression" />
+        <error line="66" column="28" source="standard:function-signature" />
+        <error line="66" column="41" source="standard:function-signature" />
+        <error line="66" column="61" source="standard:function-signature" />
+        <error line="96" column="20" source="standard:function-signature" />
+        <error line="96" column="42" source="standard:function-signature" />
+        <error line="96" column="62" source="standard:function-signature" />
+        <error line="134" column="22" source="standard:multiline-expression-wrapping" />
+        <error line="137" column="38" source="standard:condition-wrapping" />
+        <error line="138" column="46" source="standard:condition-wrapping" />
+        <error line="140" column="9" source="standard:chain-method-continuation" />
     </file>
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/configuration/UserConfiguration.kt">
         <error line="3" column="1" source="standard:import-ordering" />
@@ -1075,21 +1073,6 @@
         <error line="215" column="47" source="standard:trailing-comma-on-call-site" />
         <error line="217" column="24" source="standard:multiline-expression-wrapping" />
         <error line="218" column="37" source="standard:multiline-expression-wrapping" />
-    </file>
-    <file name="src/test/kotlin/org/jetbrains/tinygoplugin/configuration/TinyGoTargetJsonTest.kt">
-        <error line="14" column="5" source="standard:blank-line-before-declaration" />
-        <error line="19" column="21" source="standard:multiline-expression-wrapping" />
-        <error line="40" column="30" source="standard:trailing-comma-on-call-site" />
-        <error line="44" column="28" source="standard:trailing-comma-on-call-site" />
-        <error line="48" column="29" source="standard:trailing-comma-on-call-site" />
-        <error line="53" column="22" source="standard:multiline-expression-wrapping" />
-        <error line="58" column="22" source="standard:trailing-comma-on-call-site" />
-        <error line="59" column="18" source="standard:trailing-comma-on-call-site" />
-        <error line="67" column="22" source="standard:multiline-expression-wrapping" />
-        <error line="72" column="22" source="standard:trailing-comma-on-call-site" />
-        <error line="73" column="18" source="standard:trailing-comma-on-call-site" />
-        <error line="77" column="24" source="standard:multiline-expression-wrapping" />
-        <error line="80" column="87" source="standard:trailing-comma-on-call-site" />
     </file>
     <file name="src/test/kotlin/org/jetbrains/tinygoplugin/inspections/TinyGoImportInspectionTest.kt">
         <error line="32" column="44" source="standard:function-expression-body" />
