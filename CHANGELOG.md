@@ -8,6 +8,7 @@
 
 - Fix unresolved code after a TinyGo SDK download in Settings until the project opens again.
 - Fix Export TinyGo Target for boards such as `pico` and `feather-m4` on TinyGo 0.28 and later.
+- Fix TinyGo turned on in a Go project after OK on the TinyGo settings page.
 
 ## [0.6.1]
 
