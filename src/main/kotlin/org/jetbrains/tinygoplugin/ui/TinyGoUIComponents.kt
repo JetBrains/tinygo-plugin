@@ -51,7 +51,7 @@ fun generateTinyGoNewProjectSettingsPanel(
     wrapper: TinyGoPropertiesWrapper,
     parent: Disposable,
 ): JPanel = panel {
-    tinyGoSettings(project, projectPathSupplier, wrapper, parent, deferSdkDownload = true)
+    tinyGoSettings(project, projectPathSupplier, wrapper, parent, deferSdkDownload = true, selectFirstSdk = true)
 }
 
 private fun AtomicBoolean.lockOrSkip(action: () -> Unit) {
@@ -86,19 +86,22 @@ fun Row.tinyGoSdkComboChooser(
     property: GraphProperty<TinyGoSdk>,
     parentDisposable: Disposable,
     deferSdkDownload: Boolean,
+    selectFirstSdk: Boolean,
 ): Cell<TinyGoSdkChooserCombo> {
     return cell(TinyGoSdkChooserCombo(projectPathSupplier, project, deferSdkDownload))
         .align(Align.FILL)
         .applyToComponent {
             this.launchOnShow("tinyGoSdkComboChooser", Dispatchers.Default) {
-                var sdk: TinyGoSdk = property.get()
-                if (sdk == nullSdk) {
+                val sdk: TinyGoSdk = property.get()
+                if (sdk != nullSdk) {
+                    selectSdkByUrl(sdk.homeUrl)
+                } else if (selectFirstSdk) {
                     selectFirstNotNullSdk()
-                    sdk = comboBox.model.selectedItem as TinyGoSdk
+                    val firstSdk = comboBox.model.selectedItem as TinyGoSdk
                     withContext(Dispatchers.EDT) {
-                        property.set(sdk)
+                        property.set(firstSdk)
                     }
-                } else selectSdkByUrl(sdk.homeUrl)
+                }
             }
             Disposer.register(parentDisposable, this)
         }
@@ -124,6 +127,7 @@ private fun Panel.tinyGoSettings(
     wrapper: TinyGoPropertiesWrapper,
     parentDisposable: Disposable,
     deferSdkDownload: Boolean = false,
+    selectFirstSdk: Boolean = false,
 ) {
     lateinit var tinyGoSdkComboChooser: Cell<TinyGoSdkChooserCombo>
     row(TinyGoBundle.message(SDK_LABEL)) {
@@ -133,6 +137,7 @@ private fun Panel.tinyGoSettings(
             wrapper.tinyGoSdkPath,
             parentDisposable,
             deferSdkDownload,
+            selectFirstSdk,
         )
     }
     panel {
