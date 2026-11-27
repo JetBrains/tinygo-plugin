@@ -3,6 +3,7 @@ package org.jetbrains.tinygoplugin.configuration
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import com.intellij.json.JsonFileType
@@ -14,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
 import java.io.File
-import java.util.stream.Collectors
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.memberProperties
 
@@ -47,7 +47,8 @@ data class TinyGoTarget constructor(
     @SerializedName("flash-1200-bps-reset") var portReset: String?,
     @SerializedName("serial-port")          var serialPort: MutableSet<String>? = mutableSetOf(),
     @SerializedName("flash-method")         var flashMethod: String?,
-    @SerializedName("msd-volume-name")      var flashVolume: String?,
+    // A string before TinyGo 0.28, a list later. The export keeps the form that it reads.
+    @SerializedName("msd-volume-name")      var flashVolume: JsonElement?,
     @SerializedName("msd-firmware-name")    var flashFilename: String?,
     @SerializedName("uf2-family-id")        var uf2FamilyID: String?,
     @SerializedName("binary-format")        var binaryFormat: String?,
@@ -106,13 +107,7 @@ fun readTargetJson(pathToTarget: String, sdkRoot: VirtualFile): TinyGoTarget? {
 }
 
 fun TinyGoTarget.performInheritance(sdkRoot: VirtualFile) {
-    val gsonBuilder = Gson()
-
-    val inherits = inherits?.stream()
-        ?.map { parent -> File(supplyJsonPath(parent, sdkRoot)) }
-        ?.filter { it.exists() }
-        ?.map { gsonBuilder.fromJson(it.readText(), TinyGoTarget::class.java) }
-        ?.collect(Collectors.toSet()) ?: return
+    val inherits = inherits?.mapNotNull { parent -> readTargetJson(parent, sdkRoot) } ?: return
 
     for (parent in inherits) {
         if (parent.inherits != null) {

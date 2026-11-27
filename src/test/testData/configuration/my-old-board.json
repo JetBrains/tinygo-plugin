@@ -1,0 +1,4 @@
+{
+  "inherits": ["mycontroller"],
+  "msd-volume-name": "OLDBOOT"
+}

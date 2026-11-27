@@ -1,29 +1,40 @@
 package org.jetbrains.tinygoplugin.configuration
 
 import com.google.gson.Gson
+import com.google.gson.JsonParser
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import junit.framework.TestCase
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.tinygoplugin.testFramework.setupTinyGo
 import org.jetbrains.tinygoplugin.ui.ConfigurationProvider
 import org.jetbrains.tinygoplugin.ui.TinyGoPropertiesWrapper
-import java.io.File
 
 class TinyGoTargetJsonTest : BasePlatformTestCase() {
-    lateinit var mySetting: TinyGoConfiguration
-    override fun setUp() {
-        super.setUp()
-        val pathToCustomTarget =
-            System.getProperty("user.dir") + "/src/test/testData/configuration/my-custom-board.json"
+    private val testDataPath = System.getProperty("user.dir") + "/src/test/testData/configuration"
 
-        mySetting = setupTinyGo(this, myFixture.project) {
-            it.targetPlatform = pathToCustomTarget
+    private fun configure(targetFile: String): TinyGoConfiguration =
+        setupTinyGo(this, myFixture.project) {
+            it.targetPlatform = "$testDataPath/$targetFile"
             it.goOS = "linux"
             it.goArch = "arm"
             it.gc = GarbageCollector.CONSERVATIVE
             it.scheduler = Scheduler.ASYNCIFY
             it.goTags = "myarch baremetal linux arm mycpu myboard tag anotherTag"
         }
+
+    private fun createTarget(settings: TinyGoConfiguration): TinyGoTarget {
+        val target =
+            runBlocking {
+                createTargetWrapper(
+                    TinyGoPropertiesWrapper(
+                        object : ConfigurationProvider<TinyGoConfiguration> {
+                            override val tinyGoSettings: TinyGoConfiguration = settings
+                        },
+                    ),
+                )
+            }
+        TestCase.assertNotNull("createTargetWrapper returned no target", target)
+        return target!!
     }
 
     private fun testTargetObj(target: TinyGoTarget) {
@@ -37,51 +48,31 @@ class TinyGoTargetJsonTest : BasePlatformTestCase() {
         TestCase.assertEquals("flashutil -c myboard -p mycontroller -P {port}", target.flashCommand)
         TestCase.assertEquals(
             setOf("acm:2341:0043", "acm:2341:0001", "acm:2a03:0043", "acm:2341:0243"),
-            target.serialPort
+            target.serialPort,
         )
         TestCase.assertEquals(
             "myboardsim -m myboard -f 123456789",
-            target.emulator
+            target.emulator,
         )
         TestCase.assertEquals(
             setOf("myarch", "baremetal", "linux", "arm", "mycpu", "myboard", "tag", "anotherTag"),
-            target.buildTags
+            target.buildTags,
         )
+        TestCase.assertEquals(JsonParser.parseString("""["MYBOOT"]"""), target.flashVolume)
     }
 
     fun testDependencyResolver() {
-        val target = runBlocking {
-            createTargetWrapper(
-                TinyGoPropertiesWrapper(
-                    object : ConfigurationProvider<TinyGoConfiguration> {
-                        override val tinyGoSettings: TinyGoConfiguration = mySetting
-                    }
-                )
-            )
-        } ?: return
-
-        testTargetObj(target)
+        testTargetObj(createTarget(configure("my-custom-board.json")))
     }
 
     fun testDeserialized() {
-        val target = runBlocking {
-            createTargetWrapper(
-                TinyGoPropertiesWrapper(
-                    object : ConfigurationProvider<TinyGoConfiguration> {
-                        override val tinyGoSettings: TinyGoConfiguration = mySetting
-                    }
-                )
-            )
-        } ?: return
+        val target = createTarget(configure("my-custom-board.json"))
+        testTargetObj(Gson().fromJson(target.serialize(), TinyGoTarget::class.java))
+    }
 
-        val testFile = File.createTempFile(
-            "target",
-            ".json",
-            File(System.getProperty("user.dir") + "/src/test/testData/configuration/")
-        )
-        testFile.writeText(target.serialize())
-
-        val newTarget = Gson().fromJson(testFile.readText(), TinyGoTarget::class.java)
-        testTargetObj(newTarget)
+    fun testVolumeNameAsString() {
+        val target = createTarget(configure("my-old-board.json"))
+        TestCase.assertEquals(JsonParser.parseString("\"OLDBOOT\""), target.flashVolume)
+        TestCase.assertTrue(target.serialize().contains("\"msd-volume-name\": \"OLDBOOT\""))
     }
 }

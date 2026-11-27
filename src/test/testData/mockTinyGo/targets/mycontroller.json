@@ -3,5 +3,6 @@
   "cpu": "mycpu",
   "build-tags": ["mycontroller", "mycpu", "myarchspec"],
   "serial": "uart",
+  "msd-volume-name": ["MYBOOT"],
   "emulator": "mycpusim -m mycontroller -f 987654321"
 }
