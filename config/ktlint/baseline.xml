@@ -1051,28 +1051,24 @@
     <file name="src/main/kotlin/org/jetbrains/tinygoplugin/ui/TinyGoUIComponents.kt">
         <error line="53" column="13" source="standard:multiline-expression-wrapping" />
         <error line="53" column="13" source="standard:function-signature" />
-        <error line="89" column="32" source="standard:function-expression-body" />
-        <error line="101" column="19" source="standard:if-else-wrapping" />
-        <error line="101" column="24" source="standard:if-else-bracing" />
-        <error line="101" column="24" source="standard:if-else-wrapping" />
-        <error line="101" column="24" source="standard:multiline-if-else" />
-        <error line="105" column="9" source="standard:chain-method-continuation" />
-        <error line="108" column="40" source="standard:trailing-comma-on-call-site" />
-        <error line="110" column="9" source="standard:chain-method-continuation" />
-        <error line="130" column="33" source="standard:multiline-expression-wrapping" />
-        <error line="165" column="37" source="standard:trailing-comma-on-declaration-site" />
-        <error line="167" column="23" source="standard:multiline-expression-wrapping" />
-        <error line="181" column="46" source="standard:trailing-comma-on-call-site" />
-        <error line="183" column="9" source="standard:chain-method-continuation" />
-        <error line="196" column="36" source="standard:class-signature" />
-        <error line="196" column="74" source="standard:class-signature" />
-        <error line="208" column="22" source="standard:function-signature" />
-        <error line="208" column="41" source="standard:function-signature" />
-        <error line="208" column="73" source="standard:function-signature" />
-        <error line="212" column="31" source="standard:multiline-expression-wrapping" />
-        <error line="215" column="47" source="standard:trailing-comma-on-call-site" />
-        <error line="217" column="24" source="standard:multiline-expression-wrapping" />
-        <error line="218" column="37" source="standard:multiline-expression-wrapping" />
+        <error line="90" column="32" source="standard:function-expression-body" />
+        <error line="108" column="9" source="standard:chain-method-continuation" />
+        <error line="111" column="40" source="standard:trailing-comma-on-call-site" />
+        <error line="113" column="9" source="standard:chain-method-continuation" />
+        <error line="134" column="33" source="standard:multiline-expression-wrapping" />
+        <error line="170" column="37" source="standard:trailing-comma-on-declaration-site" />
+        <error line="172" column="23" source="standard:multiline-expression-wrapping" />
+        <error line="186" column="46" source="standard:trailing-comma-on-call-site" />
+        <error line="188" column="9" source="standard:chain-method-continuation" />
+        <error line="201" column="36" source="standard:class-signature" />
+        <error line="201" column="74" source="standard:class-signature" />
+        <error line="213" column="22" source="standard:function-signature" />
+        <error line="213" column="41" source="standard:function-signature" />
+        <error line="213" column="73" source="standard:function-signature" />
+        <error line="217" column="31" source="standard:multiline-expression-wrapping" />
+        <error line="220" column="47" source="standard:trailing-comma-on-call-site" />
+        <error line="222" column="24" source="standard:multiline-expression-wrapping" />
+        <error line="223" column="37" source="standard:multiline-expression-wrapping" />
     </file>
     <file name="src/test/kotlin/org/jetbrains/tinygoplugin/inspections/TinyGoImportInspectionTest.kt">
         <error line="32" column="44" source="standard:function-expression-body" />
